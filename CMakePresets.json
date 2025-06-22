@@ -2,98 +2,198 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "windows-static",
-      "displayName": "Windows static",
+      "name": "windows-static-debug",
+      "displayName": "Windows static Debug",
       "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-static",
+      "binaryDir": "${sourceDir}/out/windows-static-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows-static",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl"
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-static/vcpkg_installed/x64-windows-static/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-debug/vcpkg_installed/x64-windows-static/lib"
       }
     },
     {
-      "name": "windows-shared",
-      "displayName": "Windows shared",
+      "name": "windows-static-release",
+      "displayName": "Windows static Release",
       "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-shared",
+      "binaryDir": "${sourceDir}/out/windows-static-release",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "BUILD_SHARED_LIBS": false,
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl",
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-release/vcpkg_installed/x64-windows-static/lib"
+      }
+    },
+    {
+      "name": "windows-shared-debug",
+      "displayName": "Windows shared Debug",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/out/windows-shared-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl"
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared/vcpkg_installed/x64-windows/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-debug/vcpkg_installed/x64-windows/lib"
       }
     },
     {
-      "name": "linux-static",
-      "displayName": "Linux static",
+      "name": "windows-shared-release",
+      "displayName": "Windows shared Release",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/out/windows-shared-release",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "BUILD_SHARED_LIBS": true,
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl",
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-release/vcpkg_installed/x64-windows/lib"
+      }
+    },
+    {
+      "name": "linux-static-debug",
+      "displayName": "Linux static Debug",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-static",
+      "binaryDir": "${sourceDir}/out/linux-static-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-linux-static",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static/vcpkg_installed/x64-linux-static/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/x64-linux-static/lib"
       }
     },
     {
-      "name": "linux-shared",
-      "displayName": "Linux shared",
+      "name": "linux-static-release",
+      "displayName": "Linux static Release",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-shared",
+      "binaryDir": "${sourceDir}/out/linux-static-release",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "BUILD_SHARED_LIBS": false,
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "CXX": "clang++",
+        "CC": "clang",
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/x64-linux-static/lib"
+      }
+    },
+    {
+      "name": "linux-shared-debug",
+      "displayName": "Linux shared Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/linux-shared-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-linux",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared/vcpkg_installed/x64-linux/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/x64-linux/lib"
+      }
+    },
+    {
+      "name": "linux-shared-release",
+      "displayName": "Linux shared Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/linux-shared-release",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "BUILD_SHARED_LIBS": true,
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "CXX": "clang++",
+        "CC": "clang",
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/x64-linux/lib"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "windows-static",
-      "displayName": "Windows static",
-      "configurePreset": "windows-static"
+      "name": "windows-static-debug",
+      "displayName": "Windows static Debug",
+      "configurePreset": "windows-static-debug"
     },
     {
-      "name": "windows-shared",
-      "displayName": "Windows shared",
-      "configurePreset": "windows-shared"
+      "name": "windows-static-release",
+      "displayName": "Windows static Release",
+      "configurePreset": "windows-static-release"
     },
     {
-      "name": "linux-static",
-      "displayName": "Linux static",
-      "configurePreset": "linux-static"
+      "name": "windows-shared-debug",
+      "displayName": "Windows shared Debug",
+      "configurePreset": "windows-shared-debug"
     },
     {
-      "name": "linux-shared",
-      "displayName": "Linux shared",
-      "configurePreset": "linux-shared"
+      "name": "windows-shared-release",
+      "displayName": "Windows shared Release",
+      "configurePreset": "windows-shared-release"
+    },
+    {
+      "name": "linux-static-debug",
+      "displayName": "Linux static Debug",
+      "configurePreset": "linux-static-debug"
+    },
+    {
+      "name": "linux-static-release",
+      "displayName": "Linux static Release",
+      "configurePreset": "linux-static-release"
+    },
+    {
+      "name": "linux-shared-debug",
+      "displayName": "Linux shared Debug",
+      "configurePreset": "linux-shared-debug"
+    },
+    {
+      "name": "linux-shared-release",
+      "displayName": "Linux shared Release",
+      "configurePreset": "linux-shared-release"
     }
   ]
 }
