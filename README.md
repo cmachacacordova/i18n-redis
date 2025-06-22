@@ -33,3 +33,5 @@ cmake --build out/linux-release
 Para depuración utiliza `linux-debug`. En Windows se emplean los presets `windows-release` y `windows-debug` de forma análoga.
 
 Cada preset genera tanto la biblioteca estática como la compartida. Las dependencias compiladas por vcpkg quedan en `out/<preset>/vcpkg_installed/<triplet>/lib`, ruta que se añade automáticamente a `LIB` o `LD_LIBRARY_PATH` para el enlazador.
+En Windows la biblioteca estática se genera como `i18n-redis_static.lib` y la
+versión compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
