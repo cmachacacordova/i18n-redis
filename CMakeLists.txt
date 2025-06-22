@@ -4,8 +4,23 @@ project(i18n-redis LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(redis++ CONFIG REQUIRED)
+include(FetchContent)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
+FetchContent_Declare(
+    redis_plus_plus
+    GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
+    GIT_TAG 1.3.9
+)
+set(REDIS_PLUS_PLUS_CXX_STANDARD 17 CACHE STRING "" FORCE)
+set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(redis_plus_plus)
 
 add_library(i18n-redis
     src/i18n_redis.cpp
@@ -15,7 +30,9 @@ target_include_directories(i18n-redis PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
+add_library(redis++::redis++ ALIAS redis++)
+
 target_link_libraries(i18n-redis PUBLIC
-    redis++::redis++
+    redis++
     nlohmann_json::nlohmann_json
 )

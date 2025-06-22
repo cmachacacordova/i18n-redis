@@ -7,16 +7,9 @@
       "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/out/windows-static",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl"
       }
     },
     {
@@ -25,16 +18,9 @@
       "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/out/windows-shared",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-shared",
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl"
       }
     },
     {
@@ -43,16 +29,9 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/linux-static",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl"
       }
     },
     {
@@ -61,16 +40,9 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/linux-shared",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-shared",
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl"
       }
     }
   ],
