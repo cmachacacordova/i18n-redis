@@ -31,8 +31,19 @@ target_link_libraries(i18n-redis-obj PUBLIC i18n-redis-deps)
 
 add_library(i18n-redis-static STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
 add_library(i18n-redis-shared SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
-set_target_properties(i18n-redis-static PROPERTIES OUTPUT_NAME i18n-redis)
-set_target_properties(i18n-redis-shared PROPERTIES OUTPUT_NAME i18n-redis)
+
+# On Windows the import library for the shared target also ends with
+# `.lib`, which clashes with the static library if both have the same
+# name. Use distinct output names so that both variants can be built in
+# a single configuration.
+set_target_properties(i18n-redis-static PROPERTIES OUTPUT_NAME i18n-redis_static)
+if(WIN32)
+    set_target_properties(i18n-redis-shared PROPERTIES
+        OUTPUT_NAME i18n-redis
+        ARCHIVE_OUTPUT_NAME i18n-redis_shared)
+else()
+    set_target_properties(i18n-redis-shared PROPERTIES OUTPUT_NAME i18n-redis)
+endif()
 
 foreach(tgt i18n-redis-static i18n-redis-shared)
     target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
