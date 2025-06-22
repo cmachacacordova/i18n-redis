@@ -10,38 +10,25 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(redis++ CONFIG REQUIRED)
 
-# Helper library that groups our third-party dependencies
+# Dependencies used by both library types
 add_library(i18n-redis-deps INTERFACE)
 target_link_libraries(i18n-redis-deps INTERFACE
     redis++
     nlohmann_json::nlohmann_json
 )
 
-option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
+# Compile sources once and reuse in static and shared variants
+add_library(i18n-redis-obj OBJECT src/i18n_redis.cpp)
+set_property(TARGET i18n-redis-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_include_directories(i18n-redis-obj PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(i18n-redis-obj PUBLIC i18n-redis-deps)
 
-if(I18N_REDIS_BUILD_BOTH)
-    add_library(i18n-redis-static STATIC src/i18n_redis.cpp)
-    set_target_properties(i18n-redis-static PROPERTIES
-        POSITION_INDEPENDENT_CODE ON)
-    add_library(i18n-redis-shared SHARED src/i18n_redis.cpp)
+add_library(i18n-redis-static STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
+add_library(i18n-redis-shared SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
+set_target_properties(i18n-redis-static PROPERTIES OUTPUT_NAME i18n-redis)
+set_target_properties(i18n-redis-shared PROPERTIES OUTPUT_NAME i18n-redis)
 
-    set(common_targets i18n-redis-static i18n-redis-shared)
-else()
-    add_library(i18n-redis src/i18n_redis.cpp)
-    set(common_targets i18n-redis)
-endif()
-
-foreach(tgt IN LISTS common_targets)
-    target_include_directories(${tgt} PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
-    )
-
-    if(I18N_REDIS_BUILD_BOTH)
-        target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
-    else()
-        target_link_libraries(${tgt} PUBLIC
-            redis++
-            nlohmann_json::nlohmann_json
-        )
-    endif()
+foreach(tgt i18n-redis-static i18n-redis-shared)
+    target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
+    target_include_directories(${tgt} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 endforeach()
