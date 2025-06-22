@@ -14,6 +14,8 @@ option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
 if(I18N_REDIS_BUILD_BOTH)
     add_library(i18n-redis-static STATIC src/i18n_redis.cpp)
+    set_target_properties(i18n-redis-static PROPERTIES
+        POSITION_INDEPENDENT_CODE ON)
     add_library(i18n-redis-shared SHARED src/i18n_redis.cpp)
 
     set(common_targets i18n-redis-static i18n-redis-shared)

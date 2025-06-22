@@ -41,6 +41,11 @@ Si necesitas generar tanto la biblioteca estática como la compartida
 puedes usar los presets `linux-both-{debug,release}` o
 `windows-both-{debug,release}`.
 
+Estos presets activan la opción `I18N_REDIS_BUILD_BOTH` para
+compilar ambos tipos de biblioteca en el mismo árbol de build. Las
+compilaciones Release además utilizan LTO para optimizar el binario
+final.
+
 Cuando se compilan las dependencias en modo manifiesto, las bibliotecas
 quedan en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.
 Los presets agregan esta ruta automáticamente a `LIB` o
