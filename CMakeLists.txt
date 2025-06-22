@@ -14,6 +14,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(nlohmann_json)
 
 FetchContent_Declare(
+    hiredis
+    GIT_REPOSITORY https://github.com/redis/hiredis.git
+    GIT_TAG v1.0.2
+)
+FetchContent_MakeAvailable(hiredis)
+
+FetchContent_Declare(
     redis_plus_plus
     GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
     GIT_TAG 1.3.9
@@ -31,8 +38,10 @@ target_include_directories(i18n-redis PUBLIC
 )
 
 add_library(redis++::redis++ ALIAS redis++)
+add_library(hiredis::hiredis ALIAS hiredis)
 
 target_link_libraries(i18n-redis PUBLIC
+    hiredis::hiredis
     redis++::redis++
     nlohmann_json::nlohmann_json
 )
