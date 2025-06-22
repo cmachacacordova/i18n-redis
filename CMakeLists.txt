@@ -33,6 +33,6 @@ target_include_directories(i18n-redis PUBLIC
 add_library(redis++::redis++ ALIAS redis++)
 
 target_link_libraries(i18n-redis PUBLIC
-    redis++
+    redis++::redis++
     nlohmann_json::nlohmann_json
 )
