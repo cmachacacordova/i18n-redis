@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 14,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-static",
+      "displayName": "Windows static",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/windows-static",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "BUILD_SHARED_LIBS": false
+      }
+    },
+    {
+      "name": "windows-shared",
+      "displayName": "Windows shared",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/windows-shared",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-shared",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "BUILD_SHARED_LIBS": true
+      }
+    },
+    {
+      "name": "linux-static",
+      "displayName": "Linux static",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/linux-static",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "BUILD_SHARED_LIBS": false
+      }
+    },
+    {
+      "name": "linux-shared",
+      "displayName": "Linux shared",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/linux-shared",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-shared",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "BUILD_SHARED_LIBS": true
+      }
+    }
+  ]
+}
