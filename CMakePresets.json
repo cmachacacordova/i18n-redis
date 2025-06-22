@@ -16,7 +16,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/external/vcpkg/installed/x64-windows-static/lib;${sourceDir}/out/windows-static/vcpkg_installed/x64-windows-static/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-static/vcpkg_installed/x64-windows-static/lib"
       }
     },
     {
@@ -34,7 +34,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/external/vcpkg/installed/x64-windows/lib;${sourceDir}/out/windows-shared/vcpkg_installed/x64-windows/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared/vcpkg_installed/x64-windows/lib"
       }
     },
     {
@@ -52,7 +52,7 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/external/vcpkg/installed/x64-linux-static/lib:${sourceDir}/out/linux-static/vcpkg_installed/x64-linux-static/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static/vcpkg_installed/x64-linux-static/lib"
       }
     },
     {
@@ -70,7 +70,7 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/external/vcpkg/installed/x64-linux/lib:${sourceDir}/out/linux-shared/vcpkg_installed/x64-linux/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared/vcpkg_installed/x64-linux/lib"
       }
     }
   ],
