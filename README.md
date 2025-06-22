@@ -27,12 +27,15 @@ Los presets de CMake ya apuntan al `toolchain` ubicado en `external/vcpkg`, por
 lo que no es necesario definir `VCPKG_ROOT`. Para compilar se utiliza
 `clang-cl` en Windows y `clang`/`clang++` en Linux.
 
-Luego configura y compila la biblioteca usando los presets provistos:
+Luego configura y compila la biblioteca usando los presets provistos.
+Por ejemplo para una compilación optimizada:
 ```bash
-cmake --preset linux-static    # o linux-shared
-cmake --build out/linux-static
+cmake --preset linux-static-release    # o linux-shared-release
+cmake --build out/linux-static-release
 ```
-Para Windows utiliza `windows-static` o `windows-shared` de manera análoga.
+Para un build de depuración utiliza `linux-*-debug`. En Windows se
+utilizan los presets `windows-static-{debug,release}` o
+`windows-shared-{debug,release}` de manera análoga.
 
 Cuando se compilan las dependencias en modo manifiesto, las bibliotecas
 quedan en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.

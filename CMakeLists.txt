@@ -4,6 +4,9 @@ project(i18n-redis LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Enable link time optimization for Release builds when available
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(redis++ CONFIG REQUIRED)
 
