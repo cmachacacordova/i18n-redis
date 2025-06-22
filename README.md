@@ -1,6 +1,9 @@
 # i18n-redis
 
 Ejemplo de biblioteca C++ que utiliza CMake con [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) y [nlohmann/json](https://github.com/nlohmann/json). Las dependencias se gestionan mediante [vcpkg](https://github.com/microsoft/vcpkg) y se enlazan de forma estática.
+Cuando se emplean triplets estáticos, vcpkg instala la biblioteca `redis++` con el
+nombre `redis++_static`. El `CMakeLists.txt` crea un alias para que ambos casos
+funcionen sin modificar el código de usuario.
 
 ## Requisitos
 - CMake >= 3.14

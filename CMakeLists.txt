@@ -10,6 +10,12 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(redis++ CONFIG REQUIRED)
 
+# Use the static target name when present (vcpkg names it
+# `redis++_static` when built with a static triplet).
+if(TARGET redis++_static AND NOT TARGET redis++)
+    add_library(redis++ ALIAS redis++_static)
+endif()
+
 # Dependencies used by both library types
 add_library(i18n-redis-deps INTERFACE)
 target_link_libraries(i18n-redis-deps INTERFACE
