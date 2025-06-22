@@ -25,13 +25,20 @@ external/vcpkg/vcpkg install --triplet x64-windows-static-md
 
 Los presets de CMake ya apuntan al *toolchain* ubicado en `external/vcpkg`, por lo que no es necesario definir `VCPKG_ROOT`. Se usa `clang-cl` en Windows y `clang`/`clang++` en Unix.
 
-Configura y compila la biblioteca con los presets disponibles. Por ejemplo, para un build optimizado en Linux:
+Configura y compila la biblioteca eligiendo el preset adecuado. Por ejemplo,
+para una compilación optimizada en Linux que produzca solo la versión estática:
 ```bash
-cmake --preset linux-release
-cmake --build out/linux-release
+cmake --preset linux-static-release
+cmake --build out/linux-static-release
 ```
-Para depuración utiliza `linux-debug`. En Windows se emplean los presets `windows-release` y `windows-debug` de forma análoga.
+Los nombres de preset siguen el patrón `<plataforma>-<tipo>-<modo>` donde
+`<tipo>` es `static`, `shared` o `both` y `<modo>` puede ser `debug` o
+`release`.
 
-Cada preset genera tanto la biblioteca estática como la compartida. Las dependencias compiladas por vcpkg quedan en `out/<preset>/vcpkg_installed/<triplet>/lib`, ruta que se añade automáticamente a `LIB` o `LD_LIBRARY_PATH` para el enlazador.
-En Windows la biblioteca estática se genera como `i18n-redis_static.lib` y la
-versión compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
+Las variantes `*-both-*` activan `I18N_REDIS_BUILD_BOTH` para construir en un
+solo paso las bibliotecas estática y compartida. Las dependencias instaladas por
+vcpkg se encuentran en
+`out/<preset>/vcpkg_installed/<triplet>/lib` y se añaden automáticamente a las
+variables de entorno `LIB` o `LD_LIBRARY_PATH`.
+En Windows la biblioteca estática se llama `i18n-redis_static.lib` y la
+compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
