@@ -15,15 +15,12 @@ Ejecuta el script `scripts/install_vcpkg.sh` para clonar y compilar vcpkg en
 ```
 
 ## Compilaci\u00f3n
-Instala las dependencias con el triplet correspondiente usando como overlay
-la carpeta `vcpkg/triplets` de este repositorio:
+Instala las dependencias usando los triplets que vienen con vcpkg:
 ```bash
 external/vcpkg/vcpkg install \
-  --overlay-triplets=vcpkg/triplets \
-  --triplet x64-linux-static   # o x64-linux-shared
+  --triplet x64-linux-static   # o x64-linux
 external/vcpkg/vcpkg install \
-  --overlay-triplets=vcpkg/triplets \
-  --triplet x64-windows-static # o x64-windows-shared
+  --triplet x64-windows-static # o x64-windows
 ```
 
 Los presets de CMake ya apuntan al `toolchain` ubicado en `external/vcpkg`, por
@@ -35,4 +32,8 @@ cmake --preset linux-static    # o linux-shared
 cmake --build out/linux-static
 ```
 Para Windows utiliza `windows-static` o `windows-shared` de manera análoga.
+
+Las bibliotecas instaladas por vcpkg se encuentran en
+`external/vcpkg/installed/<triplet>/lib`. Cada preset usa la carpeta
+correspondiente según el triplet configurado.
 
