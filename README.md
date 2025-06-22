@@ -50,3 +50,10 @@ compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
 La lógica de configuración de CMake se divide en los archivos
 `scripts/cmake/Dependencies.cmake` y `scripts/cmake/Targets.cmake`,
 incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado.
+
+## Ejemplo
+Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tras compilar el proyecto puedes ejecutarla con:
+```bash
+./i18n-redis-example <clave>
+```
+La aplicación almacenará un mensaje en Redis con la clave indicada y mostrará el valor recuperado.

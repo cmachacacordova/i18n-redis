@@ -35,3 +35,13 @@ foreach(tgt IN LISTS i18n_redis_targets)
     target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
     target_include_directories(${tgt} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 endforeach()
+
+# Example application to test the library
+add_executable(i18n-redis-example example/main.cpp)
+if(TARGET i18n-redis)
+    target_link_libraries(i18n-redis-example PRIVATE i18n-redis)
+elseif(TARGET i18n-redis-static)
+    target_link_libraries(i18n-redis-example PRIVATE i18n-redis-static)
+else()
+    target_link_libraries(i18n-redis-example PRIVATE i18n-redis-shared)
+endif()
