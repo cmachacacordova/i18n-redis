@@ -50,3 +50,15 @@ compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
 La lógica de configuración de CMake se divide en los archivos
 `scripts/cmake/Dependencies.cmake` y `scripts/cmake/Targets.cmake`,
 incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado.
+
+## Interfaz gráfica para dependencias
+Puedes ejecutar `python scripts/dependency_ui.py` para abrir una ventana que
+permite seleccionar dependencias de **vcpkg** para este proyecto. Al guardar se
+actualiza el archivo `vcpkg.json` con la lista elegida.
+
+Si prefieres utilizar JavaScript, también hay una versión de consola que se
+ejecuta con Node.js:
+
+```bash
+node scripts/dependency_cli.js
+```
