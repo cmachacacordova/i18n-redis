@@ -50,8 +50,8 @@
         "CMAKE_CXX_COMPILER": "clang++"
       },
       "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
+        "CXX": "clang++",
+        "CC": "clang",
         "LD_LIBRARY_PATH": "${sourceDir}/external/vcpkg/installed/x64-linux-static/lib"
       }
     },
@@ -68,8 +68,8 @@
         "CMAKE_CXX_COMPILER": "clang++"
       },
       "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
+        "CXX": "clang++",
+        "CC": "clang",
         "LD_LIBRARY_PATH": "${sourceDir}/external/vcpkg/installed/x64-linux/lib"
       }
     }

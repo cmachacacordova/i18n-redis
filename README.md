@@ -24,7 +24,8 @@ external/vcpkg/vcpkg install \
 ```
 
 Los presets de CMake ya apuntan al `toolchain` ubicado en `external/vcpkg`, por
-lo que no es necesario definir `VCPKG_ROOT`.
+lo que no es necesario definir `VCPKG_ROOT`. Para compilar se utiliza
+`clang-cl` en Windows y `clang`/`clang++` en Linux.
 
 Luego configura y compila la biblioteca usando los presets provistos:
 ```bash
