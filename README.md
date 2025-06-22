@@ -46,3 +46,7 @@ vcpkg se encuentran en
 variables de entorno `LIB` o `LD_LIBRARY_PATH`.
 En Windows la biblioteca estática se llama `i18n-redis_static.lib` y la
 compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
+
+La lógica de configuración de CMake se divide en los archivos
+`scripts/cmake/Dependencies.cmake` y `scripts/cmake/Targets.cmake`,
+incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado.
