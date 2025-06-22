@@ -37,6 +37,10 @@ Para un build de depuración utiliza `linux-*-debug`. En Windows se
 utilizan los presets `windows-static-{debug,release}` o
 `windows-shared-{debug,release}` de manera análoga.
 
+Si necesitas generar tanto la biblioteca estática como la compartida
+puedes usar los presets `linux-both-{debug,release}` o
+`windows-both-{debug,release}`.
+
 Cuando se compilan las dependencias en modo manifiesto, las bibliotecas
 quedan en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.
 Los presets agregan esta ruta automáticamente a `LIB` o
