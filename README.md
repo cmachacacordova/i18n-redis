@@ -23,6 +23,10 @@ external/vcpkg/vcpkg install --triplet x64-linux-static
 external/vcpkg/vcpkg install --triplet x64-windows-static-md
 ```
 
+En Linux se emplea el triplet `x64-linux-static`, por lo que incluso la
+biblioteca compartida incorpora el código de las dependencias y no requiere
+archivos externos.
+
 Los presets de CMake ya apuntan al *toolchain* ubicado en `external/vcpkg`, por lo que no es necesario definir `VCPKG_ROOT`. Se usa `clang-cl` en Windows y `clang`/`clang++` en Unix.
 
 Configura y compila la biblioteca eligiendo el preset adecuado. Por ejemplo,
