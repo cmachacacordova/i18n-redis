@@ -8,7 +8,7 @@
       "binaryDir": "${sourceDir}/out/windows-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -16,7 +16,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-debug/vcpkg_installed/x64-windows-static/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-debug/vcpkg_installed/x64-windows-static-md/lib"
       }
     },
     {
@@ -26,7 +26,7 @@
       "binaryDir": "${sourceDir}/out/windows-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
         "CMAKE_BUILD_TYPE": "Release"
@@ -34,7 +34,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-release/vcpkg_installed/x64-windows-static/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-release/vcpkg_installed/x64-windows-static-md/lib"
       }
     },
     {

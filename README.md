@@ -20,7 +20,7 @@ Ejecuta el script `scripts/install_vcpkg.sh` para clonar y compilar vcpkg en `ex
 Instala las dependencias utilizando los triplets estáticos incluidos en el proyecto:
 ```bash
 external/vcpkg/vcpkg install --triplet x64-linux-static
-external/vcpkg/vcpkg install --triplet x64-windows-static
+external/vcpkg/vcpkg install --triplet x64-windows-static-md
 ```
 
 Los presets de CMake ya apuntan al *toolchain* ubicado en `external/vcpkg`, por lo que no es necesario definir `VCPKG_ROOT`. Se usa `clang-cl` en Windows y `clang`/`clang++` en Unix.
