@@ -1,15 +1,10 @@
 {
   "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 14,
-    "patch": 0
-  },
   "configurePresets": [
     {
       "name": "windows-static",
       "displayName": "Windows static",
-      "generator": "Ninja",
+      "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/out/windows-static",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
@@ -18,12 +13,16 @@
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl"
       }
     },
     {
       "name": "windows-shared",
       "displayName": "Windows shared",
-      "generator": "Ninja",
+      "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/out/windows-shared",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
@@ -32,6 +31,10 @@
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl"
       }
     },
     {
@@ -46,6 +49,10 @@
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl"
       }
     },
     {
@@ -60,6 +67,10 @@
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
+      },
+      "environment": {
+        "CXX": "clang-cl",
+        "CC": "clang-cl"
       }
     }
   ],
