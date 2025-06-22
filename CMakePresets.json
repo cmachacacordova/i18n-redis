@@ -8,7 +8,7 @@
       "binaryDir": "${sourceDir}/out/windows-static-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -27,7 +27,7 @@
       "binaryDir": "${sourceDir}/out/windows-static-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -84,7 +84,7 @@
       "binaryDir": "${sourceDir}/out/windows-both-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
         "I18N_REDIS_BUILD_BOTH": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -93,7 +93,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-      "LIB": "$penv{LIB};${sourceDir}/out/windows-both-debug/vcpkg_installed/x64-windows/lib"
+      "LIB": "$penv{LIB};${sourceDir}/out/windows-both-debug/vcpkg_installed/x64-windows-static/lib"
       }
     },
     {
@@ -103,7 +103,7 @@
       "binaryDir": "${sourceDir}/out/windows-both-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
         "I18N_REDIS_BUILD_BOTH": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -112,7 +112,7 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-release/vcpkg_installed/x64-windows/lib"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-release/vcpkg_installed/x64-windows-static/lib"
       }
     },
     {
@@ -122,7 +122,7 @@
       "binaryDir": "${sourceDir}/out/linux-static-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -141,7 +141,7 @@
       "binaryDir": "${sourceDir}/out/linux-static-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
         "BUILD_SHARED_LIBS": false,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -198,7 +198,7 @@
       "binaryDir": "${sourceDir}/out/linux-both-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
         "I18N_REDIS_BUILD_BOTH": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -207,7 +207,7 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/x64-linux/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/x64-linux-static/lib"
       }
     },
     {
@@ -217,7 +217,7 @@
       "binaryDir": "${sourceDir}/out/linux-both-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
         "I18N_REDIS_BUILD_BOTH": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -226,7 +226,7 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/x64-linux/lib"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/x64-linux-static/lib"
       }
     }
   ],

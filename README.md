@@ -44,7 +44,8 @@ puedes usar los presets `linux-both-{debug,release}` o
 Estos presets activan la opción `I18N_REDIS_BUILD_BOTH` para
 compilar ambos tipos de biblioteca en el mismo árbol de build. Las
 compilaciones Release además utilizan LTO para optimizar el binario
-final.
+final. En esta modalidad las dependencias de Redis y JSON se enlazan
+mediante una única biblioteca interna para simplificar su uso.
 
 Cuando se compilan las dependencias en modo manifiesto, las bibliotecas
 quedan en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.
