@@ -34,12 +34,8 @@ cmake --build out/linux-static
 ```
 Para Windows utiliza `windows-static` o `windows-shared` de manera análoga.
 
-Las bibliotecas instaladas por vcpkg se encuentran en
-`external/vcpkg/installed/<triplet>/lib`. Cada preset usa la carpeta
-correspondiente según el triplet configurado.
-
-Cuando se compilan las dependencias en modo manifiesto, las librerías
-quedan además en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.
-Los presets agregan estas rutas automáticamente a `LIB` o
-`LD_LIBRARY_PATH` para que el enlazador las encuentre.
+Cuando se compilan las dependencias en modo manifiesto, las bibliotecas
+quedan en la carpeta `out/<preset>/vcpkg_installed/<triplet>/lib`.
+Los presets agregan esta ruta automáticamente a `LIB` o
+`LD_LIBRARY_PATH` para que el enlazador la encuentre.
 
