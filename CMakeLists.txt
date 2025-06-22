@@ -16,6 +16,6 @@ target_include_directories(i18n-redis PUBLIC
 )
 
 target_link_libraries(i18n-redis PUBLIC
-    redis++::redis++
+    redis++
     nlohmann_json::nlohmann_json
 )
