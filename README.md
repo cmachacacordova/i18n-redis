@@ -51,6 +51,11 @@ La lógica de configuración de CMake se divide en los archivos
 `scripts/cmake/Dependencies.cmake` y `scripts/cmake/Targets.cmake`,
 incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado.
 
+Al configurar el proyecto, CMake genera el archivo `i18n_redis_export.h` en el
+directorio de compilación. Este encabezado define el macro
+`I18N_REDIS_EXPORT` que se utiliza para exportar correctamente las funciones de
+la biblioteca cuando se crea la versión compartida.
+
 ## Ejemplo
 Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tras compilar el proyecto puedes ejecutarla con:
 ```bash

@@ -1,10 +1,15 @@
 # Build options
 option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
+include(GenerateExportHeader)
+
 # Object library compiled once
 add_library(i18n-redis-obj OBJECT src/i18n_redis.cpp)
 set_property(TARGET i18n-redis-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_include_directories(i18n-redis-obj PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(i18n-redis-obj PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_BINARY_DIR}
+)
 target_link_libraries(i18n-redis-obj PUBLIC i18n-redis-deps)
 
 if(I18N_REDIS_BUILD_BOTH)
@@ -22,6 +27,9 @@ if(I18N_REDIS_BUILD_BOTH)
     endif()
 
     set(i18n_redis_targets i18n-redis-static i18n-redis-shared)
+    generate_export_header(i18n-redis-shared
+        EXPORT_MACRO_NAME I18N_REDIS_EXPORT
+        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h)
 else()
     if(BUILD_SHARED_LIBS)
         add_library(i18n-redis SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
@@ -29,11 +37,17 @@ else()
         add_library(i18n-redis STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
     endif()
     set(i18n_redis_targets i18n-redis)
+    generate_export_header(i18n-redis
+        EXPORT_MACRO_NAME I18N_REDIS_EXPORT
+        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h)
 endif()
 
 foreach(tgt IN LISTS i18n_redis_targets)
     target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
-    target_include_directories(${tgt} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${tgt} PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_BINARY_DIR}
+    )
 endforeach()
 
 # Example application to test the library
