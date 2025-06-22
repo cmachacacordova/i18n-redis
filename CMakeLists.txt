@@ -10,6 +10,13 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(redis++ CONFIG REQUIRED)
 
+# Helper library that groups our third-party dependencies
+add_library(i18n-redis-deps INTERFACE)
+target_link_libraries(i18n-redis-deps INTERFACE
+    redis++
+    nlohmann_json::nlohmann_json
+)
+
 option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
 if(I18N_REDIS_BUILD_BOTH)
@@ -29,8 +36,12 @@ foreach(tgt IN LISTS common_targets)
         ${PROJECT_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${tgt} PUBLIC
-        redis++
-        nlohmann_json::nlohmann_json
-    )
+    if(I18N_REDIS_BUILD_BOTH)
+        target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
+    else()
+        target_link_libraries(${tgt} PUBLIC
+            redis++
+            nlohmann_json::nlohmann_json
+        )
+    endif()
 endforeach()
