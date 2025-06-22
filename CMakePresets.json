@@ -16,8 +16,8 @@
         "VCPKG_TARGET_TRIPLET": "x64-windows-static",
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": false,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl"
       }
     },
     {
@@ -30,8 +30,8 @@
         "VCPKG_TARGET_TRIPLET": "x64-windows-shared",
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "BUILD_SHARED_LIBS": true,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl"
       }
     },
     {
@@ -61,6 +61,28 @@
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-static",
+      "displayName": "Windows static",
+      "configurePreset": "windows-static"
+    },
+    {
+      "name": "windows-shared",
+      "displayName": "Windows shared",
+      "configurePreset": "windows-shared"
+    },
+    {
+      "name": "linux-static",
+      "displayName": "Linux static",
+      "configurePreset": "linux-static"
+    },
+    {
+      "name": "linux-shared",
+      "displayName": "Linux shared",
+      "configurePreset": "linux-shared"
     }
   ]
 }
