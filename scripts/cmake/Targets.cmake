@@ -3,8 +3,12 @@ option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
 include(GenerateExportHeader)
 
+# Gather all cpp files under src and reconfigure when files change
+file(GLOB I18N_REDIS_SOURCES CONFIGURE_DEPENDS
+    ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
 # Object library compiled once
-add_library(i18n-redis-obj OBJECT src/i18n_redis.cpp)
+add_library(i18n-redis-obj OBJECT ${I18N_REDIS_SOURCES})
 set_property(TARGET i18n-redis-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(i18n-redis-obj PUBLIC
     ${PROJECT_SOURCE_DIR}/include
