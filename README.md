@@ -43,7 +43,9 @@ Las variantes `*-both-*` activan `I18N_REDIS_BUILD_BOTH` para construir en un
 solo paso las bibliotecas estática y compartida. Las dependencias instaladas por
 vcpkg se encuentran en
 `out/<preset>/vcpkg_installed/<triplet>/lib` y se añaden automáticamente a las
-variables de entorno `LIB` o `LD_LIBRARY_PATH`.
+variables de entorno `LIB` o `LD_LIBRARY_PATH`. Los encabezados quedan en
+`out/<preset>/vcpkg_installed/<triplet>/include` y se agregan a `INCLUDE`
+(Windows) o `CPATH` (Unix).
 En Windows la biblioteca estática se llama `i18n-redis_static.lib` y la
 compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
 
