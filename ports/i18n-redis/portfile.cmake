@@ -1,8 +1,8 @@
 include(vcpkg-cmake)
+include(vcpkg-cmake-config-fixup)
 
 vcpkg_cmake_configure(
     SOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../
-    OPTIONS -DI18N_REDIS_BUILD_BOTH=OFF
 )
 
 vcpkg_cmake_install()

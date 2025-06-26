@@ -4,7 +4,9 @@
   "description": "Minimal example Redis client library",
   "dependencies": [
     "nlohmann-json",
-    "redis-plus-plus",
+    "redis-plus-plus"
+  ],
+  "host-dependencies": [
     "vcpkg-cmake"
   ]
 }

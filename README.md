@@ -66,10 +66,18 @@ Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tra
 La aplicación almacenará un mensaje en Redis con la clave indicada y mostrará el valor recuperado.
 
 ## Instalación como port de vcpkg
-Se incluye un port básico en `ports/i18n-redis` que permite instalar la biblioteca mediante la opción `--overlay-ports` de vcpkg:
+Se incluye un port en `ports/i18n-redis` para integrar la biblioteca con vcpkg.
+Puedes instalarla indicando este directorio como *overlay* y escogiendo el
+triplet que desees. Por ejemplo:
 ```bash
-vcpkg install i18n-redis --overlay-ports=ports
+# Librería estática
+vcpkg install i18n-redis --overlay-ports=ports --triplet x64-linux-static
+
+# Librería compartida
+vcpkg install i18n-redis --overlay-ports=ports --triplet x64-linux
 ```
+El port respeta el tipo de enlace definido por el triplet, por lo que funciona
+tanto en modo estático como dinámico.
 
 
 ## Detecci\u00f3n autom\u00e1tica de archivos fuente
