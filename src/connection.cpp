@@ -1,11 +1,3 @@
-#ifndef I18N_REDIS_EXPORT_H
-#ifdef _WIN32
-#ifndef i18n_redis_EXPORTS
-#define i18n_redis_EXPORTS
-#endif
-#endif
-#endif
-
 #include "i18n/redis/connection.h"
 
 I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, int port) : redis_() {
@@ -26,11 +18,4 @@ I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, in
   } catch (const sw::redis::Error &e) { throw std::runtime_error("Failed to connect to Redis: " + std::string(e.what())); }
 }
 
-I18N_REDIS_EXPORT i18n::redis::Connection::~Connection() {
-}
-
-#ifdef _WIN32
-#ifdef i18n_redis_EXPORTS
-#undef i18n_redis_EXPORTS
-#endif
-#endif
+I18N_REDIS_EXPORT i18n::redis::Connection::~Connection() {}
