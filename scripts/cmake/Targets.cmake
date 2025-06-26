@@ -1,9 +1,9 @@
-# Build options
+#Build options
 option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
 include(GenerateExportHeader)
 
-# Gather all cpp files under src and reconfigure when files change
+#Gather all cpp files under src and reconfigure when files change
 file(GLOB I18N_REDIS_SOURCES CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
@@ -63,3 +63,32 @@ elseif(TARGET i18n-redis-static)
 else()
     target_link_libraries(i18n-redis-example PRIVATE i18n-redis-shared)
 endif()
+
+# Install rules
+include(CMakePackageConfigHelpers)
+
+install(TARGETS ${i18n_redis_targets}
+    EXPORT i18n-redis-targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION include
+)
+
+install(EXPORT i18n-redis-targets
+    NAMESPACE i18n::
+    DESTINATION lib/cmake/i18n-redis
+)
+
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/scripts/cmake/i18n-redis-config.cmake.in
+    ${PROJECT_BINARY_DIR}/i18n-redis-config.cmake
+    INSTALL_DESTINATION lib/cmake/i18n-redis
+)
+
+install(FILES ${PROJECT_BINARY_DIR}/i18n-redis-config.cmake
+    DESTINATION lib/cmake/i18n-redis
+)

@@ -1,0 +1,11 @@
+{
+    "name": "i18n-redis",
+    "version-string": "0.1.0",
+    "homepage": "https://example.com/i18n-redis",
+    "description": "Libreria para manejar i18n con Redis",
+    "license": "MIT",
+    "dependencies": [
+        "redis-plus-plus",
+        "nlohmann-json"
+    ]
+}

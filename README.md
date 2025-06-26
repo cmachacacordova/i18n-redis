@@ -70,3 +70,9 @@ El proyecto usa `file(GLOB CONFIGURE_DEPENDS ...)` para incluir todos los
 archivos `.cpp` del directorio `src`. Cuando a\u00f1adas nuevos archivos,
 CMake volver\u00e1 a configurarse autom\u00e1ticamente al invocar la compilaci\u00f3n y
 se compilar\u00e1n sin editar el `CMakeLists.txt`.
+
+## Uso desde vcpkg
+Si deseas consumir esta biblioteca como un port de vcpkg, copia la carpeta `ports/i18n-redis` al directorio `ports/` de tu instalación de vcpkg y ejecuta:
+```bash
+vcpkg install i18n-redis
+```
