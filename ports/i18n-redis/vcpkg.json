@@ -1,0 +1,9 @@
+{
+  "name": "i18n-redis",
+  "version": "0.1.0",
+  "description": "Minimal example Redis client library",
+  "dependencies": [
+    "nlohmann-json",
+    "redis-plus-plus"
+  ]
+}

@@ -65,6 +65,13 @@ Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tra
 ```
 La aplicación almacenará un mensaje en Redis con la clave indicada y mostrará el valor recuperado.
 
+## Instalación como port de vcpkg
+Se incluye un port básico en `ports/i18n-redis` que permite instalar la biblioteca mediante la opción `--overlay-ports` de vcpkg:
+```bash
+vcpkg install i18n-redis --overlay-ports=ports
+```
+
+
 ## Detecci\u00f3n autom\u00e1tica de archivos fuente
 El proyecto usa `file(GLOB CONFIGURE_DEPENDS ...)` para incluir todos los
 archivos `.cpp` del directorio `src`. Cuando a\u00f1adas nuevos archivos,
