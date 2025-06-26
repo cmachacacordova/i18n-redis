@@ -77,7 +77,9 @@ vcpkg install i18n-redis --overlay-ports=ports --triplet x64-linux-static
 vcpkg install i18n-redis --overlay-ports=ports --triplet x64-linux
 ```
 El port respeta el tipo de enlace definido por el triplet, por lo que funciona
-tanto en modo estático como dinámico.
+tanto en modo estático como dinámico. Las dependencias listadas en el archivo
+`vcpkg.json` del port se compilan automáticamente con el mismo triplet
+seleccionado, por lo que no es necesario instalarlas por separado.
 
 
 ## Detecci\u00f3n autom\u00e1tica de archivos fuente
