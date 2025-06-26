@@ -1,7 +1,9 @@
 {
   "cmake.useCMakePresets": "always",
   "cmake.debugConfig": {
-    "cwd": "${workspaceFolder}/minecraft"
+    "args": [
+      "key"
+    ]
   },
   "cmake.buildDirectory": "${workspaceRoot}/out",
   "cmake.sourceDirectory": "${workspaceRoot}",
