@@ -1,3 +1,5 @@
+include(vcpkg-cmake)
+
 vcpkg_cmake_configure(
     SOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../
     OPTIONS -DI18N_REDIS_BUILD_BOTH=OFF
