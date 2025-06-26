@@ -80,6 +80,8 @@ El port respeta el tipo de enlace definido por el triplet, por lo que funciona
 tanto en modo estático como dinámico. Las dependencias listadas en el archivo
 `vcpkg.json` del port se compilan automáticamente con el mismo triplet
 seleccionado, por lo que no es necesario instalarlas por separado.
+La instalación genera los ficheros de configuración de CMake, así que podrás
+usar `find_package(i18n-redis CONFIG)` en tus proyectos.
 
 
 ## Detecci\u00f3n autom\u00e1tica de archivos fuente

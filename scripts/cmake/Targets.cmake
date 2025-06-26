@@ -63,3 +63,19 @@ elseif(TARGET i18n-redis-static)
 else()
     target_link_libraries(i18n-redis-example PRIVATE i18n-redis-shared)
 endif()
+
+install(TARGETS ${i18n_redis_targets}
+    EXPORT i18n-redisTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${PROJECT_BINARY_DIR}/i18n_redis_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT i18n-redisTargets
+    FILE i18n-redisTargets.cmake
+    NAMESPACE i18n::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i18n-redis
+)
