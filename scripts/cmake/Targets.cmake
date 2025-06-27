@@ -48,11 +48,41 @@ endif()
 
 foreach(tgt IN LISTS i18n_redis_targets)
     target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
-    target_include_directories(${tgt} PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_BINARY_DIR}
+    target_include_directories(${tgt}
+        PUBLIC
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+            $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 endforeach()
+
+include(GNUInstallDirs)
+install(TARGETS ${i18n_redis_targets} i18n-redis-deps
+    EXPORT i18n-redis-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT i18n-redis-targets
+    NAMESPACE i18n-redis::
+    FILE i18n-redisTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i18n-redis)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${PROJECT_BINARY_DIR}/i18n-redisConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion)
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/cmake/i18n-redisConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/i18n-redisConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i18n-redis)
+install(FILES
+    ${PROJECT_BINARY_DIR}/i18n-redisConfig.cmake
+    ${PROJECT_BINARY_DIR}/i18n-redisConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i18n-redis)
 
 # Example application to test the library
 add_executable(i18n-redis-example example/main.cpp)

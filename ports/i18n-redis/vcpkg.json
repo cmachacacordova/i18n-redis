@@ -1,7 +1,7 @@
 {
   "name": "i18n-redis",
-  "version": "0.1.0",
-  "builtin-baseline": "4f8fe05871555c1798dbcb1957d0d595e94f7b57",
+  "version-string": "0.1.0",
+  "description": "Sample C++ library using redis-plus-plus and nlohmann-json",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
