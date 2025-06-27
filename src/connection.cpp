@@ -1,6 +1,6 @@
 #include "i18n/redis/connection.h"
 
-I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, int port) : redis_() {
+i18n::redis::Connection::Connection(const std::string &uri, int port) : redis_() {
   try {
     // Construct Redis connection options
     sw::redis::ConnectionOptions connection_opts;
@@ -18,4 +18,5 @@ I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, in
   } catch (const sw::redis::Error &e) { throw std::runtime_error("Failed to connect to Redis: " + std::string(e.what())); }
 }
 
-I18N_REDIS_EXPORT i18n::redis::Connection::~Connection() {}
+i18n::redis::Connection::~Connection() {
+}

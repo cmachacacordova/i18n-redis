@@ -4,6 +4,6 @@ find_package(redis++ CONFIG REQUIRED)
 
 add_library(i18n-redis-deps INTERFACE)
 target_link_libraries(i18n-redis-deps INTERFACE
-    redis++::redis++_static
+    $<IF:$<TARGET_EXISTS:redis++::redis++_static>,redis++::redis++_static,redis++::redis++>
     nlohmann_json::nlohmann_json
 )
