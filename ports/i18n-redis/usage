@@ -1,0 +1,4 @@
+To use i18n-redis with CMake, add the following to your CMakeLists.txt:
+
+find_package(i18n-redis CONFIG REQUIRED)
+target_link_libraries(main PRIVATE i18n-redis::i18n-redis)
