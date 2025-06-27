@@ -17,15 +17,18 @@ Ejecuta el script `scripts/install_vcpkg.sh` para clonar y compilar vcpkg en `ex
 ```
 
 ## Compilación
-Instala las dependencias utilizando los triplets estáticos incluidos en el proyecto:
+Instala las dependencias para los triplets utilizados por los distintos presets:
 ```bash
 external/vcpkg/vcpkg install --triplet x64-linux-static
+external/vcpkg/vcpkg install --triplet x64-linux
 external/vcpkg/vcpkg install --triplet x64-windows-static-md
+external/vcpkg/vcpkg install --triplet x64-windows
 ```
 
-En Linux se emplea el triplet `x64-linux-static`, por lo que incluso la
-biblioteca compartida incorpora el código de las dependencias y no requiere
-archivos externos.
+Los presets `*-static-*` y `*-both-*` emplean los triplets estáticos. En Linux
+esto implica que incluso la biblioteca compartida incorpora el código de las
+dependencias y no requiere archivos externos. Las variantes `*-shared-*` usan
+los triplets dinámicos (`x64-linux` o `x64-windows`).
 
 Los presets de CMake ya apuntan al *toolchain* ubicado en `external/vcpkg`, por lo que no es necesario definir `VCPKG_ROOT`. Se usa `clang-cl` en Windows y `clang`/`clang++` en Unix.
 
@@ -45,7 +48,8 @@ vcpkg se encuentran en
 `out/<preset>/vcpkg_installed/<triplet>/lib` y se añaden automáticamente a las
 variables de entorno `LIB` o `LD_LIBRARY_PATH`. Los encabezados quedan en
 `out/<preset>/vcpkg_installed/<triplet>/include` y se agregan a `INCLUDE`
-(Windows) o `CPATH` (Unix).
+(Windows) o `CPATH` (Unix). Cada preset define `VCPKG_TARGET_TRIPLET`,
+por lo que esas rutas siempre usan el triplet adecuado.
 En Windows la biblioteca estática se llama `i18n-redis_static.lib` y la
 compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
 
