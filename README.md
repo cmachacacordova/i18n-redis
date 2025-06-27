@@ -16,6 +16,13 @@ Ejecuta el script `scripts/install_vcpkg.sh` para clonar y compilar vcpkg en `ex
 ./scripts/install_vcpkg.sh
 ```
 
+## Uso del port de vcpkg
+Puedes instalar la biblioteca como un port local ejecutando:
+```bash
+external/vcpkg/vcpkg install i18n-redis --overlay-ports=ports
+```
+Luego, en tu proyecto CMake, simplemente usa `find_package(i18n-redis CONFIG REQUIRED)` y enlaza con `i18n-redis::i18n-redis`.
+
 ## Compilación
 Instala las dependencias para los triplets utilizados por los distintos presets:
 ```bash
