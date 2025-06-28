@@ -23,6 +23,10 @@ external/vcpkg/vcpkg install i18n-redis --overlay-ports=ports
 ```
 Luego, en tu proyecto CMake, simplemente usa `find_package(i18n-redis CONFIG REQUIRED)` y enlaza con `i18n-redis::i18n-redis`.
 
+El `portfile.cmake` obtiene el código desde Git usando `vcpkg_from_git`. Puedes
+seleccionar una versión específica cambiando la opción `REF` al hash de un
+commit o etiqueta del repositorio.
+
 ## Compilación
 Instala las dependencias para los triplets utilizados por los distintos presets:
 ```bash

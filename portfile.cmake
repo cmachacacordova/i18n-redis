@@ -1,8 +1,8 @@
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "https://github.com/cmachacacordova/i18n-redis.git"
-    REF 47fff296199ab4180d01cb76f8b99ab21fed7726
-    SHA512 0161c51fee4a2b2ad639080994e0c6f4506c80e9913c64c203ead5d00372db95aa1a0bcee525ac941c02f6eb9a43fa5bdf6b579551162a44f025d5d5d2181cff
+    REF be1d9a9623de827934f50bf260aab803a5f6d123 # tag v0.1.0
+    SHA512 36e085c078c45c3babd9edc1b3512d4025417cc737fbc2110dd15d73e8d7141e4d713fdda9643b40b3103e292321a39383a35ceed0175b910253be6e5f81ecf4
 )
 vcpkg_cmake_configure(SOURCE_PATH ${SOURCE_PATH})
 vcpkg_cmake_install()
