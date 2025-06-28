@@ -1,7 +1,16 @@
 {
   "name": "i18n-redis",
   "version": "0.1.0",
+  "builtin-baseline": "4f8fe05871555c1798dbcb1957d0d595e94f7b57",
   "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    },
     "nlohmann-json",
     "redis-plus-plus"
   ]

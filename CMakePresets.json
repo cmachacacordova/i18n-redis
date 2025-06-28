@@ -17,8 +17,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-debug/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-debug/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -37,8 +37,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-release/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-release/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -48,7 +48,7 @@
       "binaryDir": "${sourceDir}/out/windows-shared-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -57,8 +57,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-debug/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-debug/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -68,7 +68,7 @@
       "binaryDir": "${sourceDir}/out/windows-shared-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_COMPILER": "clang-cl",
@@ -77,8 +77,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-release/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-release/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -97,8 +97,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-debug/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-debug/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -117,8 +117,8 @@
       "environment": {
         "CXX": "clang-cl",
         "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-release/vcpkg_installed/x64-windows-static-md/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-release/vcpkg_installed/x64-windows-static-md/include"
+        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -137,8 +137,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -157,8 +157,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -168,7 +168,7 @@
       "binaryDir": "${sourceDir}/out/linux-shared-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -177,8 +177,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -188,7 +188,7 @@
       "binaryDir": "${sourceDir}/out/linux-shared-release",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
         "BUILD_SHARED_LIBS": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -197,8 +197,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -217,8 +217,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
     {
@@ -237,8 +237,8 @@
       "environment": {
         "CXX": "clang++",
         "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/x64-linux-static/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/x64-linux-static/include"
+        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
+        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     }
   ],
