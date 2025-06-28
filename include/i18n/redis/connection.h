@@ -1,9 +1,11 @@
 #pragma once
 
-#include "i18n_redis_export.h"
+#include "i18n/configuration.h"
 
 #include <memory>
+#include <optional>
 #include <string>
+
 #include <sw/redis++/redis++.h>
 
 #include "i18n/json.h"
@@ -22,12 +24,15 @@ public:
   Connection(const std::string &, int = 6379);
 
   template <typename T>
-  T value(const std::string &key) {
-    return this->value<i18n::json>(key).template get<T>();
+  std::optional<T> value(const std::string &key) const {
+    if (std::optional<i18n::json> val = this->template value<i18n::json>(key)) {
+      return std::make_optional<T>(val->get<T>());
+    }
+    return std::nullopt;
   }
 
   template <typename T>
-  T store(const std::string &key, const T &val) {
+  T store(const std::string &key, const T &val) const {
     this->store<i18n::json>(key, i18n::json(val));
     return val;
   }
@@ -36,25 +41,24 @@ public:
 };
 
 template <>
-inline std::string Connection::value<std::string>(const std::string &key) {
+inline std::optional<std::string> Connection::value<std::string>(const std::string &key) const {
   auto val = redis_->get(key);
   if (val) {
     return *val;
   }
-  return "";
+  return std::nullopt;
 }
 
 template <>
-inline i18n::json Connection::value<i18n::json>(const std::string &key) {
-  auto val = this->value<std::string>(key);
-  if (val.empty()) {
-    return json::object();
+inline std::optional<i18n::json> Connection::value<i18n::json>(const std::string &key) const {
+  if (auto val = this->value<std::string>(key)) {
+    return std::make_optional<i18n::json>(json::parse(*val));
   }
-  return json::parse(val);
+  return std::nullopt;
 }
 
 template <>
-inline std::string Connection::store<std::string>(const std::string &key, const std::string &val) {
+inline std::string Connection::store<std::string>(const std::string &key, const std::string &val) const {
   if (val.empty()) {
     throw std::invalid_argument("Value cannot be empty");
   }
@@ -63,7 +67,7 @@ inline std::string Connection::store<std::string>(const std::string &key, const 
 }
 
 template <>
-inline i18n::json Connection::store<i18n::json>(const std::string &key, const i18n::json &val) {
+inline i18n::json Connection::store<i18n::json>(const std::string &key, const i18n::json &val) const {
   auto str = val.dump();
   if (str.empty()) {
     throw std::invalid_argument("JSON value cannot be empty");

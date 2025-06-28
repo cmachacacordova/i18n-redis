@@ -32,8 +32,10 @@ if(I18N_REDIS_BUILD_BOTH)
 
     set(i18n_redis_targets i18n-redis-static i18n-redis-shared)
     generate_export_header(i18n-redis-shared
+        BASE_NAME i18n-redis
         EXPORT_MACRO_NAME I18N_REDIS_EXPORT
-        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h)
+        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h
+        STATIC_DEFINE I18N_REDIS_EXPORTS_BUILT_AS_STATIC)
 else()
     if(BUILD_SHARED_LIBS)
         add_library(i18n-redis SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
@@ -42,8 +44,10 @@ else()
     endif()
     set(i18n_redis_targets i18n-redis)
     generate_export_header(i18n-redis
+        BASE_NAME i18n-redis
         EXPORT_MACRO_NAME I18N_REDIS_EXPORT
-        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h)
+        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h
+        STATIC_DEFINE I18N_REDIS_EXPORTS_BUILT_AS_STATIC)
 endif()
 
 foreach(tgt IN LISTS i18n_redis_targets)

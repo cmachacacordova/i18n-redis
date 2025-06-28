@@ -1,26 +1,16 @@
+#include <filesystem>
 #include <iostream>
 
-#include "i18n/i18n_redis.h"
+#include "i18n/redis/translation_provider.h"
+#include "i18n/translation.h"
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    std::cerr << "Uso: " << argv[0] << " <clave>\n";
-    return 1;
-  }
-
-  std::string key = argv[1];
-  std::string value = "Hello from C++ Redis client!";
-
-  i18n::redis::Connection connection("localhost", 6379); // Default connection to Redis at localhost:6379
-  std::string result = connection.store(key, value);
-
-  result = connection.value<std::string>(key);
-
-  std::cout << "Redis value: " << result << std::endl;
-
-  i18n::redis::store_message(key);
-
-  std::cout << "Redis value: " << connection.value<i18n::json>("test1").dump() << std::endl;
-
+  std::string host = "localhost";
+  int port = 6379;
+  std::filesystem::path cwd = std::filesystem::current_path();
+  std::unique_ptr<i18n::TranslationProvider> provider = std::make_unique<i18n::RedisTranslationProvider>(host, port);
+  i18n::Translation translation(std::move(provider), "en");
+  translation.store(cwd.string(), {"en"}); // Adjust the path and locales as needed
+  std::cout << "Redis value: " << translation.translate("success", "en") << std::endl;
   return 0;
 }

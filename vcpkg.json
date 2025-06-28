@@ -12,6 +12,7 @@
       "host": true
     },
     "nlohmann-json",
-    "redis-plus-plus"
+    "redis-plus-plus",
+    "fmt"
   ]
 }

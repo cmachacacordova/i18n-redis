@@ -1,0 +1,18 @@
+[
+  {
+    "id": "error",
+    "value": "Error",
+    "category": "Client",
+    "creationDate": "2024-06-28",
+    "modificationDate": "2024-06-28",
+    "modificationVersion": 1
+  },
+  {
+    "id": "success",
+    "value": "Success",
+    "category": "Client",
+    "creationDate": "2024-06-28",
+    "modificationDate": "2024-06-28",
+    "modificationVersion": 1
+  }
+]
