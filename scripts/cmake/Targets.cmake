@@ -14,7 +14,7 @@ target_include_directories(i18n-redis-obj PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}
 )
-target_link_libraries(i18n-redis-obj PUBLIC i18n-redis-deps)
+target_link_libraries(i18n-redis-obj PUBLIC ${I18N_REDIS_DEPENDENCIES})
 
 if(I18N_REDIS_BUILD_BOTH)
     add_library(i18n-redis-static STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
@@ -47,7 +47,7 @@ else()
 endif()
 
 foreach(tgt IN LISTS i18n_redis_targets)
-    target_link_libraries(${tgt} PUBLIC i18n-redis-deps)
+    target_link_libraries(${tgt} PUBLIC ${I18N_REDIS_DEPENDENCIES})
     target_include_directories(${tgt}
         PUBLIC
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -57,7 +57,7 @@ foreach(tgt IN LISTS i18n_redis_targets)
 endforeach()
 
 include(GNUInstallDirs)
-install(TARGETS ${i18n_redis_targets} i18n-redis-deps
+install(TARGETS ${i18n_redis_targets}
     EXPORT i18n-redis-targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
