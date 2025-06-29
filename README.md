@@ -60,7 +60,9 @@ incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado
 Al configurar el proyecto, CMake genera el archivo `i18n_redis_export.h` en el
 directorio de compilación. Este encabezado define el macro
 `I18N_REDIS_EXPORT` que se utiliza para exportar correctamente las funciones de
-la biblioteca cuando se crea la versión compartida.
+la biblioteca cuando se crea la versión compartida. El archivo también se
+instala junto con el resto de los encabezados, de modo que otros proyectos
+puedan utilizar la biblioteca sin problemas.
 
 ## Ejemplo
 Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tras compilar el proyecto puedes ejecutarla con:
