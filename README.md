@@ -25,7 +25,18 @@ Luego, en tu proyecto CMake, simplemente usa `find_package(i18n-redis CONFIG REQ
 
 El `portfile.cmake` obtiene el código desde Git usando `vcpkg_from_git`. Puedes
 seleccionar una versión específica cambiando la opción `REF` al hash de un
-commit o etiqueta del repositorio.
+commit o etiqueta del repositorio. Para automatizar este proceso se incluye el
+script `scripts/update_port.sh`, que recibe la etiqueta o el hash de commit,
+calcula el SHA512 del archivo correspondiente y actualiza `portfile.cmake` y
+`vcpkg.json`. En Windows puedes ejecutar `scripts/update_port.ps1` con
+PowerShell para lograr lo mismo:
+
+```bash
+./scripts/update_port.sh v0.2.1
+```
+```powershell
+./scripts/update_port.ps1 v0.2.1
+```
 
 ## Compilación
 Instala las dependencias para los triplets utilizados por los distintos presets:
