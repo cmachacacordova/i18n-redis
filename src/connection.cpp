@@ -1,5 +1,3 @@
-#define i18n_redis_EXPORTS
-
 #include "i18n/redis/connection.h"
 
 I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, int port) : redis_() {

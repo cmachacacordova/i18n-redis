@@ -10,6 +10,7 @@ file(GLOB I18N_REDIS_SOURCES CONFIGURE_DEPENDS
 # Object library compiled once
 add_library(i18n-redis-obj OBJECT ${I18N_REDIS_SOURCES})
 set_property(TARGET i18n-redis-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(i18n-redis-obj PRIVATE i18n_redis_EXPORTS)
 target_include_directories(i18n-redis-obj PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}

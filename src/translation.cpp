@@ -1,5 +1,3 @@
-#define i18n_redis_EXPORTS
-
 #include "i18n/translation.h"
 
 I18N_REDIS_EXPORT i18n::Translation::Translation(std::unique_ptr<TranslationProvider> provider, std::string defaultLocale) : provider(std::move(provider)), defaultLocale(std::move(defaultLocale)) {

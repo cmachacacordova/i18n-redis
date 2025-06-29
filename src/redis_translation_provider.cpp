@@ -1,5 +1,3 @@
-#define i18n_redis_EXPORTS
-
 #include <filesystem>
 #include <fstream>
 
