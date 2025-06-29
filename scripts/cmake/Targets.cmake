@@ -69,6 +69,8 @@ install(TARGETS ${i18n_redis_targets}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${PROJECT_BINARY_DIR}/i18n_redis_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT i18n-redis-targets
     NAMESPACE i18n-redis::
     FILE i18n-redisTargets.cmake
