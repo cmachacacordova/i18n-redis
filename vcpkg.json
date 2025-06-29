@@ -1,6 +1,6 @@
 {
   "name": "i18n-redis",
-  "version-string": "0.1.0",
+  "version-string": "0.2.0",
   "description": "Sample C++ library using redis-plus-plus and nlohmann-json",
   "dependencies": [
     {
