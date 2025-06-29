@@ -40,8 +40,8 @@ Set-Content portfile.cmake $content
 # Update version in vcpkg.json
 $version = $Tag.TrimStart('v')
 $j = Get-Content vcpkg.json -Raw
-$replacement = '"version-string": "' + $version + '"'
-$j = $j -replace '"version-string"\s*:\s*"[^"]+"', $replacement
+$replacement = '"version": "' + $version + '"'
+$j = $j -replace '"version"\s*:\s*"[^"]+"', $replacement
 Set-Content vcpkg.json $j
 
 Write-Host "Updated to $Tag"

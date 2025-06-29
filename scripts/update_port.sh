@@ -22,7 +22,7 @@ sed -i -E "s|SHA512 [0-9a-f]{128}|SHA512 $SHA512|" portfile.cmake
 
 # Update version in vcpkg.json
 VERSION=${TAG#v}
-sed -i -E "s/(\"version-string\": \"?)[^\"]+(\")/\1$VERSION\2/" vcpkg.json
+sed -i -E "s/(\"version\": \"?)[^\"]+(\")/\1$VERSION\2/" vcpkg.json
 
 echo "Updated to $TAG" >&2
 echo "Commit: $COMMIT" >&2
