@@ -25,7 +25,7 @@ external/vcpkg/vcpkg install --triplet x64-windows-static-md
 external/vcpkg/vcpkg install --triplet x64-windows
 ```
 
-Los presets `*-static-*` y `*-both-*` emplean los triplets estáticos. En Linux
+Los presets `*-static-*` emplean los triplets estáticos. En Linux
 esto implica que incluso la biblioteca compartida incorpora el código de las
 dependencias y no requiere archivos externos. Las variantes `*-shared-*` usan
 los triplets dinámicos (`x64-linux` o `x64-windows`).
@@ -39,17 +39,15 @@ cmake --preset linux-static-release
 cmake --build out/linux-static-release
 ```
 Los nombres de preset siguen el patrón `<plataforma>-<tipo>-<modo>` donde
-`<tipo>` es `static`, `shared` o `both` y `<modo>` puede ser `debug` o
+`<tipo>` es `static` o `shared` y `<modo>` puede ser `debug` o
 `release`.
-Como alternativa, ejecuta `scripts/build_project.sh` o `scripts/build_project.bat` para instalar vcpkg y compilar de forma automática. El primer argumento indica el tipo de biblioteca (`static`, `shared` o `both`) y el segundo el modo (`release` o `debug`). Por ejemplo:
+Como alternativa, ejecuta `scripts/build_project.sh` o `scripts/build_project.bat` para instalar vcpkg y compilar de forma automática. El primer argumento indica el tipo de biblioteca (`static` o `shared`) y el segundo el modo (`release` o `debug`). Por ejemplo:
 ```bash
 ./scripts/build_project.sh static release
 ```
 
 
-Las variantes `*-both-*` activan `I18N_REDIS_BUILD_BOTH` para construir en un
-solo paso las bibliotecas estática y compartida. Las dependencias instaladas por
-vcpkg se encuentran en
+Las dependencias instaladas por vcpkg se encuentran en
 `out/<preset>/vcpkg_installed/<triplet>/lib` y se añaden automáticamente a las
 variables de entorno `LIB` o `LD_LIBRARY_PATH`. Los encabezados quedan en
 `out/<preset>/vcpkg_installed/<triplet>/include` y se agregan a `INCLUDE`

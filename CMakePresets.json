@@ -82,46 +82,6 @@
       }
     },
     {
-      "name": "windows-both-debug",
-      "displayName": "Windows static+shared Debug",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-both-debug",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
-        "I18N_REDIS_BUILD_BOTH": true,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
-    },
-    {
-      "name": "windows-both-release",
-      "displayName": "Windows static+shared Release",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-both-release",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
-        "I18N_REDIS_BUILD_BOTH": true,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
-    },
-    {
       "name": "linux-static-debug",
       "displayName": "Linux static Debug",
       "generator": "Ninja",
@@ -200,46 +160,6 @@
         "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
         "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
-    },
-    {
-      "name": "linux-both-debug",
-      "displayName": "Linux static+shared Debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-both-debug",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
-        "I18N_REDIS_BUILD_BOTH": true,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
-    },
-    {
-      "name": "linux-both-release",
-      "displayName": "Linux static+shared Release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-both-release",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
-        "I18N_REDIS_BUILD_BOTH": true,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-both-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
     }
   ],
   "buildPresets": [
@@ -264,16 +184,6 @@
       "configurePreset": "windows-shared-release"
     },
     {
-      "name": "windows-both-debug",
-      "displayName": "Windows static+shared Debug",
-      "configurePreset": "windows-both-debug"
-    },
-    {
-      "name": "windows-both-release",
-      "displayName": "Windows static+shared Release",
-      "configurePreset": "windows-both-release"
-    },
-    {
       "name": "linux-static-debug",
       "displayName": "Linux static Debug",
       "configurePreset": "linux-static-debug"
@@ -292,16 +202,6 @@
       "name": "linux-shared-release",
       "displayName": "Linux shared Release",
       "configurePreset": "linux-shared-release"
-    },
-    {
-      "name": "linux-both-debug",
-      "displayName": "Linux static+shared Debug",
-      "configurePreset": "linux-both-debug"
-    },
-    {
-      "name": "linux-both-release",
-      "displayName": "Linux static+shared Release",
-      "configurePreset": "linux-both-release"
     }
   ]
 }

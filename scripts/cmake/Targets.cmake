@@ -1,5 +1,4 @@
 # Build options
-option(I18N_REDIS_BUILD_BOTH "Build shared and static libraries" OFF)
 
 include(GenerateExportHeader)
 
@@ -17,39 +16,17 @@ target_include_directories(i18n-redis-obj PUBLIC
 )
 target_link_libraries(i18n-redis-obj PUBLIC ${I18N_REDIS_DEPENDENCIES})
 
-if(I18N_REDIS_BUILD_BOTH)
-    add_library(i18n-redis-static STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
-    add_library(i18n-redis-shared SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
-
-    # Avoid name clash of .lib files on Windows
-    set_target_properties(i18n-redis-static PROPERTIES OUTPUT_NAME i18n-redis_static)
-    if(WIN32)
-        set_target_properties(i18n-redis-shared PROPERTIES
-            OUTPUT_NAME i18n-redis
-            ARCHIVE_OUTPUT_NAME i18n-redis_shared)
-    else()
-        set_target_properties(i18n-redis-shared PROPERTIES OUTPUT_NAME i18n-redis)
-    endif()
-
-    set(i18n_redis_targets i18n-redis-static i18n-redis-shared)
-    generate_export_header(i18n-redis-shared
-        BASE_NAME i18n-redis
-        EXPORT_MACRO_NAME I18N_REDIS_EXPORT
-        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h
-        STATIC_DEFINE I18N_REDIS_EXPORTS_BUILT_AS_STATIC)
+if(BUILD_SHARED_LIBS)
+    add_library(i18n-redis SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
 else()
-    if(BUILD_SHARED_LIBS)
-        add_library(i18n-redis SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
-    else()
-        add_library(i18n-redis STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
-    endif()
-    set(i18n_redis_targets i18n-redis)
-    generate_export_header(i18n-redis
-        BASE_NAME i18n-redis
-        EXPORT_MACRO_NAME I18N_REDIS_EXPORT
-        EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h
-        STATIC_DEFINE I18N_REDIS_EXPORTS_BUILT_AS_STATIC)
+    add_library(i18n-redis STATIC $<TARGET_OBJECTS:i18n-redis-obj>)
 endif()
+set(i18n_redis_targets i18n-redis)
+generate_export_header(i18n-redis
+    BASE_NAME i18n-redis
+    EXPORT_MACRO_NAME I18N_REDIS_EXPORT
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/i18n_redis_export.h
+    STATIC_DEFINE I18N_REDIS_EXPORTS_BUILT_AS_STATIC)
 
 foreach(tgt IN LISTS i18n_redis_targets)
     target_link_libraries(${tgt} PUBLIC ${I18N_REDIS_DEPENDENCIES})

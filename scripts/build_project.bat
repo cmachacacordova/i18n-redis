@@ -2,7 +2,7 @@
 setlocal
 
 if "%~2"=="" (
-    echo Uso: %~nx0 ^<static^|shared^|both^> ^<release^|debug^>
+    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
     exit /b 1
 )
 
@@ -15,11 +15,8 @@ if /I "%TYPE%"=="static" (
 ) else if /I "%TYPE%"=="shared" (
     set PRESET=windows-shared
     set TRIPLET=x64-windows
-) else if /I "%TYPE%"=="both" (
-    set PRESET=windows-both
-    set TRIPLET=x64-windows-static-md
 ) else (
-    echo Uso: %~nx0 ^<static^|shared^|both^> ^<release^|debug^>
+    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
     exit /b 1
 )
 
@@ -28,7 +25,7 @@ if /I "%MODE%"=="debug" (
 ) else if /I "%MODE%"=="release" (
     set MODE=release
 ) else (
-    echo Uso: %~nx0 ^<static^|shared^|both^> ^<release^|debug^>
+    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
     exit /b 1
 )
 

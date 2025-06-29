@@ -2,7 +2,7 @@
 set -e
 
 usage() {
-    echo "Uso: $0 <static|shared|both> <release|debug>" >&2
+    echo "Uso: $0 <static|shared> <release|debug>" >&2
     exit 1
 }
 
@@ -12,7 +12,7 @@ TYPE=$1
 MODE=$2
 
 case "$TYPE" in
-    static|shared|both) ;;
+    static|shared) ;;
     *) usage;;
 esac
 
@@ -31,12 +31,9 @@ VCPKG="$ROOT_DIR/external/vcpkg/vcpkg"
 if [ "$TYPE" = "static" ]; then
     "$VCPKG" install --triplet x64-linux-static
     PRESET="linux-static-$MODE"
-elif [ "$TYPE" = "shared" ]; then
+else
     "$VCPKG" install --triplet x64-linux
     PRESET="linux-shared-$MODE"
-else
-    "$VCPKG" install --triplet x64-linux-static
-    PRESET="linux-both-$MODE"
 fi
 
 cmake --preset "$PRESET"
