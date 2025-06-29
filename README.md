@@ -41,6 +41,11 @@ cmake --build out/linux-static-release
 Los nombres de preset siguen el patrón `<plataforma>-<tipo>-<modo>` donde
 `<tipo>` es `static`, `shared` o `both` y `<modo>` puede ser `debug` o
 `release`.
+Como alternativa, ejecuta `scripts/build_project.sh` o `scripts/build_project.bat` para instalar vcpkg y compilar de forma automática. El primer argumento indica el tipo de biblioteca (`static`, `shared` o `both`) y el segundo el modo (`release` o `debug`). Por ejemplo:
+```bash
+./scripts/build_project.sh static release
+```
+
 
 Las variantes `*-both-*` activan `I18N_REDIS_BUILD_BOTH` para construir en un
 solo paso las bibliotecas estática y compartida. Las dependencias instaladas por
