@@ -1,7 +1,7 @@
 {
   "name": "i18n-redis",
-  "version": "0.1.0",
-  "builtin-baseline": "4f8fe05871555c1798dbcb1957d0d595e94f7b57",
+  "version": "0.3.1",
+  "builtin-baseline": "89dd0f4d241136b843fb55813b2f0fa6448c204d",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
