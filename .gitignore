@@ -1,3 +1,7 @@
-/out
-/external
-/vcpkg_installed
+/out/
+/external/
+/vcpkg_installed/
+*.user
+.vs/
+.vscode/settings.json
+CMakeUserPresets.json

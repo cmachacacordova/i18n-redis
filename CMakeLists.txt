@@ -1,11 +1,17 @@
-cmake_minimum_required(VERSION 3.14)
-project(i18n-redis VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.25)
+project(i18n-redis VERSION 0.3.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable link time optimization for Release builds when available
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+option(I18N_REDIS_BUILD_EXAMPLES "Build example applications" OFF)
+option(I18N_REDIS_BUILD_TESTS    "Build test suite"            OFF)
+option(I18N_REDIS_ENABLE_LTO     "Enable link-time optimisation for Release" ON)
+option(I18N_REDIS_ENABLE_ASAN    "Enable AddressSanitizer"    OFF)
+option(I18N_REDIS_ENABLE_UBSAN   "Enable UndefinedBehaviourSanitizer" OFF)
+
+include(CTest)
 
 # Organise build logic into separate modules
 include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/Dependencies.cmake)

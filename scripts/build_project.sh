@@ -2,14 +2,15 @@
 set -e
 
 usage() {
-    echo "Uso: $0 <static|shared> <release|debug>" >&2
+    echo "Usage: $0 <static|shared> <debug|release> [gcc|clang]" >&2
     exit 1
 }
 
-[ $# -eq 2 ] || usage
+[ $# -ge 2 ] || usage
 
 TYPE=$1
 MODE=$2
+COMPILER=${3:-gcc}
 
 case "$TYPE" in
     static|shared) ;;
@@ -17,7 +18,12 @@ case "$TYPE" in
 esac
 
 case "$MODE" in
-    release|debug) ;;
+    debug|release) ;;
+    *) usage;;
+esac
+
+case "$COMPILER" in
+    gcc|clang) ;;
     *) usage;;
 esac
 
@@ -27,14 +33,17 @@ ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 "$SCRIPT_DIR/install_vcpkg.sh"
 
 VCPKG="$ROOT_DIR/external/vcpkg/vcpkg"
+OVERLAY="$ROOT_DIR/ports-overlay"
 
 if [ "$TYPE" = "static" ]; then
-    "$VCPKG" install --triplet x64-linux-static
-    PRESET="linux-static-$MODE"
+    TRIPLET="x64-linux"
 else
-    "$VCPKG" install --triplet x64-linux
-    PRESET="linux-shared-$MODE"
+    TRIPLET="x64-linux-dynamic"
 fi
 
+"$VCPKG" install --triplet "$TRIPLET" --overlay-ports="$OVERLAY"
+
+PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
+
 cmake --preset "$PRESET"
-cmake --build "out/$PRESET"
+cmake --build "out/$PRESET" --parallel

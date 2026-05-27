@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 #include <sw/redis++/redis++.h>
@@ -16,17 +17,18 @@ class I18N_REDIS_EXPORT Connection {
 private:
   std::unique_ptr<sw::redis::Redis> redis_;
 
-  // Disable copy and assignment
+public:
+  explicit Connection(const std::string &host, int port = 6379);
+
   Connection(const Connection &) = delete;
   Connection &operator=(const Connection &) = delete;
-
-public:
-  Connection(const std::string &, int = 6379);
+  Connection(Connection &&) noexcept = default;
+  Connection &operator=(Connection &&) noexcept = default;
 
   template <typename T>
   std::optional<T> value(const std::string &key) const {
-    if (std::optional<i18n::json> val = this->template value<i18n::json>(key)) {
-      return std::make_optional<T>(val->get<T>());
+    if (std::optional<i18n::json> val = this->value<i18n::json>(key)) {
+      return std::make_optional<T>(val->template get<T>());
     }
     return std::nullopt;
   }
@@ -37,7 +39,7 @@ public:
     return val;
   }
 
-  ~Connection();
+  ~Connection() noexcept;
 };
 
 template <>
@@ -52,7 +54,7 @@ inline std::optional<std::string> Connection::value<std::string>(const std::stri
 template <>
 inline std::optional<i18n::json> Connection::value<i18n::json>(const std::string &key) const {
   if (auto val = this->value<std::string>(key)) {
-    return std::make_optional<i18n::json>(json::parse(*val));
+    return std::make_optional<i18n::json>(i18n::json::parse(*val));
   }
   return std::nullopt;
 }
@@ -68,7 +70,7 @@ inline std::string Connection::store<std::string>(const std::string &key, const 
 
 template <>
 inline i18n::json Connection::store<i18n::json>(const std::string &key, const i18n::json &val) const {
-  auto str = val.dump();
+  const auto str = val.dump();
   if (str.empty()) {
     throw std::invalid_argument("JSON value cannot be empty");
   }

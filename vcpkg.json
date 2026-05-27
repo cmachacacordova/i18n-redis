@@ -1,7 +1,7 @@
 {
   "name": "i18n-redis",
   "version": "0.3.2",
-  "builtin-baseline": "940f58770cee8e2011bfb4847fb2bd70057301a8",
+  "builtin-baseline": "9b965a116838c6cdcd36bca60d1b81b030c8ab8d",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
@@ -14,5 +14,11 @@
     "nlohmann-json",
     "redis-plus-plus",
     "fmt"
-  ]
+  ],
+  "features": {
+    "tests": {
+      "description": "Build and run the test suite with Catch2",
+      "dependencies": [ "catch2" ]
+    }
+  }
 }

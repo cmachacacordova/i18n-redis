@@ -2,7 +2,7 @@
 setlocal
 
 if "%~2"=="" (
-    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
+    echo Usage: %~nx0 ^<static^|shared^> ^<debug^|release^>
     exit /b 1
 )
 
@@ -10,13 +10,11 @@ set TYPE=%1
 set MODE=%2
 
 if /I "%TYPE%"=="static" (
-    set PRESET=windows-static
     set TRIPLET=x64-windows-static-md
 ) else if /I "%TYPE%"=="shared" (
-    set PRESET=windows-shared
     set TRIPLET=x64-windows
 ) else (
-    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
+    echo Usage: %~nx0 ^<static^|shared^> ^<debug^|release^>
     exit /b 1
 )
 
@@ -25,7 +23,7 @@ if /I "%MODE%"=="debug" (
 ) else if /I "%MODE%"=="release" (
     set MODE=release
 ) else (
-    echo Uso: %~nx0 ^<static^|shared^> ^<release^|debug^>
+    echo Usage: %~nx0 ^<static^|shared^> ^<debug^|release^>
     exit /b 1
 )
 
@@ -37,12 +35,13 @@ popd
 call "%SCRIPT_DIR%install_vcpkg.bat"
 
 set VCPKG_EXE=%ROOT_DIR%\external\vcpkg\vcpkg.exe
+set OVERLAY=%ROOT_DIR%\ports-overlay
 
-call "%VCPKG_EXE%" install --triplet %TRIPLET%
+call "%VCPKG_EXE%" install --triplet %TRIPLET% --overlay-ports=%OVERLAY%
 
-set PRESET=%PRESET%-%MODE%
+set PRESET=windows-msvc-%TYPE%-%MODE%
 
 cmake --preset %PRESET%
-cmake --build out\%PRESET%
+cmake --build out\%PRESET% --parallel
 
 endlocal

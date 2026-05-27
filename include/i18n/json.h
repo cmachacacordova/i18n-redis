@@ -3,5 +3,5 @@
 #include <nlohmann/json.hpp>
 
 namespace i18n {
-using namespace nlohmann;
+using json = nlohmann::json;
 } // namespace i18n

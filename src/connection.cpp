@@ -1,21 +1,21 @@
 #include "i18n/redis/connection.h"
 
-I18N_REDIS_EXPORT i18n::redis::Connection::Connection(const std::string &uri, int port) : redis_() {
+i18n::redis::Connection::Connection(const std::string &host, int port) {
   try {
-    // Construct Redis connection options
-    sw::redis::ConnectionOptions connection_opts;
-    connection_opts.host = uri;
-    connection_opts.port = port;
-    sw::redis::ConnectionPoolOptions pool_opts;
-    pool_opts.size = 4;                                                // Set the size of the connection pool
-    pool_opts.wait_timeout = std::chrono::milliseconds(1000);          // Set wait timeout for connection pool
-    pool_opts.connection_lifetime = std::chrono::milliseconds(60000);  // Set connection lifetime
-    pool_opts.connection_idle_time = std::chrono::milliseconds(30000); // Set idle time for connections
+    sw::redis::ConnectionOptions connectionOpts;
+    connectionOpts.host = host;
+    connectionOpts.port = port;
 
-    // Create Redis instance
-    redis_ = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
+    sw::redis::ConnectionPoolOptions poolOpts;
+    poolOpts.size = 4;
+    poolOpts.wait_timeout = std::chrono::milliseconds(1000);
+    poolOpts.connection_lifetime = std::chrono::milliseconds(60000);
+    poolOpts.connection_idle_time = std::chrono::milliseconds(30000);
 
-  } catch (const sw::redis::Error &e) { throw std::runtime_error("Failed to connect to Redis: " + std::string(e.what())); }
+    redis_ = std::make_unique<sw::redis::Redis>(connectionOpts, poolOpts);
+  } catch (const sw::redis::Error &e) {
+    throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what());
+  }
 }
 
-I18N_REDIS_EXPORT i18n::redis::Connection::~Connection() = default;
+i18n::redis::Connection::~Connection() noexcept = default;

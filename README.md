@@ -1,277 +1,284 @@
 # i18n-redis
 
-Biblioteca C++ de internacionalización (i18n) que almacena y recupera traducciones desde Redis. Utiliza CMake con [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) para la conexión a Redis, [nlohmann/json](https://github.com/nlohmann/json) para el procesamiento de archivos JSON y [fmt](https://github.com/fmtlib/fmt) para el formateo de cadenas.
+A modern C++20 library for internationalisation (i18n) backed by Redis.
+It loads JSON translation files from disk and stores them in Redis, then
+provides fast key-based lookups with optional `{fmt}` format arguments.
 
-Las dependencias se gestionan mediante [vcpkg](https://github.com/microsoft/vcpkg) y se enlazan de forma estática. Cuando se emplean triplets estáticos, vcpkg instala la biblioteca `redis++` con el nombre `redis++_static`. El `CMakeLists.txt` crea un alias para que ambos casos funcionen sin modificar el código de usuario.
+Dependencies are managed via [vcpkg](https://github.com/microsoft/vcpkg).
 
-## Requisitos
-- CMake >= 3.14
-- Un compilador C++17
-- Git y bash para instalar vcpkg
-- Servidor Redis en ejecución
+## Requirements
 
-## Instalación
+| Tool | Minimum version |
+|------|----------------|
+| CMake | 3.25 |
+| C++ compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
+| Ninja | any recent version |
+| Git | for vcpkg bootstrap |
 
-### Instalar vcpkg
-Ejecuta el script `scripts/install_vcpkg.sh` para clonar y compilar vcpkg en `external/vcpkg`:
+## Dependencies
+
+| Library | vcpkg name | Purpose |
+|---------|-----------|---------|
+| [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) | `redis-plus-plus` | Redis client |
+| [nlohmann/json](https://github.com/nlohmann/json) | `nlohmann-json` | JSON parsing |
+| [{fmt}](https://github.com/fmtlib/fmt) | `fmt` | String formatting |
+| [Catch2](https://github.com/catchorg/Catch2) *(optional)* | `catch2` | Test framework |
+
+## Quick start
+
+### 1 — Bootstrap vcpkg
+
 ```bash
+# Linux / macOS
 ./scripts/install_vcpkg.sh
+
+# Windows (cmd)
+scripts\install_vcpkg.bat
 ```
 
-### Compilación
-Instala las dependencias para los triplets utilizados por los distintos presets:
+This clones vcpkg into `external/vcpkg/` and builds the bootstrap binary.
+No `VCPKG_ROOT` environment variable is required — the presets point directly
+to `external/vcpkg/scripts/buildsystems/vcpkg.cmake`.
+
+### 2 — Configure and build
+
+Pick a preset that matches your platform, compiler, library type, and build
+configuration:
+
 ```bash
-external/vcpkg/vcpkg install --triplet x64-linux-static
-external/vcpkg/vcpkg install --triplet x64-linux
-external/vcpkg/vcpkg install --triplet x64-windows-static-md
-external/vcpkg/vcpkg install --triplet x64-windows
+cmake --preset linux-gcc-static-release
+cmake --build out/linux-gcc-static-release
 ```
 
-Los presets `*-static-*` emplean los triplets estáticos. En Linux esto implica que incluso la biblioteca compartida incorpora el código de las dependencias y no requiere archivos externos. Las variantes `*-shared-*` usan los triplets dinámicos (`x64-linux` o `x64-windows`).
+Or use the convenience script:
 
-Los presets de CMake ya apuntan al *toolchain* ubicado en `external/vcpkg`, por lo que no es necesario definir `VCPKG_ROOT`. Se usa `clang-cl` en Windows y `clang`/`clang++` en Unix.
-
-Configura y compila la biblioteca eligiendo el preset adecuado. Por ejemplo, para una compilación optimizada en Linux que produzca solo la versión estática:
 ```bash
-cmake --preset linux-static-release
-cmake --build out/linux-static-release
-```
-Los nombres de preset siguen el patrón `<plataforma>-<tipo>-<modo>` donde `<tipo>` es `static` o `shared` y `<modo>` puede ser `debug` o `release`.
+# Linux
+./scripts/build_project.sh static release   # linux-gcc-static-release
+./scripts/build_project.sh shared debug     # linux-gcc-shared-debug
 
-Como alternativa, ejecuta `scripts/build_project.sh` o `scripts/build_project.bat` para instalar vcpkg y compilar de forma automática. El primer argumento indica el tipo de biblioteca (`static` o `shared`) y el segundo el modo (`release` o `debug`). Por ejemplo:
-```bash
-./scripts/build_project.sh static release
+# Windows
+scripts\build_project.bat static release
 ```
 
-Las dependencias instaladas por vcpkg se encuentran en `out/<preset>/vcpkg_installed/<triplet>/lib` y se añaden automáticamente a las variables de entorno `LIB` o `LD_LIBRARY_PATH`. Los encabezados quedan en `out/<preset>/vcpkg_installed/<triplet>/include` y se agregan a `INCLUDE` (Windows) o `CPATH` (Unix). Cada preset define `VCPKG_TARGET_TRIPLET`, por lo que esas rutas siempre usan el triplet adecuado.
+## CMake Presets
 
-En Windows la biblioteca estática se llama `i18n-redis_static.lib` y la compartida produce `i18n-redis.dll` junto con `i18n-redis_shared.lib`.
+Preset names follow the pattern `<platform>-<compiler>-<type>-<config>`.
 
-La lógica de configuración de CMake se divide en los archivos `scripts/cmake/Dependencies.cmake` y `scripts/cmake/Targets.cmake`, incluidos desde el `CMakeLists.txt` principal para mantener el proyecto ordenado.
+### Linux (GCC)
 
-Al configurar el proyecto, CMake genera el archivo `i18n_redis_export.h` en el directorio de compilación. Este encabezado define el macro `I18N_REDIS_EXPORT` que se utiliza para exportar correctamente las funciones de la biblioteca cuando se crea la versión compartida. El archivo también se instala junto con el resto de los encabezados, de modo que otros proyectos puedan utilizar la biblioteca sin problemas.
+| Preset | Type | Config |
+|--------|------|--------|
+| `linux-gcc-static-debug` | static | Debug |
+| `linux-gcc-static-release` | static | Release |
+| `linux-gcc-shared-debug` | shared | Debug |
+| `linux-gcc-shared-release` | shared | Release |
 
-## Uso de la librería
+### Linux (Clang)
 
-### Incluir los encabezados
+| Preset | Type | Config |
+|--------|------|--------|
+| `linux-clang-static-debug` | static | Debug |
+| `linux-clang-static-release` | static | Release |
+| `linux-clang-shared-debug` | shared | Debug |
+| `linux-clang-shared-release` | shared | Release |
+
+### Windows (MSVC)
+
+| Preset | Type | Config |
+|--------|------|--------|
+| `windows-msvc-static-debug` | static | Debug |
+| `windows-msvc-static-release` | static | Release |
+| `windows-msvc-shared-debug` | shared | Debug |
+| `windows-msvc-shared-release` | shared | Release |
+
+### macOS (Clang)
+
+| Preset | Type | Config |
+|--------|------|--------|
+| `macos-clang-static-debug` | static | Debug |
+| `macos-clang-static-release` | static | Release |
+| `macos-clang-shared-debug` | shared | Debug |
+| `macos-clang-shared-release` | shared | Release |
+
+### Sanitizer presets
+
+| Preset | Sanitizer |
+|--------|-----------|
+| `linux-clang-static-asan` | AddressSanitizer |
+| `linux-clang-static-ubsan` | UndefinedBehaviourSanitizer |
+| `linux-gcc-static-asan` | AddressSanitizer |
+| `linux-gcc-static-ubsan` | UndefinedBehaviourSanitizer |
+
+### LTO presets
+
+| Preset | Notes |
+|--------|-------|
+| `linux-clang-static-release-lto` | Release + IPO/LTO |
+| `linux-gcc-static-release-lto` | Release + IPO/LTO |
+
+## Build options
+
+These CMake cache variables can be passed via `-D` or configured inside your
+own preset:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BUILD_SHARED_LIBS` | `OFF` | Build shared library instead of static |
+| `I18N_REDIS_BUILD_EXAMPLES` | `ON` | Build the example application |
+| `I18N_REDIS_BUILD_TESTS` | `ON` | Build the test suite |
+| `I18N_REDIS_ENABLE_LTO` | `ON` | Enable IPO/LTO for Release configs |
+| `I18N_REDIS_ENABLE_ASAN` | `OFF` | Enable AddressSanitizer |
+| `I18N_REDIS_ENABLE_UBSAN` | `OFF` | Enable UndefinedBehaviourSanitizer |
+
+## API usage
 
 ```cpp
-#include "i18n/translation.h"
 #include "i18n/redis/translation_provider.h"
+#include "i18n/translation.h"
+
+// Create provider pointing to a running Redis instance
+auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
+i18n::Translation t(std::move(provider), "en");
+
+// Load all locale JSON files from <cwd>/locales/<locale>/*.json into Redis
+t.store(std::filesystem::current_path().string(), {"en", "es"});
+
+// Simple lookup — returns the key unchanged if not found
+std::string msg = t.translate("greeting");           // uses default locale "en"
+std::string msg2 = t.translate("greeting", "es");   // explicit locale
+
+// Formatted lookup with {fmt} arguments
+std::string msg3 = t.translate("welcome", "en", "Alice");  // "Hello, Alice!"
 ```
 
-### Crear un proveedor Redis
+### Translation JSON format
 
-La clase `RedisTranslationProvider` gestiona la conexión y operaciones con Redis:
-
-```cpp
-std::unique_ptr<i18n::TranslationProvider> provider = 
-    std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
-```
-
-### Crear el gestor de traducciones
-
-La clase `Translation` utiliza un proveedor para cargar y recuperar traducciones:
-
-```cpp
-i18n::Translation translation(std::move(provider), "en");
-```
-
-El segundo parámetro especifica el idioma por defecto (por ejemplo, "en" para inglés).
-
-### Cargar traducciones
-
-Para cargar traducciones desde archivos JSON locales a Redis:
-
-```cpp
-translation.store("/ruta/a/locales", {"en", "es", "fr"});
-```
-
-El método `store` recibe:
-- Ruta al directorio que contiene las carpetas de idiomas
-- Vector con los códigos de idioma a cargar
-
-### Formato de archivos de traducción
-
-Los archivos JSON deben ubicarse en subdirectorios por idioma (ej: `locales/en/messages.json`) y seguir este formato:
+Each locale directory (`locales/<locale>/`) may contain any number of `.json`
+files. Each file must be a JSON array of translation objects:
 
 ```json
 [
   {
-    "id": "success",
-    "value": "Operation completed successfully",
-    "category": "Client",
-    "creationDate": "2024-06-28",
-    "modificationDate": "2024-06-28",
-    "modificationVersion": 1
-  },
-  {
-    "id": "error",
-    "value": "An error occurred",
-    "category": "Client",
-    "creationDate": "2024-06-28",
-    "modificationDate": "2024-06-28",
+    "id": "greeting",
+    "value": "Hello, {}!",
+    "category": "General",
+    "creationDate": "2024-01-01",
+    "modificationDate": "2024-06-01",
     "modificationVersion": 1
   }
 ]
 ```
 
-### Traducir mensajes
+Redis keys are stored as `i18n:<locale>:<id>` (e.g. `i18n:en:greeting`).
 
-Para obtener una traducción por clave:
+## Downstream integration (CMake)
 
-```cpp
-// Usa el idioma por defecto
-std::string msg = translation.translate("success");
-
-// Especifica un idioma diferente
-std::string msg = translation.translate("success", "es");
-```
-
-### Formateo con parámetros
-
-La biblioteca soporta formateo de cadenas con `fmt`. Incluye placeholders en los valores:
-
-```json
-{
-  "id": "welcome",
-  "value": "Welcome, {0}! You have {1} messages."
-}
-```
-
-Y pasa los argumentos al traducir:
-
-```cpp
-std::string msg = translation.translate("welcome", "en", "John", 5);
-// Resultado: "Welcome, John! You have 5 messages."
-```
-
-### Ejemplo completo
-
-```cpp
-#include <iostream>
-#include <filesystem>
-#include "i18n/translation.h"
-#include "i18n/redis/translation_provider.h"
-
-int main() {
-    // Crear proveedor Redis
-    std::unique_ptr<i18n::TranslationProvider> provider = 
-        std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
-    
-    // Crear gestor de traducciones
-    i18n::Translation translation(std::move(provider), "en");
-    
-    // Cargar traducciones desde archivos locales
-    std::filesystem::path cwd = std::filesystem::current_path();
-    translation.store(cwd.string(), {"en"});
-    
-    // Usar traducciones
-    std::cout << translation.translate("success", "en") << std::endl;
-    
-    return 0;
-}
-```
-
-## Ejemplo incluido
-
-Se incluye una pequeña aplicación en `example/` que utiliza la biblioteca. Tras compilar el proyecto puedes ejecutarla con:
-```bash
-./i18n-redis-example
-```
-
-La aplicación almacenará mensajes en Redis desde los archivos locales y mostrará los valores recuperados.
-
-## Detección automática de archivos fuente
-
-El proyecto usa `file(GLOB CONFIGURE_DEPENDS ...)` para incluir todos los archivos `.cpp` del directorio `src`. Cuando añadas nuevos archivos, CMake volverá a configurarse automáticamente al invocar la compilación y se compilarán sin editar el `CMakeLists.txt`.
-
-## Uso con vcpkg en otros proyectos
-
-Para utilizar esta biblioteca como dependencia en tu proyecto mediante vcpkg:
-
-### 1. Copiar los archivos de la biblioteca al registry de vcpkg
-
-Después de compilar e instalar la librería, copia los archivos necesarios al directorio de vcpkg para que estén disponibles como dependencia:
-
-```bash
-# Linux
-mkdir -p external/vcpkg/installed/x64-linux-static/include/i18n
-cp include/i18n/*.h external/vcpkg/installed/x64-linux-static/include/i18n/
-cp -r include/i18n/redis external/vcpkg/installed/x64-linux-static/include/i18n/
-cp out/linux-static-release/i18n_redis_export.h external/vcpkg/installed/x64-linux-static/include/
-cp out/linux-static-release/libi18n-redis.a external/vcpkg/installed/x64-linux-static/lib/
-```
-
-### 2. Referenciar en tu vcpkg.json
-
-```json
-{
-  "name": "mi-proyecto",
-  "version": "1.0.0",
-  "dependencies": [
-    "nlohmann-json",
-    "redis-plus-plus",
-    "fmt",
-    {
-      "name": "i18n-redis",
-      "platform": "!(windows & arm)"
-    }
-  ]
-}
-```
-
-### 3. Configurar CMakeLists.txt
+After installing with `cmake --install`:
 
 ```cmake
-cmake_minimum_required(VERSION 3.14)
-project(mi-proyecto LANGUAGES CXX)
-
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(redis++ CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-
-add_executable(mi-app main.cpp)
-
-target_link_libraries(mi-app PRIVATE
-    nlohmann_json::nlohmann_json
-    redis++::redis++_static
-    fmt::fmt
-    i18n-redis_static
-)
+find_package(i18n-redis CONFIG REQUIRED)
+target_link_libraries(my-app PRIVATE i18n-redis::i18n-redis)
 ```
 
-### 4. Opción: Crear un overlay port
+The package config file automatically locates the transitive dependencies
+(`redis++`, `nlohmann_json`, `fmt`).
 
-Para un control más robusto, puedes crear un *overlay port* en tu proyecto:
+### Static linking example
 
-**vcpkg-overlay-ports/i18n-redis/portfile.cmake:**
-```cmake
-vcpkg_from_git(
-    OUT_SOURCE_PATH SOURCE_PATH
-    URL https://github.com/usuario/i18n-redis.git
-    REF v0.3.1
-)
-
-vcpkg_cmake_configure(SOURCE_PATH ${SOURCE_PATH})
-vcpkg_cmake_install()
-vcpkg_cmake_config_fixup()
-```
-
-**vcpkg-overlay-ports/i18n-redis/vcpkg.json:**
-```json
-{
-  "name": "i18n-redis",
-  "version": "0.3.1",
-  "dependencies": [
-    "nlohmann-json",
-    "redis-plus-plus",
-    "fmt"
-  ]
-}
-```
-
-Usa el overlay en tu configuración de CMake:
 ```bash
-cmake -B build -S . -DVCPKG_OVERLAY_PORTS=./vcpkg-overlay-ports
+cmake --preset linux-gcc-static-release
+cmake --build out/linux-gcc-static-release
+cmake --install out/linux-gcc-static-release --prefix /opt/i18n-redis
 ```
+
+### Shared linking example
+
+```bash
+cmake --preset linux-gcc-shared-release
+cmake --build out/linux-gcc-shared-release
+cmake --install out/linux-gcc-shared-release --prefix /opt/i18n-redis
+```
+
+## Running tests
+
+```bash
+cmake --preset linux-gcc-static-debug
+cmake --build out/linux-gcc-static-debug
+ctest --test-dir out/linux-gcc-static-debug --output-on-failure
+```
+
+To enable the Catch2 test framework install the `tests` vcpkg feature first:
+
+```bash
+external/vcpkg/vcpkg install --triplet x64-linux "[tests]"
+cmake --preset linux-gcc-static-debug
+cmake --build out/linux-gcc-static-debug
+ctest --test-dir out/linux-gcc-static-debug --output-on-failure
+```
+
+## Project structure
+
+```
+i18n-redis/
+├── CMakeLists.txt          # Root build definition
+├── CMakePresets.json       # All build presets
+├── vcpkg.json              # vcpkg manifest
+├── include/
+│   └── i18n/
+│       ├── configuration.h        # Export macro + key format
+│       ├── json.h                 # nlohmann::json alias
+│       ├── translation.h          # Public Translation class
+│       ├── translation_provider.h # Abstract provider interface
+│       ├── types.h                # Translation struct
+│       └── redis/
+│           ├── connection.h            # Redis connection wrapper
+│           └── translation_provider.h  # Redis-backed provider
+├── src/
+│   ├── connection.cpp
+│   ├── redis_translation_provider.cpp
+│   ├── translation.cpp
+│   └── translation_provider.cpp
+├── tests/
+│   ├── CMakeLists.txt
+│   ├── main.cpp
+│   ├── test_translation_key.cpp
+│   └── test_types.cpp
+├── example/
+│   └── main.cpp
+├── locales/
+│   └── en/
+│       └── messages.json
+├── cmake/
+│   └── i18n-redisConfig.cmake.in
+└── scripts/
+    ├── cmake/
+    │   ├── Dependencies.cmake
+    │   └── Targets.cmake
+    ├── build_project.sh
+    ├── build_project.bat
+    ├── install_vcpkg.sh
+    └── install_vcpkg.bat
+```
+
+## Platform notes
+
+- **Linux**: GCC and Clang are both fully supported. Static and shared variants
+  use the `x64-linux` vcpkg triplet.
+- **Windows**: MSVC (`cl`) with the `x64-windows-static-md` (static) or
+  `x64-windows` (shared) triplets. The presets use Ninja as the generator.
+- **macOS**: Clang with `x64-osx` / `x64-osx-dynamic` triplets. Requires Xcode
+  Command Line Tools.
+
+## CI
+
+GitHub Actions builds are defined in `.github/workflows/ci.yml` and cover:
+
+- Linux / GCC — static + shared, Debug + Release
+- Linux / Clang — static + shared, Debug + Release
+- Linux / Clang — ASan + UBSan
+- Windows / MSVC — static + shared, Debug + Release
+
+## License
+
+See [LICENSE](LICENSE).

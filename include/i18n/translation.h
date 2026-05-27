@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fmt/core.h>
 
@@ -16,20 +17,20 @@ private:
   std::string defaultLocale;
 
 public:
-  Translation(std::unique_ptr<TranslationProvider>, std::string);
+  Translation(std::unique_ptr<TranslationProvider>, std::string defaultLocale);
 
-  bool store(const std::string &, const std::vector<std::string> &);
+  bool store(const std::string &cwd, const std::vector<std::string> &locales);
 
   template <typename... Args>
-  std::string translate(const std::string &key, const std::string &locale = "", Args &&...args) const {
-    std::string usedLocale = locale.empty() ? defaultLocale : locale;
-    std::string raw = provider->get(key, usedLocale);
-    return fmt::format(raw, std::forward<Args>(args)...);
+  std::string translate(const std::string &key, const std::string &locale, Args &&...args) const {
+    const std::string &usedLocale = locale.empty() ? defaultLocale : locale;
+    const std::string raw = provider->get(key, usedLocale);
+    return fmt::vformat(raw, fmt::make_format_args(args...));
   }
 
-  std::string translate(const std::string &, const std::string & = "") const;
+  std::string translate(const std::string &key, const std::string &locale = "") const;
 
-  ~Translation();
+  ~Translation() noexcept;
 };
 
 } // namespace i18n

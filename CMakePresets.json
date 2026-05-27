@@ -1,207 +1,336 @@
 {
-  "version": 3,
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+
   "configurePresets": [
+
     {
-      "name": "windows-static-debug",
-      "displayName": "Windows static Debug",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-static-debug",
+      "name": "base",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
-        "BUILD_SHARED_LIBS": false,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports-overlay"
+      }
+    },
+
+    {
+      "name": "base-ninja",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Ninja"
+    },
+
+    {
+      "name": "base-windows",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Ninja"
+    },
+
+    {
+      "name": "base-linux",
+      "hidden": true,
+      "inherits": "base-ninja"
+    },
+
+    {
+      "name": "base-macos",
+      "hidden": true,
+      "inherits": "base-ninja"
+    },
+
+    {
+      "name": "base-static",
+      "hidden": true,
+      "cacheVariables": { "BUILD_SHARED_LIBS": "OFF" }
+    },
+
+    {
+      "name": "base-shared",
+      "hidden": true,
+      "cacheVariables": { "BUILD_SHARED_LIBS": "ON" }
+    },
+
+    {
+      "name": "cfg-debug",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+
+    {
+      "name": "cfg-release",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+
+    {
+      "name": "cfg-relwithdebinfo",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    },
+
+    {
+      "name": "cfg-minsizerel",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "MinSizeRel" }
+    },
+
+    {
+      "name": "opt-lto",
+      "hidden": true,
+      "cacheVariables": { "I18N_REDIS_ENABLE_LTO": "ON" }
+    },
+
+    {
+      "name": "opt-asan",
+      "hidden": true,
+      "cacheVariables": {
+        "I18N_REDIS_ENABLE_ASAN": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
+
     {
-      "name": "windows-static-release",
-      "displayName": "Windows static Release",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-static-release",
+      "name": "opt-ubsan",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
-        "BUILD_SHARED_LIBS": false,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
-    },
-    {
-      "name": "windows-shared-debug",
-      "displayName": "Windows shared Debug",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-shared-debug",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "BUILD_SHARED_LIBS": true,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
+        "I18N_REDIS_ENABLE_UBSAN": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
       }
     },
+
     {
-      "name": "windows-shared-release",
-      "displayName": "Windows shared Release",
-      "generator": "NMake Makefiles",
-      "binaryDir": "${sourceDir}/out/windows-shared-release",
+      "name": "opt-dev",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "BUILD_SHARED_LIBS": true,
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang-cl",
-        "CC": "clang-cl",
-        "LIB": "$penv{LIB};${sourceDir}/out/windows-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "INCLUDE": "$penv{INCLUDE};${sourceDir}/out/windows-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
+        "I18N_REDIS_BUILD_EXAMPLES": "ON",
+        "I18N_REDIS_BUILD_TESTS": "ON"
       }
     },
+
     {
-      "name": "linux-static-debug",
-      "displayName": "Linux static Debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-static-debug",
+      "name": "compiler-msvc",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
-        "BUILD_SHARED_LIBS": false,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
+        "CMAKE_CXX_COMPILER": "cl",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
       }
     },
+
     {
-      "name": "linux-static-release",
-      "displayName": "Linux static Release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-static-release",
+      "name": "compiler-gcc",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-static",
-        "BUILD_SHARED_LIBS": false,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-static-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
+        "CMAKE_CXX_COMPILER": "g++"
       }
     },
+
     {
-      "name": "linux-shared-debug",
-      "displayName": "Linux shared Debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-shared-debug",
+      "name": "compiler-clang",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "BUILD_SHARED_LIBS": true,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-debug/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
+        "CMAKE_CXX_COMPILER": "clang++"
       }
     },
+
     {
-      "name": "linux-shared-release",
-      "displayName": "Linux shared Release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/linux-shared-release",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "BUILD_SHARED_LIBS": true,
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "CXX": "clang++",
-        "CC": "clang",
-        "LD_LIBRARY_PATH": "$penv{LD_LIBRARY_PATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/lib",
-        "CPATH": "$penv{CPATH}:${sourceDir}/out/linux-shared-release/vcpkg_installed/$cache{VCPKG_TARGET_TRIPLET}/include"
-      }
+      "name": "triplet-linux-static",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-linux" }
+    },
+
+    {
+      "name": "triplet-linux-dynamic",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic" }
+    },
+
+    {
+      "name": "triplet-macos-static",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-osx" }
+    },
+
+    {
+      "name": "triplet-macos-dynamic",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-osx-dynamic" }
+    },
+
+    {
+      "name": "triplet-windows-static",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows-static-md" }
+    },
+
+    {
+      "name": "triplet-windows-dynamic",
+      "hidden": true,
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows" }
+    },
+
+    {
+      "name": "windows-msvc-static-debug",
+      "displayName": "Windows / MSVC / Static / Debug",
+      "inherits": ["base-windows", "compiler-msvc", "triplet-windows-static", "base-static", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "windows-msvc-static-release",
+      "displayName": "Windows / MSVC / Static / Release",
+      "inherits": ["base-windows", "compiler-msvc", "triplet-windows-static", "base-static", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "windows-msvc-shared-debug",
+      "displayName": "Windows / MSVC / Shared / Debug",
+      "inherits": ["base-windows", "compiler-msvc", "triplet-windows-dynamic", "base-shared", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "windows-msvc-shared-release",
+      "displayName": "Windows / MSVC / Shared / Release",
+      "inherits": ["base-windows", "compiler-msvc", "triplet-windows-dynamic", "base-shared", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+
+    {
+      "name": "linux-gcc-static-debug",
+      "displayName": "Linux / GCC / Static / Debug",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-static", "base-static", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-static-release",
+      "displayName": "Linux / GCC / Static / Release",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-static", "base-static", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-shared-debug",
+      "displayName": "Linux / GCC / Shared / Debug",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-dynamic", "base-shared", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-shared-release",
+      "displayName": "Linux / GCC / Shared / Release",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-dynamic", "base-shared", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+
+    {
+      "name": "linux-clang-static-debug",
+      "displayName": "Linux / Clang / Static / Debug",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-static", "base-static", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-clang-static-release",
+      "displayName": "Linux / Clang / Static / Release",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-static", "base-static", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-clang-shared-debug",
+      "displayName": "Linux / Clang / Shared / Debug",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-dynamic", "base-shared", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-clang-shared-release",
+      "displayName": "Linux / Clang / Shared / Release",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-dynamic", "base-shared", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+
+    {
+      "name": "macos-clang-static-debug",
+      "displayName": "macOS / Clang / Static / Debug",
+      "inherits": ["base-macos", "compiler-clang", "triplet-macos-static", "base-static", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "macos-clang-static-release",
+      "displayName": "macOS / Clang / Static / Release",
+      "inherits": ["base-macos", "compiler-clang", "triplet-macos-static", "base-static", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "macos-clang-shared-debug",
+      "displayName": "macOS / Clang / Shared / Debug",
+      "inherits": ["base-macos", "compiler-clang", "triplet-macos-dynamic", "base-shared", "cfg-debug", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "macos-clang-shared-release",
+      "displayName": "macOS / Clang / Shared / Release",
+      "inherits": ["base-macos", "compiler-clang", "triplet-macos-dynamic", "base-shared", "cfg-release"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+
+    {
+      "name": "linux-clang-static-asan",
+      "displayName": "Linux / Clang / Static / ASan",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-static", "base-static", "opt-asan", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-clang-static-ubsan",
+      "displayName": "Linux / Clang / Static / UBSan",
+      "inherits": ["base-linux", "compiler-clang", "triplet-linux-static", "base-static", "opt-ubsan", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-static-asan",
+      "displayName": "Linux / GCC / Static / ASan",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-static", "base-static", "opt-asan", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-static-ubsan",
+      "displayName": "Linux / GCC / Static / UBSan",
+      "inherits": ["base-linux", "compiler-gcc", "triplet-linux-static", "base-static", "opt-ubsan", "opt-dev"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+
+    {
+      "name": "linux-clang-static-release-lto",
+      "displayName": "Linux / Clang / Static / Release + LTO",
+      "inherits": ["linux-clang-static-release", "opt-lto"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
+    },
+    {
+      "name": "linux-gcc-static-release-lto",
+      "displayName": "Linux / GCC / Static / Release + LTO",
+      "inherits": ["linux-gcc-static-release", "opt-lto"],
+      "binaryDir": "${sourceDir}/out/${presetName}"
     }
   ],
+
   "buildPresets": [
-    {
-      "name": "windows-static-debug",
-      "displayName": "Windows static Debug",
-      "configurePreset": "windows-static-debug"
-    },
-    {
-      "name": "windows-static-release",
-      "displayName": "Windows static Release",
-      "configurePreset": "windows-static-release"
-    },
-    {
-      "name": "windows-shared-debug",
-      "displayName": "Windows shared Debug",
-      "configurePreset": "windows-shared-debug"
-    },
-    {
-      "name": "windows-shared-release",
-      "displayName": "Windows shared Release",
-      "configurePreset": "windows-shared-release"
-    },
-    {
-      "name": "linux-static-debug",
-      "displayName": "Linux static Debug",
-      "configurePreset": "linux-static-debug"
-    },
-    {
-      "name": "linux-static-release",
-      "displayName": "Linux static Release",
-      "configurePreset": "linux-static-release"
-    },
-    {
-      "name": "linux-shared-debug",
-      "displayName": "Linux shared Debug",
-      "configurePreset": "linux-shared-debug"
-    },
-    {
-      "name": "linux-shared-release",
-      "displayName": "Linux shared Release",
-      "configurePreset": "linux-shared-release"
-    }
+    { "name": "windows-msvc-static-debug",        "displayName": "Windows / MSVC / Static / Debug",         "configurePreset": "windows-msvc-static-debug" },
+    { "name": "windows-msvc-static-release",       "displayName": "Windows / MSVC / Static / Release",       "configurePreset": "windows-msvc-static-release" },
+    { "name": "windows-msvc-shared-debug",         "displayName": "Windows / MSVC / Shared / Debug",         "configurePreset": "windows-msvc-shared-debug" },
+    { "name": "windows-msvc-shared-release",       "displayName": "Windows / MSVC / Shared / Release",       "configurePreset": "windows-msvc-shared-release" },
+    { "name": "linux-gcc-static-debug",            "displayName": "Linux / GCC / Static / Debug",            "configurePreset": "linux-gcc-static-debug" },
+    { "name": "linux-gcc-static-release",          "displayName": "Linux / GCC / Static / Release",          "configurePreset": "linux-gcc-static-release" },
+    { "name": "linux-gcc-shared-debug",            "displayName": "Linux / GCC / Shared / Debug",            "configurePreset": "linux-gcc-shared-debug" },
+    { "name": "linux-gcc-shared-release",          "displayName": "Linux / GCC / Shared / Release",          "configurePreset": "linux-gcc-shared-release" },
+    { "name": "linux-clang-static-debug",          "displayName": "Linux / Clang / Static / Debug",          "configurePreset": "linux-clang-static-debug" },
+    { "name": "linux-clang-static-release",        "displayName": "Linux / Clang / Static / Release",        "configurePreset": "linux-clang-static-release" },
+    { "name": "linux-clang-shared-debug",          "displayName": "Linux / Clang / Shared / Debug",          "configurePreset": "linux-clang-shared-debug" },
+    { "name": "linux-clang-shared-release",        "displayName": "Linux / Clang / Shared / Release",        "configurePreset": "linux-clang-shared-release" },
+    { "name": "macos-clang-static-debug",          "displayName": "macOS / Clang / Static / Debug",          "configurePreset": "macos-clang-static-debug" },
+    { "name": "macos-clang-static-release",        "displayName": "macOS / Clang / Static / Release",        "configurePreset": "macos-clang-static-release" },
+    { "name": "macos-clang-shared-debug",          "displayName": "macOS / Clang / Shared / Debug",          "configurePreset": "macos-clang-shared-debug" },
+    { "name": "macos-clang-shared-release",        "displayName": "macOS / Clang / Shared / Release",        "configurePreset": "macos-clang-shared-release" },
+    { "name": "linux-clang-static-asan",           "displayName": "Linux / Clang / Static / ASan",           "configurePreset": "linux-clang-static-asan" },
+    { "name": "linux-clang-static-ubsan",          "displayName": "Linux / Clang / Static / UBSan",          "configurePreset": "linux-clang-static-ubsan" },
+    { "name": "linux-gcc-static-asan",             "displayName": "Linux / GCC / Static / ASan",             "configurePreset": "linux-gcc-static-asan" },
+    { "name": "linux-gcc-static-ubsan",            "displayName": "Linux / GCC / Static / UBSan",            "configurePreset": "linux-gcc-static-ubsan" },
+    { "name": "linux-clang-static-release-lto",   "displayName": "Linux / Clang / Static / Release + LTO",  "configurePreset": "linux-clang-static-release-lto" },
+    { "name": "linux-gcc-static-release-lto",     "displayName": "Linux / GCC / Static / Release + LTO",    "configurePreset": "linux-gcc-static-release-lto" }
   ]
 }
+

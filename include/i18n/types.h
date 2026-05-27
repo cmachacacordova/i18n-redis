@@ -5,12 +5,12 @@
 #include <string>
 
 namespace i18n {
-struct translation {
+struct Translation {
   std::string id;
   std::string value;
   std::string category;
   std::string creationDate;
   std::string modificationDate;
-  int version;
+  int modificationVersion{0};
 };
 } // namespace i18n
