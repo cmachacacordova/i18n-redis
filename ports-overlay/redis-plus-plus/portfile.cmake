@@ -28,6 +28,9 @@ endif()
 if ("async-std" IN_LIST FEATURES)
     list(APPEND EXTRA_OPT "-DREDIS_PLUS_PLUS_ASYNC_FUTURE=std")
 endif()
+if(NOT VCPKG_TARGET_IS_WINDOWS)
+    list(APPEND EXTRA_OPT "-DCMAKE_CXX_FLAGS=-Wno-maybe-uninitialized")
+endif()
 
 string(COMPARE EQUAL "${VCPKG_LIBRARY_LINKAGE}" "static" REDIS_PLUS_PLUS_BUILD_STATIC)
 string(COMPARE EQUAL "${VCPKG_LIBRARY_LINKAGE}" "dynamic" REDIS_PLUS_PLUS_BUILD_SHARED)
@@ -42,10 +45,6 @@ vcpkg_cmake_configure(
         -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
         -DREDIS_PLUS_PLUS_CXX_STANDARD=${REDIS_PLUS_PLUS_CXX_STANDARD}
         ${EXTRA_OPT}
-    OPTIONS_RELEASE
-        "-DCMAKE_CXX_FLAGS=-Wno-maybe-uninitialized"
-    OPTIONS_DEBUG
-        "-DCMAKE_CXX_FLAGS=-Wno-maybe-uninitialized"
 )
 
 vcpkg_cmake_install()

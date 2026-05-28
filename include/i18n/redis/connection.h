@@ -33,6 +33,23 @@ public:
     return std::nullopt;
   }
 
+  template <>
+  inline std::optional<std::string> value<std::string>(const std::string &key) const {
+    auto val = redis_->get(key);
+    if (val) {
+      return *val;
+    }
+    return std::nullopt;
+  }
+
+  template <>
+  inline std::optional<i18n::json> value<i18n::json>(const std::string &key) const {
+    if (auto val = this->value<std::string>(key)) {
+      return std::make_optional<i18n::json>(i18n::json::parse(*val));
+    }
+    return std::nullopt;
+  }
+
   template <typename T>
   T store(const std::string &key, const T &val) const {
     this->store<i18n::json>(key, i18n::json(val));
@@ -41,23 +58,6 @@ public:
 
   ~Connection() noexcept;
 };
-
-template <>
-inline std::optional<std::string> Connection::value<std::string>(const std::string &key) const {
-  auto val = redis_->get(key);
-  if (val) {
-    return *val;
-  }
-  return std::nullopt;
-}
-
-template <>
-inline std::optional<i18n::json> Connection::value<i18n::json>(const std::string &key) const {
-  if (auto val = this->value<std::string>(key)) {
-    return std::make_optional<i18n::json>(i18n::json::parse(*val));
-  }
-  return std::nullopt;
-}
 
 template <>
 inline std::string Connection::store<std::string>(const std::string &key, const std::string &val) const {
