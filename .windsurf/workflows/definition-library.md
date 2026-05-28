@@ -29,6 +29,7 @@ description: Modernize and build C++ library project
 - Consult official docs before modifying any dependency or toolchain config.
 - All external deps must be declared in `vcpkg.json` and managed through vcpkg.
 - Prefer official vcpkg packages. Replace outdated or unsafe deps.
+- The project uses a custom vcpkg registry as a git submodule at `vcpkg/` (repo: `git@github.com:cmachacacordova/vcpkg-registry.git`, branch: `vcpkg`). This registry must be registered in `vcpkg-configuration.json` so vcpkg searches it for ports alongside the default registry.
 
 ## Tooling Requirements
 - **Clang with LTO/IPO**: When using Clang compiler presets with LTO/IPO enabled, the CMake preset must define:
@@ -80,6 +81,7 @@ description: Modernize and build C++ library project
     2. Otherwise, install vcpkg locally into `external/vcpkg`.
     - Provide an `install_vcpkg` script (name at discretion, in `scripts/`) that clones, bootstraps, and validates vcpkg. Must work on Windows, Linux, and macOS.
     - **Important:** vcpkg isolates packages by triplet (e.g., `x64-linux` vs `x64-linux-dynamic`). Switching between static/shared builds requires reinstalling all dependencies. To avoid unnecessary rebuilds when a system `VCPKG_HOME` exists but has incompatible triplets, the build script should prefer the local `external/vcpkg` installation.
+    - **Custom registry:** Add `git@github.com:cmachacacordova/vcpkg-registry.git` as a git submodule in `vcpkg/` (branch `vcpkg`). All scripts and CI must ensure the submodule is initialized and always pulls the latest from the `vcpkg` branch before building. Configure `vcpkg-configuration.json` to register this path as an additional registry so vcpkg searches it for ports alongside the default registry.
 
 12. **Create build scripts** (in `scripts/`, for Windows `.bat` and Linux/macOS `.sh`). Each build script must:
     - Accept arguments for linkage (static/shared) and config (debug/release).
@@ -117,6 +119,8 @@ project/
 ├── CMakeLists.txt
 ├── CMakePresets.json
 ├── vcpkg.json
+├── vcpkg-configuration.json
+├── vcpkg/                  ← submodule: vcpkg-registry (branch: vcpkg)
 ├── include/
 ├── src/
 ├── tests/

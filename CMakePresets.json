@@ -15,7 +15,6 @@
           "value": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
         },
-        "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports-overlay",
         "VCPKG_INSTALLED_DIR": "${sourceDir}/vcpkg_installed",
         "VCPKG_TARGET_ARCHITECTURE": "x64"
       }
@@ -145,14 +144,16 @@
       "name": "triplet-linux-static",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_CXX_FLAGS": "-Wno-maybe-uninitialized"
       }
     },
     {
       "name": "triplet-linux-dynamic",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+        "VCPKG_CXX_FLAGS": "-Wno-maybe-uninitialized"
       }
     },
     {

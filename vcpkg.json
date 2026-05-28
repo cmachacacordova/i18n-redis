@@ -10,8 +10,14 @@
       "name": "vcpkg-cmake-config",
       "host": true
     },
+    {
+      "name": "redis-plus-plus",
+      "features": [
+        "cxx17",
+        "async"
+      ]
+    },
     "nlohmann-json",
-    "redis-plus-plus",
     "fmt"
   ],
   "features": {
