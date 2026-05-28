@@ -8,8 +8,8 @@ on:
 
 env:
   PROJECT_ROOT: ${{ github.workspace }}
-  BUILD_DIR: ${{ env.PROJECT_ROOT }}/out/build
-  VCPKG_HOME: ${{ env.PROJECT_ROOT }}/external/vcpkg
+  BUILD_DIR: ${{ github.workspace }}/out/build
+  VCPKG_HOME: ${{ github.workspace }}/external/vcpkg
 
 jobs:
   linux-gcc:
