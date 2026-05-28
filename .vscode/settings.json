@@ -8,7 +8,22 @@
     "cwd": "${workspaceFolder}",
   },
   "editor.fontSize": 15,
+  "cmake.configureSettings": {
+    "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake"
+  },
   "editor.codeActionsOnSave": {},
+  "editor.formatOnSave": true,
+  "clangd.path": "/usr/sbin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=/usr/bin/clang++",
+    "--completion-style=bundled",
+    "--cross-file-rename",
+    "--header-insertion=iwyu",
+    "--pch-storage=memory"
+  ],
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
   "C_Cpp.errorSquiggles": "disabled",
   "files.associations": {
     "bitset": "cpp",
@@ -161,6 +176,12 @@
   "cmake.buildBeforeRun": true,
   "cmake.configureOnEdit": false,
   "cmake.options.statusBarVisibility": "compact",
+  "cmake.generator": "Ninja",
+  "cmake.preferredGenerators": [
+    "Ninja",
+    "Unix Makefiles"
+  ],
+  "cmake.cmakePath": "cmake",
   "formatFiles.excludedFolders": [
     "node_modules",
     ".vscode",
@@ -170,9 +191,23 @@
     "packages",
     "out",
     "libs",
-    "vcpkg_install"
+    "vcpkg_installed",
+    "external"
   ],
-  "formatFiles.extensionsToInclude": "hpp, cpp, h, c",
-  "formatFiles.runOrganizeImports": true,
-  "formatFiles.useGitIgnore": true
+  "clang-format.executable.linux": "clang-format",
+  "clang-format.executable.osx": "clang-format",
+  "clang-format.executable.windows": "clang-format",
+  "clang-format.executable": "clang-format",
+  "cmake.cmakeProviderExtensions": [
+    "stmicroelectronics.stm32-vscode-extension",
+    "espressif.esp-idf-extension",
+    "NXPSemiconductors.mcuxpresso",
+    "nordic-semiconductor.nrf-connect",
+    "eclipse-cdt.cdt-gdb-vscode",
+    "vadimcn.vscode-lldb"
+  ],
+  "clang.executable": "clang++",
+  "formatFiles.extensionsToInclude": "h,hpp,c,cpp,in",
+  "formatFiles.inheritWorkspaceExcludedFiles": false,
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/out/build/compile_commands.json"
 }

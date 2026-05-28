@@ -12,7 +12,7 @@ TEST_CASE("Translation struct default initialisation", "[types]") {
   i18n::TranslationRegister t;
   REQUIRE(t.id.empty());
   REQUIRE(t.value.empty());
-  REQUIRE(t.category.empty());
+  REQUIRE(t.m_category.empty());
   REQUIRE(t.creationDate.empty());
   REQUIRE(t.modificationDate.empty());
   REQUIRE(t.modificationVersion == 0);
@@ -22,14 +22,14 @@ TEST_CASE("Translation struct field assignment", "[types]") {
   i18n::TranslationRegister t;
   t.id = "key";
   t.value = "Hello";
-  t.category = "General";
+  t.m_category = "General";
   t.creationDate = "2024-01-01";
   t.modificationDate = "2024-06-01";
   t.modificationVersion = 2;
 
   REQUIRE(t.id == "key");
   REQUIRE(t.value == "Hello");
-  REQUIRE(t.category == "General");
+  REQUIRE(t.m_category == "General");
   REQUIRE(t.modificationVersion == 2);
 }
 
@@ -38,26 +38,26 @@ TEST_CASE("Translation struct field assignment", "[types]") {
 int runTests() {
   {
     i18n::TranslationRegister t;
-    assert(t.id.empty());
-    assert(t.value.empty());
-    assert(t.category.empty());
-    assert(t.creationDate.empty());
-    assert(t.modificationDate.empty());
-    assert(t.modificationVersion == 0);
+    assert(t.m_id.empty());
+    assert(t.m_value.empty());
+    assert(t.m_category.empty());
+    assert(t.m_creation_date.empty());
+    assert(t.m_modification_date.empty());
+    assert(t.m_modification_version == 0);
     std::cout << "[PASS] Translation default initialisation\n";
   }
   {
     i18n::TranslationRegister t;
-    t.id = "key";
-    t.value = "Hello";
-    t.category = "General";
-    t.creationDate = "2024-01-01";
-    t.modificationDate = "2024-06-01";
-    t.modificationVersion = 2;
-    assert(t.id == "key");
-    assert(t.value == "Hello");
-    assert(t.category == "General");
-    assert(t.modificationVersion == 2);
+    t.m_id = "key";
+    t.m_value = "Hello";
+    t.m_category = "General";
+    t.m_creation_date = "2024-01-01";
+    t.m_modification_date = "2024-06-01";
+    t.m_modification_version = 2;
+    assert(t.m_id == "key");
+    assert(t.m_value == "Hello");
+    assert(t.m_category == "General");
+    assert(t.m_modification_version == 2);
     std::cout << "[PASS] Translation field assignment\n";
   }
   return EXIT_SUCCESS;
