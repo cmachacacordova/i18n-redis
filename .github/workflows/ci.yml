@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, master ]
 
+env:
+  PROJECT_ROOT: ${{ github.workspace }}
+  BUILD_DIR: ${{ env.PROJECT_ROOT }}/out/build
+  VCPKG_HOME: ${{ env.PROJECT_ROOT }}/external/vcpkg
+
 jobs:
   linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
