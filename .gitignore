@@ -512,4 +512,5 @@ FodyWeavers.xsd
 /packages
 /minecraft
 /vcpkg_installed
+/external
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,java,java-web,visualstudio,visualstudiocode,cmake,ninja

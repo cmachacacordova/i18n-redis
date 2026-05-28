@@ -30,6 +30,9 @@ description: Modernize and build C++ library project
 - All external deps must be declared in `vcpkg.json` and managed through vcpkg.
 - Prefer official vcpkg packages. Replace outdated or unsafe deps.
 
+## Scope
+- This workflow generates or fixes a library project from scratch. Do NOT use the current project state as context — treat every run as if starting from zero.
+
 ## Modification Policy
 - You may modify any file, remove unused files, and restructure the project at discretion.
 - Fix warnings instead of suppressing them.
@@ -62,17 +65,28 @@ description: Modernize and build C++ library project
     - Optional: ASan, UBSan, LTO/IPO presets.
     - All presets use `binaryDir: out/build`. Support clean rebuilds. Document usage.
 
-11. **Integrate vcpkg.** Maintain `vcpkg.json` with proper deps. Detect vcpkg via `VCPKG_HOME` env var — use it if valid, otherwise auto-install into `external/vcpkg`. Provide `install_vcpkg` script (clone, bootstrap, validate) for Windows/Linux/macOS. All presets and scripts must auto-detect the vcpkg instance.
+11. **Integrate vcpkg.** Maintain `vcpkg.json` with proper deps. All scripts, presets, and CMake configs must follow this vcpkg detection order:
+    1. Check `VCPKG_HOME` env var — if set and points to a valid vcpkg installation, use it.
+    2. Otherwise, install vcpkg locally into `external/vcpkg`.
+    - Provide an `install_vcpkg` script (name at discretion, in `scripts/`) that clones, bootstraps, and validates vcpkg. Must work on Windows, Linux, and macOS.
+    - **Important:** vcpkg isolates packages by triplet (e.g., `x64-linux` vs `x64-linux-dynamic`). Switching between static/shared builds requires reinstalling all dependencies. To avoid unnecessary rebuilds when a system `VCPKG_HOME` exists but has incompatible triplets, the build script should prefer the local `external/vcpkg` installation.
 
-12. **Enable strict compiler warnings** on MSVC, GCC, and Clang. Fix warnings instead of suppressing them.
+12. **Create build scripts** (in `scripts/`, for Windows `.bat` and Linux/macOS `.sh`). Each build script must:
+    - Accept arguments for linkage (static/shared) and config (debug/release).
+    - Detect vcpkg using this order: check local `external/vcpkg` first, then fall back to `VCPKG_HOME` env var. This prevents unnecessary dependency reinstallations when switching between static/shared builds.
+    - If vcpkg is not found anywhere, call the `install_vcpkg` script automatically.
+    - Configure and build with CMake using the correct preset (vcpkg toolchain handles dependency installation automatically during CMake configure).
+    - All output goes to `out/build`.
 
-13. **Configure testing.** CTest integration. Portable tests. Add or improve as needed.
+13. **Enable strict compiler warnings** on MSVC, GCC, and Clang. Fix warnings instead of suppressing them.
 
-14. **Write documentation in English.** Cover: build/install instructions, dependency setup, vcpkg usage, API usage, export/import, platform notes, preset usage, static/shared examples, enabling examples/tests.
+14. **Configure testing.** CTest integration. Portable tests. Add or improve as needed.
 
-15. **Configure CI/CD.** GitHub Actions: multi-platform, multi-compiler, static/shared, Debug/Release. Must use `out/build` and the same presets as local builds. Optimize vcpkg caching. CI triggers on tag push (`push.tags: ['*-SNAPSHOT', '*-RELEASE']`) and **only creates the GitHub Release** (with build artifacts). CI does NOT create tags.
+15. **Write documentation in English.** Cover: build/install instructions, dependency setup, vcpkg usage, API usage, export/import, platform notes, preset usage, static/shared examples, enabling examples/tests.
 
-16. **Create a versioning script** (name and language at discretion — no Python — placed in `scripts/`). The script must:
+16. **Configure CI/CD.** GitHub Actions: multi-platform, multi-compiler, static/shared, Debug/Release. Must use `out/build` and the same presets as local builds. Optimize vcpkg caching. CI triggers on tag push (`push.tags: ['*-SNAPSHOT', '*-RELEASE']`) and **only creates the GitHub Release** (with build artifacts). CI does NOT create tags.
+
+17. **Create a versioning script** (name and language at discretion — no Python — placed in `scripts/`). The script must:
     - Accept one argument: `snapshot` or `release`.
     - Accept an optional version argument (e.g. `1.2.3`). If omitted, read current version from `CMakeLists.txt` (`project(... VERSION X.Y.Z ...)`).
     - Generate the full version string:
@@ -84,7 +98,7 @@ description: Modernize and build C++ library project
     - Push the commit and tag to origin.
     - The script must be portable (run on Linux/macOS; Windows via Git Bash).
 
-17. **Build and validate.** Compile all four variants (static/shared x debug/release). Verify install/export and downstream consumption. Validate on multiple compilers when possible.
+18. **Build and validate.** Compile all four variants (static/shared x debug/release). Verify install/export and downstream consumption. Validate on multiple compilers when possible.
 
 # Expected Structure
 
