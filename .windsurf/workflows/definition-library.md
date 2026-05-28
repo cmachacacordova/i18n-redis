@@ -2,258 +2,93 @@
 description: Modernize and build C++ library project
 ---
 
-Role: Senior Software Engineer specialized in Modern C++ and Cross-Platform Architecture.
+# Constraints
 
-Primary Objectives:
-- Analyze, modernize, secure, optimize, document, and build the entire project.
-- The project must become portable, maintainable, easy to integrate, and production-ready.
-- The final result must compile successfully as both static and shared libraries.
-- The library must generate both Debug and Release binaries.
+## Language
+- C++20. Use a lower standard only if a dependency explicitly requires it.
+- No undefined behavior (UB).
+- Prefer RAII, smart pointers, STL containers, constexpr, std::span, std::string_view.
+- Reduce macro usage. Use scoped enums and strong typing.
+- camelCase naming convention for all identifiers.
+- Code style: strictly LLVM (2-space indent, K&R braces, `BasedOnStyle: LLVM` for clang-format).
 
-Global Rules:
-- Use only C++.
-- Use the C++ version currently adopted by most modern compilers (prefer C++20 unless a dependency requires otherwise).
-- Before modifying code, search and consult the official documentation of all libraries, frameworks, toolchains, and dependencies used by the project.
-- Prefer modern tooling, modern CMake practices, and portable solutions.
-- Avoid compiler-specific hacks unless absolutely required.
-- Maintain compatibility with:
-  - MSVC
-  - GCC
-  - Clang
-- Maintain compatibility with:
-  - Windows
-  - Linux
-  - macOS (when possible)
-- Avoid undefined behavior (UB).
-- Prefer RAII, smart pointers, STL containers, constexpr, spans, string_view, and modern language features when appropriate.
-- Use camelCase naming convention.
-- Keep the codebase fully portable.
-- Avoid unnecessary external dependencies.
-- Prefer standard library features whenever possible.
+## Portability
+- Must compile on: MSVC, GCC, Clang.
+- Must run on: Windows, Linux, macOS (when possible).
+- No compiler-specific hacks unless strictly necessary.
+- Prefer standard library features over external dependencies.
+- Keep the codebase fully portable — avoid platform-specific code unless isolated behind abstractions.
 
-Required Tasks:
+## Build Policy
+- Modern CMake >= 3.25. Target-based configuration only (no global flags).
+- All build artifacts go to a single directory: `out/build`. No nested platform/compiler subdirs.
+- All scripts, presets, CI/CD pipelines, and configs must use `out/build` consistently.
+- Modify any existing config that violates this policy.
 
-1. Project Analysis
-- Analyze the entire codebase.
-- Analyze:
-  - architecture,
-  - dependencies,
-  - frameworks,
-  - build system,
-  - compiler requirements,
-  - ABI/API exposure,
-  - threading model,
-  - memory management,
-  - portability issues,
-  - platform-specific code,
-  - binary compatibility,
-  - install/export structure.
-- Identify obsolete, deprecated, unsafe, or non-portable code.
+## Dependencies
+- Consult official docs before modifying any dependency or toolchain config.
+- All external deps must be declared in `vcpkg.json` and managed through vcpkg.
+- Prefer official vcpkg packages. Replace outdated or unsafe deps.
 
-2. Dependency Analysis
-- Identify all external dependencies.
-- Verify if dependencies are maintained and portable.
-- Prefer official packages from vcpkg whenever possible.
-- Replace outdated or unsafe dependencies when appropriate.
-- Verify licensing compatibility if needed.
+## Modification Policy
+- You may modify any file, remove unused files, and restructure the project at discretion.
+- Fix warnings instead of suppressing them.
+- Prioritize maintainability, portability, clarity, and correctness over preserving legacy.
 
-3. Performance Analysis
-- Detect:
-  - unnecessary allocations,
-  - copies,
-  - cache inefficiencies,
-  - locking/contention problems,
-  - inefficient algorithms,
-  - excessive virtual dispatch,
-  - blocking operations,
-  - bad threading patterns.
-- Optimize where appropriate without harming maintainability.
+# Steps
 
-4. Security Analysis
-- Detect:
-  - buffer overflows,
-  - integer overflows,
-  - dangling pointers,
-  - race conditions,
-  - unsafe casts,
-  - UB,
-  - memory leaks,
-  - invalid ownership models,
-  - unsafe filesystem usage,
-  - insecure APIs,
-  - exception safety problems.
-- Apply secure and modern replacements.
+1. **Analyze the project.** Read every source file, header, build script, and config. Identify: architecture, deps, ABI/API surface, threading, memory management, portability issues, install/export structure. Flag obsolete, deprecated, unsafe, or non-portable code.
 
-5. Modernization
-- Refactor old-style C++ into modern C++.
-- Remove legacy patterns when possible.
-- Improve const-correctness.
-- Improve noexcept usage where applicable.
-- Reduce macro usage.
-- Use scoped enums and strong typing.
-- Improve encapsulation and API clarity.
+2. **Analyze dependencies.** List all external deps. Verify each is maintained and portable. Prefer vcpkg packages. Replace outdated or unsafe deps. Check licensing.
 
-6. Project Cleanup
-- Detect unused, obsolete, duplicated, temporary, generated, dead, or irrelevant files.
-- Remove files and directories that are not truly used by the project.
-- Clean legacy build artifacts and unnecessary configurations.
-- Remove unused source files, headers, scripts, assets, examples, or dependencies when appropriate.
-- Perform cleanup at your own discretion while preserving project integrity and required functionality.
+3. **Audit performance.** Detect unnecessary allocations/copies, cache misses, contention, bad algorithms, excessive virtual dispatch, blocking ops, bad threading. Fix without harming maintainability.
 
-7. Build System
-- Use modern CMake.
-- Minimum recommended CMake version: 3.25+.
-- Configure:
-  - static library,
-  - shared library,
-  - Debug builds,
-  - Release builds,
-  - RelWithDebInfo builds,
-  - MinSizeRel builds,
-  - install rules,
-  - export targets,
-  - package config files,
-  - version config files,
-  - proper include directories,
-  - interface/public/private dependencies.
-- Avoid global compiler flags.
-- Use target-based CMake configuration.
+4. **Audit security.** Detect buffer/integer overflows, dangling pointers, races, unsafe casts, UB, leaks, invalid ownership, unsafe FS/API usage, exception safety issues. Apply modern replacements.
 
-8. Optional Examples and Tests
-- Configure the project so examples and tests can be enabled or disabled independently through CMake options.
-- Create configurable options such as:
-  - BUILD_EXAMPLES
-  - BUILD_TESTS
-- Examples and tests must not be compiled unless explicitly enabled.
-- Ensure the project can be used as a dependency without forcing examples or tests to build.
-- Document all available CMake options.
+5. **Modernize code.** Refactor to modern C++. Improve const-correctness, noexcept, encapsulation, API clarity. Reduce macros. Use scoped enums and strong typing. Remove legacy patterns.
 
-9. Build Outputs
-The build system must generate:
-- Static Debug library
-- Static Release library
-- Shared Debug library
-- Shared Release library
+6. **Clean the project.** Remove unused, obsolete, duplicated, dead, or generated files. Clean legacy build artifacts. Preserve project integrity.
 
-The output naming and structure must avoid collisions between configurations.
+7. **Configure the build system.** Use modern CMake >= 3.25 with target-based config (no global flags). Configure: static/shared libs, all build types (Debug, Release, RelWithDebInfo, MinSizeRel), install rules, export targets, package/version config, include dirs, interface/public/private deps.
 
-10. CMake Presets
-Create presets that allow selecting:
-- Library type:
-  - Static
-  - Shared/Dynamic
-- Build configuration:
-  - Debug
-  - Release
-  - RelWithDebInfo
-  - MinSizeRel
-- Compiler/toolchain:
-  - MSVC
-  - GCC
-  - Clang
-- Generator:
-  - Ninja
-  - Platform default generators
+8. **Add CMake options for examples and tests.** Create `BUILD_EXAMPLES` and `BUILD_TESTS` options (default OFF). They must not compile unless explicitly enabled.
 
-Required preset coverage:
+9. **Set up the output directory.** All build artifacts go to `out/build` — CMake, presets, scripts, tests, CI/CD, everything. No nested platform/compiler subdirs. Modify any config that violates this.
 
-MSVC:
-- windows-msvc-static-debug
-- windows-msvc-static-release
-- windows-msvc-shared-debug
-- windows-msvc-shared-release
+10. **Create CMake presets.** Use naming pattern `{platform}-{compiler}-{linkage}-{config}`:
+    - MSVC: `windows-msvc-{static,shared}-{debug,release}`
+    - GCC: `linux-gcc-{static,shared}-{debug,release}`
+    - Clang: `linux-clang-{static,shared}-{debug,release}`, `macos-clang-{static,shared}-{debug,release}`
+    - Optional: ASan, UBSan, LTO/IPO presets.
+    - All presets use `binaryDir: out/build`. Support clean rebuilds. Document usage.
 
-GCC:
-- linux-gcc-static-debug
-- linux-gcc-static-release
-- linux-gcc-shared-debug
-- linux-gcc-shared-release
+11. **Integrate vcpkg.** Maintain `vcpkg.json` with proper deps. Detect vcpkg via `VCPKG_HOME` env var — use it if valid, otherwise auto-install into `external/vcpkg`. Provide `install_vcpkg` script (clone, bootstrap, validate) for Windows/Linux/macOS. All presets and scripts must auto-detect the vcpkg instance.
 
-Clang:
-- linux-clang-static-debug
-- linux-clang-static-release
-- linux-clang-shared-debug
-- linux-clang-shared-release
-- macos-clang-static-debug
-- macos-clang-static-release
-- macos-clang-shared-debug
-- macos-clang-shared-release
+12. **Enable strict compiler warnings** on MSVC, GCC, and Clang. Fix warnings instead of suppressing them.
 
-Also create optional presets for:
-- AddressSanitizer
-- UndefinedBehaviorSanitizer
-- LTO/IPO
+13. **Configure testing.** CTest integration. Portable tests. Add or improve as needed.
 
-Preset Requirements:
-- All presets must use:
-  - binaryDir: out/build
-- The final compilation output directory must always be exactly:
-  - out/build
-- No additional subdirectories based on preset name, compiler, configuration, or platform may be appended to binaryDir.
-- Example:
-  - out/build/CMakeCache.txt
-  - out/build/build.ninja
-- Invalid examples:
-  - out/build/windows-msvc-debug
-  - out/build/linux-gcc-release
-  - out/build/ninja-debug
-- The build directory must be automatically cleaned before each build.
-- Configure clean rebuild behavior directly in the presets when possible.
-- Presets must support reproducible clean builds.
-- Avoid stale or incompatible artifacts between configurations, compilers, or library types.
-- Presets must be easy to use and properly documented.
+14. **Write documentation in English.** Cover: build/install instructions, dependency setup, vcpkg usage, API usage, export/import, platform notes, preset usage, static/shared examples, enabling examples/tests.
 
-11. vcpkg Integration
-- Configure the project for vcpkg.
-- Create:
-  - vcpkg.json
-  - proper dependency declarations
-- Ensure dependencies can be installed reproducibly.
-- Ensure clean integration with CMake toolchains.
+15. **Configure CI/CD.** GitHub Actions: multi-platform, multi-compiler, static/shared, Debug/Release. Must use `out/build` and the same presets as local builds. Optimize vcpkg caching. CI triggers on tag push (`push.tags: ['*-SNAPSHOT', '*-RELEASE']`) and **only creates the GitHub Release** (with build artifacts). CI does NOT create tags.
 
-12. Compiler Warnings and Quality
-Enable strict warnings for all compilers:
-- MSVC
-- GCC
-- Clang
+16. **Create a versioning script** (name and language at discretion — no Python — placed in `scripts/`). The script must:
+    - Accept one argument: `snapshot` or `release`.
+    - Accept an optional version argument (e.g. `1.2.3`). If omitted, read current version from `CMakeLists.txt` (`project(... VERSION X.Y.Z ...)`).
+    - Generate the full version string:
+      - `snapshot` → `X.Y.Z-<7-char git hash>-SNAPSHOT`
+      - `release` → `X.Y.Z-RELEASE`
+    - Update `CMakeLists.txt` project VERSION and `vcpkg.json` version field to the generated string.
+    - **`vcpkg.json` must use `"version-string"` (not `"version"`)** because the custom format (`X.Y.Z-hash-SNAPSHOT`, `X.Y.Z-RELEASE`) does not conform to relaxed semver. This is the official vcpkg scheme for arbitrary version strings.
+    - Commit the version changes and create the tag locally.
+    - Push the commit and tag to origin.
+    - The script must be portable (run on Linux/macOS; Windows via Git Bash).
 
-Treat warnings seriously.
-Fix warnings instead of suppressing them whenever possible.
+17. **Build and validate.** Compile all four variants (static/shared x debug/release). Verify install/export and downstream consumption. Validate on multiple compilers when possible.
 
-13. Testing
-- Configure test support using CTest.
-- Add or improve tests when needed.
-- Ensure tests are portable.
+# Expected Structure
 
-14. Documentation
-Generate documentation entirely in English.
-
-Include:
-- Build instructions
-- Installation instructions
-- Dependency setup
-- vcpkg usage
-- Example integration
-- API usage
-- Export/import usage
-- Platform notes
-- Compiler requirements
-- Preset usage
-- Shared/static linking examples
-- Debug/Release usage examples
-- How to build static/shared variants
-- How to use CMake presets
-- How to enable/disable examples and tests
-
-15. CI/CD (Optional but Recommended)
-If possible, configure:
-- GitHub Actions
-- Multi-platform builds
-- Multi-compiler validation
-
-16. Deliverables
-The final project structure should be clean and maintainable, for example:
-
+```
 project/
 ├── CMakeLists.txt
 ├── CMakePresets.json
@@ -264,22 +99,6 @@ project/
 ├── examples/
 ├── docs/
 ├── cmake/
-├── out/
-│   └── build/
-└── third_party/
-
-17. Final Validation
-- Compile the project successfully.
-- Generate all library variants:
-  - static debug
-  - static release
-  - shared debug
-  - shared release
-- Validate builds on different compilers when possible.
-- Ensure installation/export works correctly.
-- Ensure downstream projects can consume the library cleanly.
-
-18. Modification Policy
-- You are allowed to modify any configuration, source code, build scripts, project structure, or architecture when necessary.
-- You are also allowed to remove unused or obsolete files and configurations at your own discretion.
-- Prioritize long-term maintainability, portability, clarity, and correctness over preserving legacy structure.
+├── out/build/
+└── external/vcpkg/
+```
