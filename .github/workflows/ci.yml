@@ -167,6 +167,11 @@ jobs:
         with:
           submodules: false
 
+      - name: Setup MSVC developer environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Install Ninja
         run: choco install ninja --no-progress -y
 
