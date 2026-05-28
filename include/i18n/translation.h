@@ -1,14 +1,12 @@
 #pragma once
 
-#include "i18n/configuration.h"
-
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <fmt/core.h>
-
 #include "i18n/translation_provider.h"
+
+#include <fmt/core.h>
 
 namespace i18n {
 class I18N_REDIS_EXPORT Translation {

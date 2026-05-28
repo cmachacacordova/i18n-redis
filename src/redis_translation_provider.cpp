@@ -36,6 +36,9 @@ i18n::RedisTranslationProvider::RedisTranslationProvider(const std::string &host
 }
 
 bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vector<std::string> &locales) const {
+  if (locales.empty()) {
+    return false;
+  }
   for (const auto &locale : locales) {
     const std::filesystem::path localePath = (std::filesystem::path(cwd) / "locales" / locale).lexically_normal();
 
@@ -54,7 +57,11 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
       }
 
       i18n::json j;
-      file >> j;
+      try {
+        file >> j;
+      } catch (const nlohmann::json::parse_error &e) {
+        throw std::runtime_error(fmt::format("Failed to parse JSON file '{}': {}", entry.path().string(), e.what()));
+      }
       const auto translations = j.get<std::vector<i18n::TranslationRegister>>();
 
       for (const auto &translation : translations) {
