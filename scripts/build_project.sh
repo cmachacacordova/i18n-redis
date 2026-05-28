@@ -46,4 +46,4 @@ fi
 PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
 
 cmake --preset "$PRESET"
-cmake --build "out/$PRESET" --parallel
+cmake --build --preset "$PRESET" --clean-first --parallel

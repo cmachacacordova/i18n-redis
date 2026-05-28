@@ -42,6 +42,6 @@ call "%VCPKG_EXE%" install --triplet %TRIPLET% --overlay-ports=%OVERLAY%
 set PRESET=windows-msvc-%TYPE%-%MODE%
 
 cmake --preset %PRESET%
-cmake --build out\%PRESET% --parallel
+cmake --build --preset %PRESET% --clean-first --parallel
 
 endlocal

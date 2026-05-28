@@ -5,7 +5,7 @@
 #include <string>
 
 namespace i18n {
-struct Translation {
+struct TranslationRegister {
   std::string id;
   std::string value;
   std::string category;

@@ -7,18 +7,18 @@ extern int runTests();
 extern int runKeyTests();
 
 int main() {
-    int result = EXIT_SUCCESS;
-    try {
-        result |= runTests();
-        result |= runKeyTests();
-    } catch (const std::exception &ex) {
-        std::cerr << "[ERROR] Unexpected exception: " << ex.what() << '\n';
-        return EXIT_FAILURE;
-    }
-    if (result == EXIT_SUCCESS) {
-        std::cout << "All tests passed.\n";
-    }
-    return result;
+  int result = EXIT_SUCCESS;
+  try {
+    result |= runTests();
+    result |= runKeyTests();
+  } catch (const std::exception &ex) {
+    std::cerr << "[ERROR] Unexpected exception: " << ex.what() << '\n';
+    return EXIT_FAILURE;
+  }
+  if (result == EXIT_SUCCESS) {
+    std::cout << "All tests passed.\n";
+  }
+  return result;
 }
 
 #endif

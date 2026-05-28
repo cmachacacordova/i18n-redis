@@ -1,14 +1,12 @@
 {
   "cmake.useCMakePresets": "always",
-  "cmake.debugConfig": {
-    "args": [
-      "key"
-    ]
-  },
-  "cmake.buildDirectory": "${workspaceRoot}/out",
+  "cmake.buildDirectory": "${workspaceRoot}/out/build",
   "cmake.sourceDirectory": "${workspaceRoot}",
   "cmake.clearOutputBeforeBuild": true,
   "cmake.skipConfigureIfCachePresent": false,
+  "cmake.debugConfig": {
+    "cwd": "${workspaceFolder}",
+  },
   "editor.fontSize": 15,
   "editor.codeActionsOnSave": {},
   "C_Cpp.errorSquiggles": "disabled",
@@ -171,6 +169,10 @@
     ".chrome",
     "packages",
     "out",
-    "libs"
-  ]
+    "libs",
+    "vcpkg_install"
+  ],
+  "formatFiles.extensionsToInclude": "hpp, cpp, h, c",
+  "formatFiles.runOrganizeImports": true,
+  "formatFiles.useGitIgnore": true
 }

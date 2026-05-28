@@ -184,7 +184,24 @@ Also create optional presets for:
 - UndefinedBehaviorSanitizer
 - LTO/IPO
 
-Presets must be easy to use and properly documented.
+Preset Requirements:
+- All presets must use:
+  - binaryDir: out/build
+- The final compilation output directory must always be exactly:
+  - out/build
+- No additional subdirectories based on preset name, compiler, configuration, or platform may be appended to binaryDir.
+- Example:
+  - out/build/CMakeCache.txt
+  - out/build/build.ninja
+- Invalid examples:
+  - out/build/windows-msvc-debug
+  - out/build/linux-gcc-release
+  - out/build/ninja-debug
+- The build directory must be automatically cleaned before each build.
+- Configure clean rebuild behavior directly in the presets when possible.
+- Presets must support reproducible clean builds.
+- Avoid stale or incompatible artifacts between configurations, compilers, or library types.
+- Presets must be easy to use and properly documented.
 
 11. vcpkg Integration
 - Configure the project for vcpkg.
@@ -247,6 +264,8 @@ project/
 ├── examples/
 ├── docs/
 ├── cmake/
+├── out/
+│   └── build/
 └── third_party/
 
 17. Final Validation

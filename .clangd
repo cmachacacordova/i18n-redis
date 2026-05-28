@@ -1,0 +1,24 @@
+CompileFlags:
+  CompilationDatabase: out/build
+  Remove:
+    - -Wpragma-once-outside-header
+
+Index:
+  Background: Build
+  StandardLibrary: Yes
+
+Diagnostics:
+  Suppress:
+    - pp_pragma_once_in_main_file
+  ClangTidy:
+    FastCheckFilter: Strict
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+
+Completion:
+  AllScopes: true
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes

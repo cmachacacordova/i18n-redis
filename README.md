@@ -47,7 +47,7 @@ configuration:
 
 ```bash
 cmake --preset linux-gcc-static-release
-cmake --build out/linux-gcc-static-release
+cmake --build --preset linux-gcc-static-release
 ```
 
 Or use the convenience script:
@@ -125,8 +125,8 @@ own preset:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BUILD_SHARED_LIBS` | `OFF` | Build shared library instead of static |
-| `I18N_REDIS_BUILD_EXAMPLES` | `ON` | Build the example application |
-| `I18N_REDIS_BUILD_TESTS` | `ON` | Build the test suite |
+| `I18N_REDIS_BUILD_EXAMPLES` | `OFF` | Build the example application |
+| `I18N_REDIS_BUILD_TESTS` | `OFF` | Build the test suite |
 | `I18N_REDIS_ENABLE_LTO` | `ON` | Enable IPO/LTO for Release configs |
 | `I18N_REDIS_ENABLE_ASAN` | `OFF` | Enable AddressSanitizer |
 | `I18N_REDIS_ENABLE_UBSAN` | `OFF` | Enable UndefinedBehaviourSanitizer |
@@ -188,24 +188,27 @@ The package config file automatically locates the transitive dependencies
 
 ```bash
 cmake --preset linux-gcc-static-release
-cmake --build out/linux-gcc-static-release
-cmake --install out/linux-gcc-static-release --prefix /opt/i18n-redis
+cmake --build --preset linux-gcc-static-release
+cmake --install out/build --prefix /opt/i18n-redis
 ```
 
 ### Shared linking example
 
 ```bash
 cmake --preset linux-gcc-shared-release
-cmake --build out/linux-gcc-shared-release
-cmake --install out/linux-gcc-shared-release --prefix /opt/i18n-redis
+cmake --build --preset linux-gcc-shared-release
+cmake --install out/build --prefix /opt/i18n-redis
 ```
 
 ## Running tests
 
+Tests are built when `I18N_REDIS_BUILD_TESTS=ON`. All debug presets enable this
+automatically. Use `--clean-first` to ensure a clean rebuild before each run:
+
 ```bash
 cmake --preset linux-gcc-static-debug
-cmake --build out/linux-gcc-static-debug
-ctest --test-dir out/linux-gcc-static-debug --output-on-failure
+cmake --build --preset linux-gcc-static-debug --clean-first
+ctest --test-dir out/build --output-on-failure
 ```
 
 To enable the Catch2 test framework install the `tests` vcpkg feature first:
@@ -213,8 +216,8 @@ To enable the Catch2 test framework install the `tests` vcpkg feature first:
 ```bash
 external/vcpkg/vcpkg install --triplet x64-linux "[tests]"
 cmake --preset linux-gcc-static-debug
-cmake --build out/linux-gcc-static-debug
-ctest --test-dir out/linux-gcc-static-debug --output-on-failure
+cmake --build --preset linux-gcc-static-debug --clean-first
+ctest --test-dir out/build --output-on-failure
 ```
 
 ## Project structure

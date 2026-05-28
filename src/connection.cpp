@@ -13,9 +13,7 @@ i18n::redis::Connection::Connection(const std::string &host, int port) {
     poolOpts.connection_idle_time = std::chrono::milliseconds(30000);
 
     redis_ = std::make_unique<sw::redis::Redis>(connectionOpts, poolOpts);
-  } catch (const sw::redis::Error &e) {
-    throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what());
-  }
+  } catch (const sw::redis::Error &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); }
 }
 
 i18n::redis::Connection::~Connection() noexcept = default;
