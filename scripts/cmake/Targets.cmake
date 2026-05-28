@@ -68,6 +68,9 @@ target_include_directories(i18n-redis
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(i18n-redis PUBLIC ${I18N_REDIS_DEPENDENCIES})
+if(I18N_REDIS_SANITIZER_FLAGS)
+    target_link_options(i18n-redis PUBLIC ${I18N_REDIS_SANITIZER_FLAGS})
+endif()
 
 # ── LTO (opt-in, Release configs only) ───────────────────────────────────────
 if(I18N_REDIS_ENABLE_LTO)
