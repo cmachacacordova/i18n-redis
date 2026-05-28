@@ -15,7 +15,7 @@ public:
 
   virtual bool load(const std::string &, const std::vector<std::string> &) const = 0; // Assuming a method to load translations, can be overridden by derived classes
 
-  virtual ~TranslationProvider();
+  virtual ~TranslationProvider() noexcept;
 };
 
 } // namespace i18n

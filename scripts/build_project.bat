@@ -63,8 +63,7 @@ for %%I in ("%VCPKG_EXE%") do set VCPKG_HOME=%%~dpI
 
 set PRESET=windows-msvc-%TYPE%-%MODE%
 
-if exist out\build rmdir /s /q out\build
-cmake --preset %PRESET%
+cmake --preset %PRESET% --fresh
 cmake --build out\build --parallel
 
 endlocal

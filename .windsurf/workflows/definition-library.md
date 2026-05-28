@@ -30,6 +30,16 @@ description: Modernize and build C++ library project
 - All external deps must be declared in `vcpkg.json` and managed through vcpkg.
 - Prefer official vcpkg packages. Replace outdated or unsafe deps.
 
+## Tooling Requirements
+- **Clang with LTO/IPO**: When using Clang compiler presets with LTO/IPO enabled, the CMake preset must define:
+  - `CMAKE_CXX_COMPILER_AR: llvm-ar`
+  - `CMAKE_CXX_COMPILER_RANLIB: llvm-ranlib`
+  These tools are required for CMake's IPO/LTO test to pass when building static libraries with ThinLTO.
+- **Strict warnings compliance**: With strict compiler warnings enabled (`-Werror`), ensure:
+  - Exception specifications match between declarations and definitions (e.g., `noexcept`)
+  - All virtual destructors have consistent specifiers
+  - Fix all warnings rather than suppressing them
+
 ## Scope
 - This workflow generates or fixes a library project from scratch. Do NOT use the current project state as context — treat every run as if starting from zero.
 

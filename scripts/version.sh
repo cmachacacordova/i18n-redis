@@ -69,36 +69,38 @@ updateCMakeLists() {
 }
 
 updateVcpkgJson() {
-  if [[ -f "$VCPKG_FILE" ]]; then
-    if command -v python3 &> /dev/null; then
-      python3 -c "
-import json
-import sys
-
-with open('$VCPKG_FILE', 'r') as f:
-    data = json.load(f)
-
-if 'version' in data:
-    del data['version']
-data['version-string'] = '$FULL_VERSION'
-
-with open('$VCPKG_FILE', 'w') as f:
-    json.dump(data, f, indent=2)
-    f.write('\n')
-"
-    else
-      sed -i.bak 's/"version"[[:space:]]*:[[:space:]]*"[^"]*"//' "$VCPKG_FILE"
-      if grep -q '"version-string"' "$VCPKG_FILE"; then
-        sed -i.bak "s/\"version-string\":[[:space:]]*\"[^\"]*\"/\"version-string\": \"$FULL_VERSION\"/" "$VCPKG_FILE"
-      else
-        sed -i.bak "s/^{/{\n  \"version-string\": \"$FULL_VERSION\",/" "$VCPKG_FILE"
-      fi
-      rm -f "$VCPKG_FILE.bak"
-    fi
-    echo "Updated vcpkg.json: version-string = $FULL_VERSION"
-  else
+  if [[ ! -f "$VCPKG_FILE" ]]; then
     echo "Warning: vcpkg.json not found at $VCPKG_FILE"
+    return 0
   fi
+
+  local tmp_file="${VCPKG_FILE}.tmp"
+
+  # Remove old "version" field and ensure "version-string" is set correctly
+  awk -v ver="$FULL_VERSION" '
+    /^\s*"version"\s*:/ { next }
+    /^\s*"version-string"\s*:/ {
+      print "  \"version-string\": \"" ver "\","
+      next
+    }
+    { print }
+  ' "$VCPKG_FILE" > "$tmp_file"
+
+  # Check if version-string was found and added; if not, add it after the name field
+  if ! grep -q '"version-string"' "$tmp_file"; then
+    awk -v ver="$FULL_VERSION" '
+      /^\s*"name"\s*:/ {
+        print
+        print "  \"version-string\": \"" ver "\","
+        next
+      }
+      { print }
+    ' "$tmp_file" > "${tmp_file}.2"
+    mv "${tmp_file}.2" "$tmp_file"
+  fi
+
+  mv "$tmp_file" "$VCPKG_FILE"
+  echo "Updated vcpkg.json: version-string = $FULL_VERSION"
 }
 
 updateCMakeLists

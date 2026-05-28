@@ -58,6 +58,5 @@ export VCPKG_HOME=$(dirname "$VCPKG")
 
 PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
 
-rm -rf out/build
-cmake --preset "$PRESET"
+cmake --preset "$PRESET" --fresh
 cmake --build out/build --parallel

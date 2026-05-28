@@ -2,4 +2,4 @@
 
 i18n::TranslationProvider::TranslationProvider() = default;
 
-i18n::TranslationProvider::~TranslationProvider() = default;
+i18n::TranslationProvider::~TranslationProvider() noexcept = default;

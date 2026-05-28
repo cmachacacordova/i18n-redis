@@ -15,4 +15,4 @@ std::string i18n::Translation::translate(const std::string &key, const std::stri
   return provider->get(key, usedLocale);
 }
 
-i18n::Translation::~Translation() = default;
+i18n::Translation::~Translation() noexcept = default;
