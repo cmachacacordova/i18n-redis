@@ -31,7 +31,8 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
           git -C vcpkg checkout origin/vcpkg
 
@@ -89,7 +90,8 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
           git -C vcpkg checkout origin/vcpkg
 
@@ -147,7 +149,8 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
           git -C vcpkg checkout origin/vcpkg
 

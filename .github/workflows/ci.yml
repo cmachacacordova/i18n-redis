@@ -35,9 +35,10 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
-          git -C vcpkg checkout origin/vcpkg
+          git -C vcpkg checkout vcpkg
 
       - name: Install system dependencies
         run: |
@@ -87,9 +88,10 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
-          git -C vcpkg checkout origin/vcpkg
+          git -C vcpkg checkout vcpkg
 
       - name: Install system dependencies
         run: |
@@ -135,9 +137,10 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
-          git -C vcpkg checkout origin/vcpkg
+          git -C vcpkg checkout vcpkg
 
       - name: Install system dependencies
         run: |
@@ -187,9 +190,10 @@ jobs:
 
       - name: Update custom vcpkg registry submodule
         run: |
-          git submodule update --remote vcpkg
+          git submodule sync vcpkg
+          git submodule update --init --force vcpkg
           git -C vcpkg fetch origin vcpkg
-          git -C vcpkg checkout origin/vcpkg
+          git -C vcpkg checkout vcpkg
 
       - name: Setup MSVC developer environment
         uses: ilammy/msvc-dev-cmd@v1
