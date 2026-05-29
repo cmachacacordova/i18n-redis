@@ -27,7 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
+
+      - name: Update custom vcpkg registry submodule
+        run: |
+          git submodule update --remote vcpkg
+          git -C vcpkg fetch origin vcpkg
+          git -C vcpkg checkout origin/vcpkg
 
       - name: Install system dependencies
         run: |
@@ -79,7 +85,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
+
+      - name: Update custom vcpkg registry submodule
+        run: |
+          git submodule update --remote vcpkg
+          git -C vcpkg fetch origin vcpkg
+          git -C vcpkg checkout origin/vcpkg
 
       - name: Install system dependencies
         run: |
@@ -131,7 +143,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
+
+      - name: Update custom vcpkg registry submodule
+        run: |
+          git submodule update --remote vcpkg
+          git -C vcpkg fetch origin vcpkg
+          git -C vcpkg checkout origin/vcpkg
 
       - name: Setup MSVC developer environment
         uses: ilammy/msvc-dev-cmd@v1

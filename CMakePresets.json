@@ -12,7 +12,7 @@
       "binaryDir": "${sourceDir}/out/build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
-          "value": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
+          "value": "$penv{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
         },
         "VCPKG_INSTALLED_DIR": "${sourceDir}/vcpkg_installed",
@@ -144,16 +144,14 @@
       "name": "triplet-linux-static",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "VCPKG_CXX_FLAGS": "-Wno-maybe-uninitialized"
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
       }
     },
     {
       "name": "triplet-linux-dynamic",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
-        "VCPKG_CXX_FLAGS": "-Wno-maybe-uninitialized"
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
       }
     },
     {

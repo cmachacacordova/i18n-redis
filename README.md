@@ -226,7 +226,11 @@ ctest --test-dir out/build --output-on-failure
 i18n-redis/
 ├── CMakeLists.txt          # Root build definition
 ├── CMakePresets.json       # All build presets
-├── vcpkg.json              # vcpkg manifest
+├── vcpkg.json              # vcpkg manifest (uses version-string format)
+├── vcpkg-configuration.json # vcpkg registry configuration
+├── vcpkg/                  # git submodule: custom vcpkg registry (branch: vcpkg)
+│   ├── ports/              # overlay ports
+│   └── triplets/           # overlay triplets
 ├── include/
 │   └── i18n/
 │       ├── configuration.h        # Export macro + key format
@@ -254,14 +258,16 @@ i18n-redis/
 │       └── messages.json
 ├── cmake/
 │   └── i18n-redisConfig.cmake.in
-└── scripts/
-    ├── cmake/
-    │   ├── Dependencies.cmake
-    │   └── Targets.cmake
-    ├── build_project.sh
-    ├── build_project.bat
-    ├── install_vcpkg.sh
-    └── install_vcpkg.bat
+├── scripts/
+│   ├── cmake/
+│   │   ├── Dependencies.cmake
+│   │   └── Targets.cmake
+│   ├── build_project.sh      # Build helper (Linux/macOS)
+│   ├── build_project.bat     # Build helper (Windows)
+│   ├── install_vcpkg.sh      # vcpkg installer (Linux/macOS)
+│   ├── install_vcpkg.bat     # vcpkg installer (Windows)
+│   └── version.sh            # Versioning script (creates SNAPSHOT/RELEASE tags)
+└── external/vcpkg/           # Local vcpkg installation (auto-created)
 ```
 
 ## Platform notes
@@ -273,14 +279,29 @@ i18n-redis/
 - **macOS**: Clang with `x64-osx` / `x64-osx-dynamic` triplets. Requires Xcode
   Command Line Tools.
 
+## Versioning and Releases
+
+The project uses a custom versioning scheme with two release types:
+
+| Type | Format | Example |
+|------|--------|---------|
+| SNAPSHOT | `X.Y.Z-<git-hash>-SNAPSHOT` | `0.3.2-abc1234-SNAPSHOT` |
+| RELEASE | `X.Y.Z-RELEASE` | `0.3.2-RELEASE` |
+
 ## CI
 
-GitHub Actions builds are defined in `.github/workflows/ci.yml` and cover:
+GitHub Actions workflows:
 
-- Linux / GCC — static + shared, Debug + Release
-- Linux / Clang — static + shared, Debug + Release
-- Linux / Clang — ASan + UBSan
-- Windows / MSVC — static + shared, Debug + Release
+- **CI** (`.github/workflows/ci.yml`): Builds on every push/PR
+  - Linux / GCC — static + shared, Debug + Release
+  - Linux / Clang — static + shared, Debug + Release
+  - Linux / Clang — ASan + UBSan
+  - Windows / MSVC — static + shared, Debug + Release
+
+- **Release** (`.github/workflows/release.yml`): Triggered on tag push (`*-SNAPSHOT`, `*-RELEASE`)
+  - Builds all release variants
+  - Packages artifacts
+  - Creates GitHub Release automatically
 
 ## License
 

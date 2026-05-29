@@ -4,7 +4,7 @@
 
 ---
 
-### `struct Translation`  *(i18n/types.h)*
+### `struct TranslationRegister`  *(i18n/types.h)*
 
 Plain data struct representing a single translation entry loaded from JSON.
 
@@ -100,12 +100,17 @@ Connection(const std::string& host, int port);
 template<> std::optional<std::string> value<std::string>(const std::string& key) const;
 template<> std::optional<i18n::json>  value<i18n::json> (const std::string& key) const;
 
-template<> void store<std::string>    (const std::string& key, const std::string& value);
-template<> void store<i18n::json>     (const std::string& key, const i18n::json& value);
-template<> void store<i18n::TranslationRegister>(const std::string& key, const i18n::TranslationRegister& value);
+template<> bool store<std::string>(const std::string& key, const std::string& val) const noexcept;
+template<> bool store<i18n::json> (const std::string& key, const i18n::json& val) const noexcept;
+template<typename T> bool store(const std::string& key, const T& val) const noexcept;
 ```
 
 Move-only. Copy is deleted.
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `value<T>(key)` | `std::optional<T>` | Reads and deserialises value from Redis; returns `nullopt` if key absent |
+| `store<T>(key, val)` | `bool` | Serialises and writes value to Redis; returns `true` on success |
 
 ---
 
@@ -118,7 +123,7 @@ i18n:<locale>:<id>
 ```
 
 The format string is defined in `include/i18n/configuration.h` as
-`I18N_FORMAT_KEY` and can be overridden at compile time.
+`i18n::kFormatKey` (`inline constexpr std::string_view`).
 
 ---
 

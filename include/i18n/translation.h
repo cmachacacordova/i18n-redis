@@ -1,5 +1,7 @@
 #pragma once
 
+#include "i18n_redis_export.h"
+
 #include <memory>
 #include <string>
 #include <vector>

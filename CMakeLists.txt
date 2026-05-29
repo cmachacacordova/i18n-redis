@@ -11,8 +11,20 @@ option(I18N_REDIS_ENABLE_LTO     "Enable link-time optimisation for Release" ON)
 option(I18N_REDIS_ENABLE_ASAN    "Enable AddressSanitizer"    OFF)
 option(I18N_REDIS_ENABLE_UBSAN   "Enable UndefinedBehaviourSanitizer" OFF)
 
+find_package(Git QUIET)
+if(Git_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} submodule update --init --remote --merge
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    RESULT_VARIABLE _submodule_result
+    OUTPUT_QUIET
+    ERROR_QUIET)
+  if(NOT _submodule_result EQUAL 0)
+    message(STATUS "git submodule update failed (non-git environment or no network); continuing.")
+  endif()
+endif()
+
 include(CTest)
 
-# Organise build logic into separate modules
 include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/Dependencies.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/Targets.cmake)

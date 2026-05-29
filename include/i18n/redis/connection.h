@@ -60,10 +60,9 @@ public:
   /// @tparam T   Source type; must be JSON-serialisable.
   /// @param key  Redis key to write.
   /// @param val  Value to store.
-  /// @return The value that was stored.
-  /// @throws std::invalid_argument if the serialised representation is empty.
+  /// @return @c true if the value was stored successfully, @c false otherwise.
   template <typename T>
-  T store(const std::string &key, const T &val) const;
+  bool store(const std::string &key, const T &val) const noexcept;
 
   ~Connection() noexcept;
 };
@@ -94,28 +93,18 @@ std::optional<T> Connection::value(const std::string &key) const {
 }
 
 template <>
-inline std::string Connection::store<std::string>(const std::string &key, const std::string &val) const {
-  if (val.empty()) {
-    throw std::invalid_argument("Value cannot be empty");
-  }
-  m_redis->set(key, val);
-  return val;
+inline bool Connection::store<std::string>(const std::string &key, const std::string &val) const noexcept {
+  return m_redis->set(key, val);
 }
 
 template <>
-inline i18n::json Connection::store<i18n::json>(const std::string &key, const i18n::json &val) const {
-  const auto str = val.dump();
-  if (str.empty()) {
-    throw std::invalid_argument("JSON value cannot be empty");
-  }
-  this->store<std::string>(key, str);
-  return val;
+inline bool Connection::store<i18n::json>(const std::string &key, const i18n::json &val) const noexcept {
+  return this->store<std::string>(key, val.dump());
 }
 
 template <typename T>
-T Connection::store(const std::string &key, const T &val) const {
-  this->store<i18n::json>(key, i18n::json(val));
-  return val;
+bool Connection::store(const std::string &key, const T &val) const noexcept {
+  return this->store<i18n::json>(key, i18n::json(val));
 }
 
 } // namespace i18n::redis

@@ -10,27 +10,27 @@
 
 TEST_CASE("Translation struct default initialisation", "[types]") {
   i18n::TranslationRegister t;
-  REQUIRE(t.id.empty());
-  REQUIRE(t.value.empty());
+  REQUIRE(t.m_id.empty());
+  REQUIRE(t.m_value.empty());
   REQUIRE(t.m_category.empty());
-  REQUIRE(t.creationDate.empty());
-  REQUIRE(t.modificationDate.empty());
-  REQUIRE(t.modificationVersion == 0);
+  REQUIRE(t.m_creation_date.empty());
+  REQUIRE(t.m_modification_date.empty());
+  REQUIRE(t.m_modification_version == 0);
 }
 
 TEST_CASE("Translation struct field assignment", "[types]") {
   i18n::TranslationRegister t;
-  t.id = "key";
-  t.value = "Hello";
+  t.m_id = "key";
+  t.m_value = "Hello";
   t.m_category = "General";
-  t.creationDate = "2024-01-01";
-  t.modificationDate = "2024-06-01";
-  t.modificationVersion = 2;
+  t.m_creation_date = "2024-01-01";
+  t.m_modification_date = "2024-06-01";
+  t.m_modification_version = 2;
 
-  REQUIRE(t.id == "key");
-  REQUIRE(t.value == "Hello");
+  REQUIRE(t.m_id == "key");
+  REQUIRE(t.m_value == "Hello");
   REQUIRE(t.m_category == "General");
-  REQUIRE(t.modificationVersion == 2);
+  REQUIRE(t.m_modification_version == 2);
 }
 
 #else

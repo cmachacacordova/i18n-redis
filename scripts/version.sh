@@ -63,7 +63,7 @@ fi
 echo "Generating version: $FULL_VERSION"
 
 updateCMakeLists() {
-  sed -i.bak "s/project(\s*\([a-zA-Z0-9_-]*\)\s*VERSION\s*[0-9]\+\.[0-9]\+\.[0-9]\+/project(\1 VERSION $VERSION/" "$CMAKE_FILE"
+  sed -i.bak -E "s/project\([[:space:]]*([a-zA-Z0-9_-]+)[[:space:]]+VERSION[[:space:]]+[0-9]+\.[0-9]+\.[0-9]+/project(\1 VERSION $VERSION/" "$CMAKE_FILE"
   rm -f "$CMAKE_FILE.bak"
   echo "Updated CMakeLists.txt: VERSION $VERSION"
 }

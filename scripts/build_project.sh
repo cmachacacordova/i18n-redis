@@ -56,6 +56,9 @@ echo "Using vcpkg: $VCPKG"
 
 export VCPKG_HOME=$(dirname "$VCPKG")
 
+echo "Updating git submodules..."
+git -C "$ROOT_DIR" submodule update --init --remote --merge 2>/dev/null || true
+
 PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
 
 cmake --preset "$PRESET" --fresh

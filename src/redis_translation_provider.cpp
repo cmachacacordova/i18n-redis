@@ -86,14 +86,14 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
         if (translation.m_modification_version < 0) {
           throw std::runtime_error(fmt::format("Translation modificationVersion is negative for ID '{}' in file: {}", translation.m_id, entry.path().string()));
         }
-        // Colons are used as namespace separators in I18N_FORMAT_KEY, so
+        // Colons are used as namespace separators in kFormatKey, so
         // they must not appear in the id itself.
         if (translation.m_id.find(':') != std::string::npos) {
           throw std::runtime_error(fmt::format("Translation ID '{}' contains a colon, which is not allowed in Redis keys.", translation.m_id));
         }
 
         // Build the final Redis key, e.g. "i18n:en:greeting".
-        const std::string key = fmt::format(I18N_FORMAT_KEY, locale, translation.m_id);
+        const std::string key = fmt::format(i18n::kFormatKey, locale, translation.m_id);
         this->m_connection.store<i18n::TranslationRegister>(key, translation);
       }
     }
@@ -102,11 +102,11 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
 }
 
 std::string i18n::RedisTranslationProvider::get(const std::string &key, const std::string &locale) const {
-  if (const auto value = this->m_connection.value<i18n::TranslationRegister>(fmt::format(I18N_FORMAT_KEY, locale, key))) {
+  if (const auto value = this->m_connection.value<i18n::TranslationRegister>(fmt::format(i18n::kFormatKey, locale, key))) {
     return value->m_value;
   }
   // Return the key itself as a safe fallback when no translation is found.
   return key;
 }
 
-i18n::RedisTranslationProvider::~RedisTranslationProvider() = default;
+i18n::RedisTranslationProvider::~RedisTranslationProvider() noexcept = default;

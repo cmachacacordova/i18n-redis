@@ -29,7 +29,10 @@ description: Modernize and build C++ library project
 - Consult official docs before modifying any dependency or toolchain config.
 - All external deps must be declared in `vcpkg.json` and managed through vcpkg.
 - Prefer official vcpkg packages. Replace outdated or unsafe deps.
-- The project uses a custom vcpkg registry as a git submodule at `vcpkg/` (repo: `git@github.com:cmachacacordova/vcpkg-registry.git`, branch: `vcpkg`). This registry must be registered in `vcpkg-configuration.json` so vcpkg searches it for ports alongside the default registry.
+- The project uses a custom vcpkg registry (`https://github.com/cmachacacordova/vcpkg-registry.git`). It serves two roles:
+  - **Registry** (in `vcpkg-configuration.json`): branch `main`. vcpkg fetches port metadata from this branch.
+  - **Submodule** (at `vcpkg/`): branch `vcpkg`. Contains overlay-ports and overlay-triplets used locally.
+  Both must be registered/configured so vcpkg searches this registry for ports alongside the default registry.
 
 ## Tooling Requirements
 - **Clang with LTO/IPO**: When using Clang compiler presets with LTO/IPO enabled, the CMake preset must define:
@@ -65,7 +68,7 @@ description: Modernize and build C++ library project
 
 7. **Configure the build system.** Use modern CMake >= 3.25 with target-based config (no global flags). Configure: static/shared libs, all build types (Debug, Release, RelWithDebInfo, MinSizeRel), install rules, export targets, package/version config, include dirs, interface/public/private deps.
 
-8. **Add CMake options for examples and tests.** Create `BUILD_EXAMPLES` and `BUILD_TESTS` options (default OFF). They must not compile unless explicitly enabled.
+8. **Add CMake options for examples and tests.** Create `I18N_REDIS_BUILD_EXAMPLES` and `I18N_REDIS_BUILD_TESTS` options (default OFF). They must not compile unless explicitly enabled.
 
 9. **Set up the output directory.** All build artifacts go to `out/build` — CMake, presets, scripts, tests, CI/CD, everything. No nested platform/compiler subdirs. Modify any config that violates this.
 
@@ -81,7 +84,11 @@ description: Modernize and build C++ library project
     2. Otherwise, install vcpkg locally into `external/vcpkg`.
     - Provide an `install_vcpkg` script (name at discretion, in `scripts/`) that clones, bootstraps, and validates vcpkg. Must work on Windows, Linux, and macOS.
     - **Important:** vcpkg isolates packages by triplet (e.g., `x64-linux` vs `x64-linux-dynamic`). Switching between static/shared builds requires reinstalling all dependencies. To avoid unnecessary rebuilds when a system `VCPKG_HOME` exists but has incompatible triplets, the build script should prefer the local `external/vcpkg` installation.
-    - **Custom registry:** Add `git@github.com:cmachacacordova/vcpkg-registry.git` as a git submodule in `vcpkg/` (branch `vcpkg`). All scripts and CI must ensure the submodule is initialized and always pulls the latest from the `vcpkg` branch before building. Configure `vcpkg-configuration.json` to register this path as an additional registry so vcpkg searches it for ports alongside the default registry.
+    - **Custom registry:** Add `https://github.com/cmachacacordova/vcpkg-registry.git` as a git submodule in `vcpkg/` tracking branch `vcpkg`. In `vcpkg-configuration.json`, register the same repo as a git registry pointing to branch `main` (where vcpkg version metadata lives).
+    - **Submodule pull must be guaranteed in all entry points:**
+      - **GitHub Actions:** use `actions/checkout` with `submodules: recursive` (or add an explicit step: `git submodule update --init --remote --merge`).
+      - **Build scripts:** before configuring, run `git submodule update --init --remote --merge` to pull the latest from the `vcpkg` branch.
+      - **CMake:** add an `execute_process` or custom target at configure time that runs `git submodule update --init --remote --merge` in the project root, so the submodule is always up to date even when invoking CMake directly without the build script.
 
 12. **Create build scripts** (in `scripts/`, for Windows `.bat` and Linux/macOS `.sh`). Each build script must:
     - Accept arguments for linkage (static/shared) and config (debug/release).

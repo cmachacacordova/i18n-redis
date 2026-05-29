@@ -4,7 +4,7 @@
 #include "i18n/redis/translation_provider.h"
 #include "i18n/translation.h"
 
-int main(int argc, char **argv) {
+int main() {
   std::string host = "localhost";
   int port = 6379;
   std::filesystem::path cwd = std::filesystem::current_path();

@@ -61,6 +61,9 @@ echo Using vcpkg: %VCPKG_EXE%
 
 for %%I in ("%VCPKG_EXE%") do set VCPKG_HOME=%%~dpI
 
+echo Updating git submodules...
+git -C "%ROOT_DIR%" submodule update --init --remote --merge 2>nul || echo Note: Could not update submodules
+
 set PRESET=windows-msvc-%TYPE%-%MODE%
 
 cmake --preset %PRESET% --fresh
