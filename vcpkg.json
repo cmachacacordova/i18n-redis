@@ -1,6 +1,6 @@
 {
   "name": "i18n-redis",
-  "version-string": "0.3.2",
+  "version-string": "1.0.0-SNAPSHOT",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
