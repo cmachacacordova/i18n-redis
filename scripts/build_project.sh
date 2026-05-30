@@ -2,7 +2,9 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 <static|shared> <debug|release> [gcc|clang]" >&2
+  echo "Usage: $0 <static|shared> <debug|release> [gcc|clang] [simdjson|yyjson]" >&2
+  echo "" >&2
+  echo "  If VCPKG_HOME is unset, the bundled submodule (extras/vcpkg) is used automatically." >&2
   exit 1
 }
 
@@ -11,6 +13,7 @@ usage() {
 TYPE=$1
 MODE=$2
 COMPILER=${3:-gcc}
+JSON_BACKEND=${4:-simdjson}
 
 case "$TYPE" in
   static|shared) ;;
@@ -27,21 +30,40 @@ case "$COMPILER" in
   *) usage;;
 esac
 
-if [[ -z "${VCPKG_HOME:-}" ]] || [[ ! -x "$VCPKG_HOME/vcpkg" ]]; then
-  echo "Error: VCPKG_HOME is not set or does not point to a valid vcpkg installation." >&2
-  echo "       export VCPKG_HOME=/path/to/vcpkg" >&2
-  exit 1
-fi
+case "$JSON_BACKEND" in
+  simdjson|yyjson) ;;
+  *) usage;;
+esac
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 
-echo "Using vcpkg: $VCPKG_HOME/vcpkg"
+if [ -z "${VCPKG_HOME:-}" ]; then
+  SUBMODULE_VCPKG="$ROOT_DIR/extras/vcpkg"
+  echo "VCPKG_HOME is not set — using bundled submodule at extras/vcpkg"
+  git -C "$ROOT_DIR" submodule update --init --recursive extras/vcpkg
+  if [ ! -f "$SUBMODULE_VCPKG/vcpkg" ] && [ ! -f "$SUBMODULE_VCPKG/vcpkg.exe" ]; then
+    echo "Bootstrapping vcpkg..."
+    "$SUBMODULE_VCPKG/bootstrap-vcpkg.sh" -disableMetrics
+  fi
+  VCPKG_HOME="$SUBMODULE_VCPKG"
+  echo "  VCPKG_HOME set to: $VCPKG_HOME"
+  echo ""
+fi
 
-echo "Updating git submodules..."
-git -C "$ROOT_DIR" submodule update --init --remote --merge 2>/dev/null || true
+echo "Build configuration:"
+echo "  Type:         $TYPE"
+echo "  Mode:         $MODE"
+echo "  Compiler:     $COMPILER"
+echo "  JSON backend: $JSON_BACKEND"
+echo "  VCPKG_HOME:   $VCPKG_HOME"
+echo ""
 
-PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
+if [ "$JSON_BACKEND" = "yyjson" ]; then
+  PRESET="linux-${COMPILER}-${TYPE}-${MODE}-yyjson"
+else
+  PRESET="linux-${COMPILER}-${TYPE}-${MODE}"
+fi
 
-cmake --preset "$PRESET" --fresh
-cmake --build out/build --parallel
+cmake --preset "$PRESET" --fresh -S "$ROOT_DIR"
+cmake --build --preset "$PRESET" --parallel

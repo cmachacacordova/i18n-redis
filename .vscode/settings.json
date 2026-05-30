@@ -12,7 +12,6 @@
     "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake"
   },
   "editor.codeActionsOnSave": {},
-  "editor.formatOnSave": true,
   "clangd.path": "/usr/sbin/clangd",
   "clangd.arguments": [
     "--background-index",

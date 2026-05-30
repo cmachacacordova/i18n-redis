@@ -2,7 +2,9 @@
 
 ## `class Translation`  *(i18n/translation.h)*
 
-Top-level façade. Owns a `TranslationProvider` and exposes all public lookups.
+High-level facade. Owns a `TranslationProvider` and exposes all public lookups.
+Calls `load()` on the provider via friend access — callers only interact with
+`store()` and `translate()`.
 
 ### Constructor
 
@@ -10,29 +12,36 @@ Top-level façade. Owns a `TranslationProvider` and exposes all public lookups.
 Translation(std::unique_ptr<TranslationProvider> provider, std::string locale);
 ```
 
+`locale` is the BCP-47 tag used as fallback when `translate()` receives an
+empty locale string.
+
 ### Methods
 
 ```cpp
 bool store(const std::string& cwd, const std::vector<std::string>& locales);
 ```
 
-Loads all `.json` files under `<cwd>/locales/<locale>/` into the backing store.
-Returns `false` if the provider is null, `true` otherwise. Errors during
-parsing are propagated as `std::runtime_error` from the provider.
+Delegates to `TranslationProvider::load()`. Returns `false` if the provider is
+null, `true` if loading was attempted. Propagates `std::runtime_error` on
+parsing errors.
 
 ```cpp
-std::string translate(const std::string& key, const std::string& locale = "") const;
+std::string translate(const std::string& key,
+                      const std::string& locale = "") const;
 ```
 
-Returns the translated string for `key`. Uses the default locale when `locale`
-is empty. Returns `key` unchanged if no translation is found.
+Returns the raw translated string for `key`. Uses the default locale when
+`locale` is empty. Returns `key` unchanged if no translation is found.
 
 ```cpp
 template <typename... Args>
-std::string translate(const std::string& key, const std::string& locale, Args&&... args) const;
+std::string translate(const std::string& key,
+                      const std::string& locale,
+                      Args&&... args) const;
 ```
 
-Same as above but formats the result with `{fmt}` arguments.
+Same as above but formats the result through `fmt::vformat` with `args`.
+The translation string may contain `{fmt}` placeholders (e.g. `{}`).
 
 ### Example
 
@@ -45,9 +54,9 @@ i18n::Translation t(
 
 t.store("/app", {"en", "es"});
 
-std::string s  = t.translate("greeting");
-std::string s2 = t.translate("greeting", "es");
-std::string s3 = t.translate("welcome", "en", "Alice");
+std::string s  = t.translate("greeting");           // default locale
+std::string s2 = t.translate("greeting", "es");     // explicit locale
+std::string s3 = t.translate("welcome", "en", "Alice"); // fmt formatting
 ```
 
 ---
@@ -57,6 +66,9 @@ std::string s3 = t.translate("welcome", "en", "Alice");
 Concrete `TranslationProvider` backed by Redis via `redis-plus-plus`.
 Inherits from `i18n::TranslationProvider`.
 
+`load()` is `protected` and called exclusively by `i18n::Translation` through
+friend access.
+
 ### Constructor
 
 ```cpp
@@ -65,32 +77,73 @@ explicit RedisTranslationProvider(const std::string& host, int port);
 
 Throws `std::runtime_error` if the connection cannot be established.
 
-### Behaviour
+### Public methods
 
-- `store()` → `load()` scans `<cwd>/locales/<locale>/*.json`, validates each
-  entry (requires `id`, `value`, `category`, `creationDate`, `modificationDate`,
-  `modificationVersion`; `id` must not contain `:`), and stores the raw JSON
-  object in Redis under `i18n:<locale>:<id>`.
-- `translate()` → `get()` retrieves the JSON from Redis, parses it with the
-  active backend, and returns the `value` field as plain text. Returns `key`
-  if the entry is not found.
+```cpp
+std::string get(const std::string& key, const std::string& locale) const override;
+```
+
+Queries Redis for the key `i18n:<locale>:<key>`, parses the stored JSON with
+the active backend, and returns the `value` field as plain text. Returns `key`
+unchanged if the entry is not found or the JSON is malformed.
+
+### Protected methods
+
+```cpp
+bool load(const std::string& cwd,
+          const std::vector<std::string>& locales) override;
+```
+
+Scans `<cwd>/locales/<locale>/*.json` for each requested locale, validates
+every entry (all six fields required: `id`, `value`, `category`,
+`creationDate`, `modificationDate`, `modificationVersion`; `id` must not
+contain `:`), and stores the raw JSON object in Redis under
+`i18n:<locale>:<id>`. Returns `true` if all locales were processed. Throws
+`std::runtime_error` on missing fields or invalid `id`.
+
+### Private members
+
+```cpp
+std::unique_ptr<sw::redis::Redis> m_redis;
+```
 
 ---
 
 ## `class TranslationProvider`  *(i18n/translation_provider.h)*
 
-Abstract base. Implement this to provide a custom backend.
+Abstract base class. Implement this to provide a custom backend.
 
 ```cpp
 class TranslationProvider {
 public:
+  TranslationProvider();
+
   virtual std::string get(const std::string& key,
                           const std::string& locale = "en") const = 0;
-  virtual void load(const std::string& cwd,
+
+  virtual bool load(const std::string& cwd,
                     const std::vector<std::string>& locales) = 0;
+
   virtual ~TranslationProvider() noexcept;
 };
 ```
+
+`get()` must return the translated string or `key` unchanged if not found.
+`load()` must return `true` when all locales were processed, and may throw
+`std::runtime_error` on errors.
+
+---
+
+## `configuration.h`  *(i18n/configuration.h)*
+
+```cpp
+namespace i18n {
+  inline constexpr std::string_view kFormatKey = "i18n:{}:{}";
+}
+```
+
+`kFormatKey` is the `{fmt}` format string used to build Redis keys.
+Arguments: `locale`, `id`. Example result: `i18n:en:greeting`.
 
 ---
 
@@ -116,32 +169,40 @@ All six fields are required. `id` must not contain `:`.
 
 ---
 
-## Redis key format
-
-```
-i18n:<locale>:<id>
-```
-
-Defined in `include/i18n/configuration.h` as `i18n::kFormatKey`.
-
----
-
 ## JSON backend
 
-Selected at CMake configure time. `simdjson` is the default.
+Selected per CMake preset. Both `VCPKG_MANIFEST_FEATURES` and
+`I18N_REDIS_JSON_BACKEND` are set automatically — no manual `-D` flags needed.
+
+| Preset suffix | Backend | vcpkg feature | CMake define |
+|---------------|---------|---------------|--------------|
+| *(none)* | simdjson | `simdjson` | `I18N_REDIS_USE_SIMDJSON` |
+| `-yyjson` | yyjson | `yyjson` | `I18N_REDIS_USE_YYJSON` |
 
 ```bash
-# simdjson (default)
+# simdjson — use any preset without suffix
 cmake --preset linux-gcc-static-release
+cmake --build --preset linux-gcc-static-release
 
-# yyjson
-cmake --preset linux-gcc-static-release \
-      -DI18N_REDIS_JSON_BACKEND=yyjson \
-      -DVCPKG_MANIFEST_FEATURES=yyjson
+# yyjson — use any preset with -yyjson suffix
+cmake --preset linux-gcc-static-release-yyjson
+cmake --build --preset linux-gcc-static-release-yyjson
 ```
 
-The hidden presets `opt-simdjson` and `opt-yyjson` can be inherited in a custom
-`CMakePresets.json`.
+The hidden presets `backend-simdjson` and `backend-yyjson` defined in
+`CMakePresets.json` can be inherited in a downstream `CMakeUserPresets.json`.
+
+### Convenience script
+
+`build_project.sh` / `build_project.bat` select the correct preset automatically:
+
+```bash
+./scripts/build_project.sh static release gcc simdjson
+./scripts/build_project.sh static release gcc yyjson
+```
+
+If `VCPKG_HOME` is unset, the script initialises the `extras/vcpkg` submodule
+and bootstraps vcpkg before running cmake.
 
 ---
 
@@ -160,6 +221,6 @@ automatically by the package config.
 ## Export macro
 
 `I18N_REDIS_EXPORT` is generated by `GenerateExportHeader`. It expands to the
-correct visibility attribute for shared builds, and to nothing for static builds.
+correct visibility attribute for shared builds and to nothing for static builds.
 
 Define `I18N_REDIS_STATIC_DEFINE` when linking against a static install.

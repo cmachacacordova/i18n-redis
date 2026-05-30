@@ -31,7 +31,7 @@ public:
   /// @brief Loads locale files from disk through the underlying provider.
   /// @param cwd     Path to the directory that contains the "locales/" folder.
   /// @param locales Locale tags to load (e.g. {"en", "es"}).
-  /// @return @c false if the provider is null, @c true otherwise.
+  /// @return @c false if the provider is null, @c true if load was attempted.
   bool store(const std::string &cwd, const std::vector<std::string> &locales);
 
   /// @brief Retrieves and formats a translation with variadic fmt arguments.
