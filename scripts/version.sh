@@ -76,31 +76,34 @@ updateVcpkgJson() {
 
   local tmp_file="${VCPKG_FILE}.tmp"
 
-  # Remove old "version" field and ensure "version-string" is set correctly
-  awk -v ver="$FULL_VERSION" '
-    /^\s*"version"\s*:/ { next }
-    /^\s*"version-string"\s*:/ {
-      print "  \"version-string\": \"" ver "\","
-      next
-    }
-    { print }
-  ' "$VCPKG_FILE" > "$tmp_file"
-
-  # Check if version-string was found and added; if not, add it after the name field
-  if ! grep -q '"version-string"' "$tmp_file"; then
-    awk -v ver="$FULL_VERSION" '
-      /^\s*"name"\s*:/ {
-        print
+  if command -v jq >/dev/null 2>&1; then
+    jq --arg ver "$VERSION" '."version-string" = $ver | del(.version)' \
+      "$VCPKG_FILE" > "$tmp_file"
+  else
+    awk -v ver="$VERSION" '
+      /^\s*"version"\s*:/ { next }
+      /^\s*"version-string"\s*:/ {
         print "  \"version-string\": \"" ver "\","
         next
       }
       { print }
-    ' "$tmp_file" > "${tmp_file}.2"
-    mv "${tmp_file}.2" "$tmp_file"
+    ' "$VCPKG_FILE" > "$tmp_file"
+
+    if ! grep -q '"version-string"' "$tmp_file"; then
+      awk -v ver="$VERSION" '
+        /^\s*"name"\s*:/ {
+          print
+          print "  \"version-string\": \"" ver "\","
+          next
+        }
+        { print }
+      ' "$tmp_file" > "${tmp_file}.2"
+      mv "${tmp_file}.2" "$tmp_file"
+    fi
   fi
 
   mv "$tmp_file" "$VCPKG_FILE"
-  echo "Updated vcpkg.json: version-string = $FULL_VERSION"
+  echo "Updated vcpkg.json: version-string = $VERSION"
 }
 
 updateCMakeLists

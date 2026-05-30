@@ -7,9 +7,7 @@ on:
     branches: [ main, master ]
 
 env:
-  PROJECT_ROOT: ${{ github.workspace }}
-  BUILD_DIR: ${{ github.workspace }}/out/build
-  VCPKG_HOME: ${{ github.workspace }}/external/vcpkg
+  VCPKG_HOME: ${{ github.workspace }}/extras/vcpkg
 
 jobs:
   linux-gcc:
@@ -20,18 +18,39 @@ jobs:
       matrix:
         include:
           - preset: linux-gcc-static-debug
-            variant: static-debug
+            variant: static-debug [simdjson]
+          - preset: linux-gcc-static-debug-yyjson
+            variant: static-debug [yyjson]
           - preset: linux-gcc-static-release
-            variant: static-release
+            variant: static-release [simdjson]
+          - preset: linux-gcc-static-release-yyjson
+            variant: static-release [yyjson]
           - preset: linux-gcc-shared-debug
-            variant: shared-debug
+            variant: shared-debug [simdjson]
+          - preset: linux-gcc-shared-debug-yyjson
+            variant: shared-debug [yyjson]
           - preset: linux-gcc-shared-release
-            variant: shared-release
+            variant: shared-release [simdjson]
+          - preset: linux-gcc-shared-release-yyjson
+            variant: shared-release [yyjson]
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Verify submodules were populated
+        run: |
+          FAILED=0
+          for path in extras/vcpkg extras/registry; do
+            if [ ! -d "$path" ] || [ -z "$(ls -A "$path")" ]; then
+              echo "ERROR: submodule '$path' is missing or empty."
+              FAILED=1
+            else
+              echo "OK: $path"
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
 
       - name: Install system dependencies
         run: |
@@ -42,18 +61,21 @@ jobs:
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
-          path: external/vcpkg
-          key: vcpkg-linux-gcc-${{ hashFiles('vcpkg.json') }}
+          path: extras/vcpkg
+          key: vcpkg-linux-gcc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-gcc-
 
-      - name: Install vcpkg
-        run: ./scripts/install_vcpkg.sh
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -f extras/vcpkg/vcpkg ]; then
+            extras/vcpkg/bootstrap-vcpkg.sh -disableMetrics
+          fi
 
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
-        run: cmake --build out/build --parallel
+        run: cmake --build --preset ${{ matrix.preset }} --parallel
 
       - name: Test
         run: ctest --test-dir out/build --output-on-failure
@@ -66,18 +88,39 @@ jobs:
       matrix:
         include:
           - preset: linux-clang-static-debug
-            variant: static-debug
+            variant: static-debug [simdjson]
+          - preset: linux-clang-static-debug-yyjson
+            variant: static-debug [yyjson]
           - preset: linux-clang-static-release
-            variant: static-release
+            variant: static-release [simdjson]
+          - preset: linux-clang-static-release-yyjson
+            variant: static-release [yyjson]
           - preset: linux-clang-shared-debug
-            variant: shared-debug
+            variant: shared-debug [simdjson]
+          - preset: linux-clang-shared-debug-yyjson
+            variant: shared-debug [yyjson]
           - preset: linux-clang-shared-release
-            variant: shared-release
+            variant: shared-release [simdjson]
+          - preset: linux-clang-shared-release-yyjson
+            variant: shared-release [yyjson]
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Verify submodules were populated
+        run: |
+          FAILED=0
+          for path in extras/vcpkg extras/registry; do
+            if [ ! -d "$path" ] || [ -z "$(ls -A "$path")" ]; then
+              echo "ERROR: submodule '$path' is missing or empty."
+              FAILED=1
+            else
+              echo "OK: $path"
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
 
       - name: Install system dependencies
         run: |
@@ -88,18 +131,21 @@ jobs:
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
-          path: external/vcpkg
-          key: vcpkg-linux-clang-${{ hashFiles('vcpkg.json') }}
+          path: extras/vcpkg
+          key: vcpkg-linux-clang-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-clang-
 
-      - name: Install vcpkg
-        run: ./scripts/install_vcpkg.sh
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -f extras/vcpkg/vcpkg ]; then
+            extras/vcpkg/bootstrap-vcpkg.sh -disableMetrics
+          fi
 
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
-        run: cmake --build out/build --parallel
+        run: cmake --build --preset ${{ matrix.preset }} --parallel
 
       - name: Test
         run: ctest --test-dir out/build --output-on-failure
@@ -112,14 +158,31 @@ jobs:
       matrix:
         include:
           - preset: linux-clang-static-asan
-            variant: ASan
+            variant: ASan [simdjson]
+          - preset: linux-clang-static-asan-yyjson
+            variant: ASan [yyjson]
           - preset: linux-clang-static-ubsan
-            variant: UBSan
+            variant: UBSan [simdjson]
+          - preset: linux-clang-static-ubsan-yyjson
+            variant: UBSan [yyjson]
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Verify submodules were populated
+        run: |
+          FAILED=0
+          for path in extras/vcpkg extras/registry; do
+            if [ ! -d "$path" ] || [ -z "$(ls -A "$path")" ]; then
+              echo "ERROR: submodule '$path' is missing or empty."
+              FAILED=1
+            else
+              echo "OK: $path"
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
 
       - name: Install system dependencies
         run: |
@@ -130,18 +193,21 @@ jobs:
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
-          path: external/vcpkg
-          key: vcpkg-linux-clang-san-${{ hashFiles('vcpkg.json') }}
+          path: extras/vcpkg
+          key: vcpkg-linux-clang-san-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-clang-san-
 
-      - name: Install vcpkg
-        run: ./scripts/install_vcpkg.sh
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -f extras/vcpkg/vcpkg ]; then
+            extras/vcpkg/bootstrap-vcpkg.sh -disableMetrics
+          fi
 
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
-        run: cmake --build out/build --parallel
+        run: cmake --build --preset ${{ matrix.preset }} --parallel
 
       - name: Test
         run: ctest --test-dir out/build --output-on-failure
@@ -154,18 +220,40 @@ jobs:
       matrix:
         include:
           - preset: windows-msvc-static-debug
-            variant: static-debug
+            variant: static-debug [simdjson]
+          - preset: windows-msvc-static-debug-yyjson
+            variant: static-debug [yyjson]
           - preset: windows-msvc-static-release
-            variant: static-release
+            variant: static-release [simdjson]
+          - preset: windows-msvc-static-release-yyjson
+            variant: static-release [yyjson]
           - preset: windows-msvc-shared-debug
-            variant: shared-debug
+            variant: shared-debug [simdjson]
+          - preset: windows-msvc-shared-debug-yyjson
+            variant: shared-debug [yyjson]
           - preset: windows-msvc-shared-release
-            variant: shared-release
+            variant: shared-release [simdjson]
+          - preset: windows-msvc-shared-release-yyjson
+            variant: shared-release [yyjson]
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Verify submodules were populated
+        run: |
+          $failed = $false
+          foreach ($path in @("extras/vcpkg", "extras/registry")) {
+            if (-not (Test-Path $path) -or (Get-ChildItem $path).Count -eq 0) {
+              Write-Error "ERROR: submodule '$path' is missing or empty."
+              $failed = $true
+            } else {
+              Write-Host "OK: $path"
+            }
+          }
+          if ($failed) { exit 1 }
+        shell: pwsh
 
       - name: Setup MSVC developer environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -178,20 +266,23 @@ jobs:
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
-          path: external/vcpkg
-          key: vcpkg-windows-msvc-${{ hashFiles('vcpkg.json') }}
+          path: extras/vcpkg
+          key: vcpkg-windows-msvc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-windows-msvc-
 
-      - name: Install vcpkg
-        run: scripts\install_vcpkg.bat
-        shell: cmd
+      - name: Bootstrap vcpkg
+        run: |
+          if (-not (Test-Path "extras\vcpkg\vcpkg.exe")) {
+            & "extras\vcpkg\bootstrap-vcpkg.bat" -disableMetrics
+          }
+        shell: pwsh
 
       - name: Configure
         run: cmake --preset ${{ matrix.preset }}
         shell: cmd
 
       - name: Build
-        run: cmake --build out\build --parallel
+        run: cmake --build --preset ${{ matrix.preset }} --parallel
         shell: cmd
 
       - name: Test
