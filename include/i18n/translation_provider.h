@@ -26,8 +26,7 @@ public:
   /// @brief Loads translation files from disk into the backing store.
   /// @param cwd     Working directory that contains the "locales/" subdirectory.
   /// @param locales List of locale tags to load (e.g. {"en", "es"}).
-  /// @return @c true if at least one locale was processed successfully.
-  virtual bool load(const std::string &cwd, const std::vector<std::string> &locales) const = 0;
+  virtual bool load(const std::string &cwd, const std::vector<std::string> &locales) = 0;
 
   virtual ~TranslationProvider() noexcept;
 };

@@ -27,34 +27,16 @@ case "$COMPILER" in
   *) usage;;
 esac
 
+if [[ -z "${VCPKG_HOME:-}" ]] || [[ ! -x "$VCPKG_HOME/vcpkg" ]]; then
+  echo "Error: VCPKG_HOME is not set or does not point to a valid vcpkg installation." >&2
+  echo "       export VCPKG_HOME=/path/to/vcpkg" >&2
+  exit 1
+fi
+
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
-VCPKG_DIR="$ROOT_DIR/external/vcpkg"
 
-detectVcpkg() {
-  if [ -d "$VCPKG_DIR" ] && [ -x "$VCPKG_DIR/vcpkg" ]; then
-    echo "$VCPKG_DIR/vcpkg"
-    return 0
-  fi
-  if [[ "${VCPKG_HOME:-}" ]] && [ -d "$VCPKG_HOME" ] && [ -x "$VCPKG_HOME/vcpkg" ]; then
-    echo "$VCPKG_HOME/vcpkg"
-    return 0
-  fi
-  return 1
-}
-
-VCPKG=$(detectVcpkg) || {
-  echo "vcpkg not found. Installing to $VCPKG_DIR..."
-  "$SCRIPT_DIR/install_vcpkg.sh"
-  VCPKG=$(detectVcpkg) || {
-    echo "Error: vcpkg installation failed" >&2
-    exit 1
-  }
-}
-
-echo "Using vcpkg: $VCPKG"
-
-export VCPKG_HOME=$(dirname "$VCPKG")
+echo "Using vcpkg: $VCPKG_HOME/vcpkg"
 
 echo "Updating git submodules..."
 git -C "$ROOT_DIR" submodule update --init --remote --merge 2>/dev/null || true

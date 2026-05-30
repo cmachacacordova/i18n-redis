@@ -1,112 +1,183 @@
 #include <filesystem>
-#include <fstream>
 #include <stdexcept>
 
-#include <fmt/core.h>
-
 #include "i18n/configuration.h"
-#include "i18n/json.h"
 #include "i18n/redis/translation_provider.h"
-#include "i18n/types.h"
 
-// ADL serializer for TranslationRegister: maps camelCase JSON field names
-// (used in locale files) to the struct's snake_case member variables.
-NLOHMANN_JSON_NAMESPACE_BEGIN
+#include <fmt/core.h>
+#ifdef I18N_REDIS_USE_SIMDJSON
+#include <simdjson.h>
+#elif defined(I18N_REDIS_USE_YYJSON)
+#include <yyjson.h>
+#endif
 
-template <>
-struct adl_serializer<i18n::TranslationRegister> {
-  static void to_json(nlohmann::json &j, const i18n::TranslationRegister &t) {
-    j["id"] = t.m_id;
-    j["value"] = t.m_value;
-    j["category"] = t.m_category;
-    j["creationDate"] = t.m_creation_date;
-    j["modificationDate"] = t.m_modification_date;
-    j["modificationVersion"] = t.m_modification_version;
+i18n::RedisTranslationProvider::RedisTranslationProvider(const std::string &host, int port) {
+  try {
+    sw::redis::ConnectionOptions connection_opts;
+    connection_opts.host = host;
+    connection_opts.port = port;
+
+    sw::redis::ConnectionPoolOptions pool_opts;
+    pool_opts.size = 4;
+    pool_opts.wait_timeout = std::chrono::milliseconds(1000);
+    pool_opts.connection_lifetime = std::chrono::milliseconds(60000);
+    pool_opts.connection_idle_time = std::chrono::milliseconds(30000);
+
+    m_redis = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
+  } catch (const std::exception &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); } catch (...) {
+    throw std::runtime_error("Failed to connect to Redis: unknown error");
   }
-  static void from_json(const nlohmann::json &j, i18n::TranslationRegister &t) {
-    j.at("id").get_to(t.m_id);
-    j.at("value").get_to(t.m_value);
-    j.at("category").get_to(t.m_category);
-    j.at("creationDate").get_to(t.m_creation_date);
-    j.at("modificationDate").get_to(t.m_modification_date);
-    j.at("modificationVersion").get_to(t.m_modification_version);
-  }
-};
-
-NLOHMANN_JSON_NAMESPACE_END
-
-i18n::RedisTranslationProvider::RedisTranslationProvider(const std::string &host, int port) : m_connection(host, port) {
 }
 
-bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vector<std::string> &locales) const {
-  if (locales.empty()) {
-    return false;
-  }
+bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vector<std::string> &locales) {
+  bool all_locales_loaded = locales.size() > 0;
   for (const auto &locale : locales) {
-    const std::filesystem::path localePath = (std::filesystem::path(cwd) / "locales" / locale).lexically_normal();
+    const std::filesystem::path locale_path = (std::filesystem::path(cwd) / "locales" / locale).lexically_normal();
 
-    if (!std::filesystem::exists(localePath) || !std::filesystem::is_directory(localePath)) {
+    if (!std::filesystem::exists(locale_path) || !std::filesystem::is_directory(locale_path)) {
+      all_locales_loaded &= false;
       continue;
     }
 
-    for (const auto &entry : std::filesystem::directory_iterator(localePath)) {
+    for (const auto &entry : std::filesystem::directory_iterator(locale_path)) {
       if (!entry.is_regular_file() || entry.path().extension() != ".json") {
         continue;
       }
 
-      std::ifstream file(entry.path());
-      if (!file) {
-        continue;
+#ifdef I18N_REDIS_USE_SIMDJSON
+      using namespace simdjson;
+
+      ondemand::parser parser;
+      padded_string json = padded_string::load(entry.path().string());
+      ondemand::document doc = parser.iterate(json);
+
+      size_t index = 0;
+      for (ondemand::object obj : doc.get_array()) {
+        // raw_json() consumes the object, so capture it first, then reset() to re-iterate fields.
+        std::string raw_json(obj.raw_json().value());
+        obj.reset();
+
+        std::string_view id;
+        if (obj["id"].get_string().get(id)) {
+          throw std::runtime_error(fmt::format("Translation 'id' missing or not a string in file {}, index {}", entry.path().string(), index));
+        }
+        // Copy id before any further field access that may invalidate the string_view.
+        std::string id_str(id);
+
+        if (id_str.find(':') != std::string::npos) {
+          throw std::runtime_error(fmt::format("Translation ID '{}' contains a colon, which is not allowed in Redis keys.", id_str));
+        }
+        if (obj["value"].error()) {
+          throw std::runtime_error(fmt::format("Translation 'value' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
+        }
+        if (obj["category"].error()) {
+          throw std::runtime_error(fmt::format("Translation 'category' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
+        }
+        if (obj["creationDate"].error()) {
+          throw std::runtime_error(fmt::format("Translation 'creationDate' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
+        }
+        if (obj["modificationDate"].error()) {
+          throw std::runtime_error(fmt::format("Translation 'modificationDate' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
+        }
+        if (obj["modificationVersion"].error()) {
+          throw std::runtime_error(fmt::format("Translation 'modificationVersion' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
+        }
+
+        const std::string redis_key = fmt::format(i18n::kFormatKey, locale, id_str);
+        this->m_redis->set(redis_key, raw_json);
+        ++index;
+      }
+#elif defined(I18N_REDIS_USE_YYJSON)
+      yyjson_doc *doc = yyjson_read_file(entry.path().string().c_str(), YYJSON_READ_NOFLAG, nullptr, nullptr);
+      if (!doc) {
+        throw std::runtime_error(fmt::format("Failed to parse JSON file: {}", entry.path().string()));
       }
 
-      i18n::json j;
-      try {
-        file >> j;
-      } catch (const nlohmann::json::parse_error &e) { throw std::runtime_error(fmt::format("Failed to parse JSON file '{}': {}", entry.path().string(), e.what())); }
-      const auto translations = j.get<std::vector<i18n::TranslationRegister>>();
-
-      // Validate every entry before writing to Redis to prevent partial or
-      // corrupted data from reaching the store.
-      for (const auto &translation : translations) {
-        if (translation.m_id.empty()) {
-          throw std::runtime_error(fmt::format("Translation ID is empty in file: {}", entry.path().string()));
-        }
-        if (translation.m_value.empty()) {
-          throw std::runtime_error(fmt::format("Translation value is empty for ID '{}' in file: {}", translation.m_id, entry.path().string()));
-        }
-        if (translation.m_category.empty()) {
-          throw std::runtime_error(fmt::format("Translation category is empty for ID '{}' in file: {}", translation.m_id, entry.path().string()));
-        }
-        if (translation.m_creation_date.empty()) {
-          throw std::runtime_error(fmt::format("Translation creationDate is empty for ID '{}' in file: {}", translation.m_id, entry.path().string()));
-        }
-        if (translation.m_modification_date.empty()) {
-          throw std::runtime_error(fmt::format("Translation modificationDate is empty for ID '{}' in file: {}", translation.m_id, entry.path().string()));
-        }
-        if (translation.m_modification_version < 0) {
-          throw std::runtime_error(fmt::format("Translation modificationVersion is negative for ID '{}' in file: {}", translation.m_id, entry.path().string()));
-        }
-        // Colons are used as namespace separators in kFormatKey, so
-        // they must not appear in the id itself.
-        if (translation.m_id.find(':') != std::string::npos) {
-          throw std::runtime_error(fmt::format("Translation ID '{}' contains a colon, which is not allowed in Redis keys.", translation.m_id));
-        }
-
-        // Build the final Redis key, e.g. "i18n:en:greeting".
-        const std::string key = fmt::format(i18n::kFormatKey, locale, translation.m_id);
-        this->m_connection.store<i18n::TranslationRegister>(key, translation);
+      yyjson_val *root = yyjson_doc_get_root(doc);
+      if (!yyjson_is_arr(root)) {
+        yyjson_doc_free(doc);
+        throw std::runtime_error(fmt::format("Expected JSON array in file: {}", entry.path().string()));
       }
+
+      size_t index = 0;
+      yyjson_val *obj;
+      yyjson_arr_iter iter = yyjson_arr_iter_with(root);
+      while ((obj = yyjson_arr_iter_next(&iter))) {
+        yyjson_val *id_val = yyjson_obj_get(obj, "id");
+        if (!id_val || !yyjson_is_str(id_val)) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'id' missing or not a string in file {}, index {}", entry.path().string(), index));
+        }
+        std::string_view id = yyjson_get_str(id_val);
+        if (id.find(':') != std::string::npos) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation ID '{}' contains a colon, which is not allowed in Redis keys.", id));
+        }
+
+        yyjson_val *value_val = yyjson_obj_get(obj, "value");
+        if (!value_val || !yyjson_is_str(value_val)) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'value' missing for ID '{}' in file {}, index {}", id, entry.path().string(), index));
+        }
+        if (!yyjson_obj_get(obj, "category")) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'category' missing for ID '{}' in file {}, index {}", id, entry.path().string(), index));
+        }
+        if (!yyjson_obj_get(obj, "creationDate")) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'creationDate' missing for ID '{}' in file {}, index {}", id, entry.path().string(), index));
+        }
+        if (!yyjson_obj_get(obj, "modificationDate")) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'modificationDate' missing for ID '{}' in file {}, index {}", id, entry.path().string(), index));
+        }
+        yyjson_val *ver_val = yyjson_obj_get(obj, "modificationVersion");
+        if (!ver_val || !yyjson_is_int(ver_val)) {
+          yyjson_doc_free(doc);
+          throw std::runtime_error(fmt::format("Translation 'modificationVersion' missing or not an integer for ID '{}' in file {}, index {}", id, entry.path().string(), index));
+        }
+
+        const std::string redis_key = fmt::format(i18n::kFormatKey, locale, id);
+        size_t json_len = 0;
+        char *json_str = yyjson_val_write(obj, YYJSON_WRITE_NOFLAG, &json_len);
+        this->m_redis->set(redis_key, std::string(json_str, json_len));
+        free(json_str);
+        ++index;
+      }
+      yyjson_doc_free(doc);
+#endif
     }
   }
-  return true;
+  return all_locales_loaded;
 }
 
 std::string i18n::RedisTranslationProvider::get(const std::string &key, const std::string &locale) const {
-  if (const auto value = this->m_connection.value<i18n::TranslationRegister>(fmt::format(i18n::kFormatKey, locale, key))) {
-    return value->m_value;
+  auto raw = this->m_redis->get(fmt::format(i18n::kFormatKey, locale, key));
+  if (!raw) {
+    return key;
   }
-  // Return the key itself as a safe fallback when no translation is found.
+
+#ifdef I18N_REDIS_USE_SIMDJSON
+  simdjson::ondemand::parser parser;
+  simdjson::padded_string padded(*raw);
+  auto doc = parser.iterate(padded);
+  std::string_view value;
+  if (doc["value"].get_string().get(value)) {
+    return key;
+  }
+  return std::string(value);
+#elif defined(I18N_REDIS_USE_YYJSON)
+  yyjson_doc *doc = yyjson_read(raw->c_str(), raw->size(), YYJSON_READ_NOFLAG);
+  if (!doc) {
+    return key;
+  }
+  yyjson_val *value_val = yyjson_obj_get(yyjson_doc_get_root(doc), "value");
+  std::string result = (value_val && yyjson_is_str(value_val)) ? yyjson_get_str(value_val) : key;
+  yyjson_doc_free(doc);
+  return result;
+#else
   return key;
+#endif
 }
 
 i18n::RedisTranslationProvider::~RedisTranslationProvider() noexcept = default;

@@ -11,7 +11,6 @@ endif()
 if(Catch2_FOUND)
     add_executable(i18n-redis-tests
         test_translation_key.cpp
-        test_types.cpp
     )
     target_link_libraries(i18n-redis-tests
         PRIVATE
@@ -28,7 +27,6 @@ else()
     add_executable(i18n-redis-tests
         main.cpp
         test_translation_key.cpp
-        test_types.cpp
     )
     target_link_libraries(i18n-redis-tests PRIVATE i18n-redis::i18n-redis)
     target_compile_features(i18n-redis-tests PRIVATE cxx_std_20)

@@ -1,0 +1,8 @@
+[submodule "extras/vcpkg"]
+	path = extras/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
+	branch = master
+[submodule "extras/registry"]
+	path = extras/registry
+	url = git@github.com:cmachacacordova/vcpkg-registry.git
+	branch = vcpkg

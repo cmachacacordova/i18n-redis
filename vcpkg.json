@@ -17,7 +17,6 @@
         "async"
       ]
     },
-    "nlohmann-json",
     "fmt"
   ],
   "features": {
@@ -25,6 +24,31 @@
       "description": "Build and run the test suite with Catch2",
       "dependencies": [
         "catch2"
+      ]
+    },
+    "simdjson": {
+      "description": "Build with simdjson support for faster JSON parsing and reading",
+      "dependencies": [
+        {
+          "name": "simdjson",
+          "features": [
+            "exceptions",
+            "utf8-validation",
+            "threads"
+          ]
+        }
+      ]
+    },
+    "yyjson": {
+      "description": "Build with yyjson support for faster JSON parsing and reading",
+      "dependencies": [
+        {
+          "name": "yyjson",
+          "features": [
+            "reader",
+            "writer"
+          ]
+        }
       ]
     }
   }

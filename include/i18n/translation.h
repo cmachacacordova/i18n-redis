@@ -31,7 +31,7 @@ public:
   /// @brief Loads locale files from disk through the underlying provider.
   /// @param cwd     Path to the directory that contains the "locales/" folder.
   /// @param locales Locale tags to load (e.g. {"en", "es"}).
-  /// @return @c true if the provider loaded at least one locale successfully.
+  /// @return @c false if the provider is null, @c true otherwise.
   bool store(const std::string &cwd, const std::vector<std::string> &locales);
 
   /// @brief Retrieves and formats a translation with variadic fmt arguments.
@@ -48,7 +48,7 @@ public:
   std::string translate(const std::string &key, const std::string &locale, Args &&...args) const {
     const std::string &used_locale = locale.empty() ? m_default_locale : locale;
     const std::string raw = m_provider->get(key, used_locale);
-    return fmt::vformat(raw, fmt::make_format_args(args...));
+    return fmt::format(fmt::runtime(raw), std::forward<Args>(args)...);
   }
 
   /// @brief Retrieves a translation without fmt formatting.

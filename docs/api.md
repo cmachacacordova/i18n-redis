@@ -1,138 +1,165 @@
 # i18n-redis API Reference
 
-## Namespace `i18n`
+## `class Translation`  *(i18n/translation.h)*
 
----
+Top-level façade. Owns a `TranslationProvider` and exposes all public lookups.
 
-### `struct TranslationRegister`  *(i18n/types.h)*
-
-Plain data struct representing a single translation entry loaded from JSON.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `std::string` | Unique identifier used as the Redis key suffix |
-| `value` | `std::string` | The translated string, may contain `{fmt}` placeholders |
-| `category` | `std::string` | Logical grouping (e.g. `"General"`) |
-| `creationDate` | `std::string` | ISO 8601 creation date |
-| `modificationDate` | `std::string` | ISO 8601 last-modification date |
-| `modificationVersion` | `int` | Monotonically increasing version counter |
-
----
-
-### `class TranslationProvider`  *(i18n/translation_provider.h)*
-
-Abstract base class. Implement this to provide a custom translation backend.
+### Constructor
 
 ```cpp
-class TranslationProvider {
-public:
-  virtual ~TranslationProvider() noexcept = default;
-  virtual std::string get(const std::string& key, const std::string& locale) const = 0;
-  virtual bool load(const std::string& cwd, const std::vector<std::string>& locales) const = 0;
-};
+Translation(std::unique_ptr<TranslationProvider> provider, std::string locale);
 ```
 
----
-
-### `class Translation`  *(i18n/translation.h)*
-
-Top-level façade. Owns a `TranslationProvider` and exposes the public API.
-
-#### Constructor
+### Methods
 
 ```cpp
-explicit Translation(std::unique_ptr<TranslationProvider> provider,
-                     std::string defaultLocale = "en");
+bool store(const std::string& cwd, const std::vector<std::string>& locales);
 ```
 
-#### Methods
-
-| Method | Description |
-|--------|-------------|
-| `store(cwd, locales)` | Loads JSON files from `<cwd>/locales/<locale>/` and stores them via the provider |
-| `translate(key)` | Returns the translation for `key` using the default locale |
-| `translate(key, locale)` | Returns the translation for `key` in the given locale |
-| `translate(key, locale, args...)` | Formats the translated string with `{fmt}` arguments |
+Loads all `.json` files under `<cwd>/locales/<locale>/` into the backing store.
+Returns `false` if the provider is null, `true` otherwise. Errors during
+parsing are propagated as `std::runtime_error` from the provider.
 
 ```cpp
-// store all en + es translations
+std::string translate(const std::string& key, const std::string& locale = "") const;
+```
+
+Returns the translated string for `key`. Uses the default locale when `locale`
+is empty. Returns `key` unchanged if no translation is found.
+
+```cpp
+template <typename... Args>
+std::string translate(const std::string& key, const std::string& locale, Args&&... args) const;
+```
+
+Same as above but formats the result with `{fmt}` arguments.
+
+### Example
+
+```cpp
+#include "i18n/redis/translation_provider.h"
+#include "i18n/translation.h"
+
+i18n::Translation t(
+    std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379), "en");
+
 t.store("/app", {"en", "es"});
 
-// simple lookup
-std::string s = t.translate("greeting");
-
-// with explicit locale
+std::string s  = t.translate("greeting");
 std::string s2 = t.translate("greeting", "es");
-
-// with format arguments
 std::string s3 = t.translate("welcome", "en", "Alice");
 ```
 
 ---
 
-### `class RedisTranslationProvider`  *(i18n/redis/translation_provider.h)*
+## `class RedisTranslationProvider`  *(i18n/redis/translation_provider.h)*
 
 Concrete `TranslationProvider` backed by Redis via `redis-plus-plus`.
+Inherits from `i18n::TranslationProvider`.
 
-#### Constructor
+### Constructor
 
 ```cpp
-RedisTranslationProvider(const std::string& host, int port);
+explicit RedisTranslationProvider(const std::string& host, int port);
 ```
 
 Throws `std::runtime_error` if the connection cannot be established.
 
-#### Behaviour
+### Behaviour
 
-- `load()` scans `<cwd>/locales/<locale>/*.json` and stores each entry as a
-  JSON string under the key `i18n:<locale>:<id>`.
-- `get()` fetches the value and deserialises it.
+- `store()` → `load()` scans `<cwd>/locales/<locale>/*.json`, validates each
+  entry (requires `id`, `value`, `category`, `creationDate`, `modificationDate`,
+  `modificationVersion`; `id` must not contain `:`), and stores the raw JSON
+  object in Redis under `i18n:<locale>:<id>`.
+- `translate()` → `get()` retrieves the JSON from Redis, parses it with the
+  active backend, and returns the `value` field as plain text. Returns `key`
+  if the entry is not found.
 
 ---
 
-### `class redis::Connection`  *(i18n/redis/connection.h)*
+## `class TranslationProvider`  *(i18n/translation_provider.h)*
 
-Low-level RAII wrapper around `sw::redis::Redis`.
+Abstract base. Implement this to provide a custom backend.
 
 ```cpp
-Connection(const std::string& host, int port);
-
-template<> std::optional<std::string> value<std::string>(const std::string& key) const;
-template<> std::optional<i18n::json>  value<i18n::json> (const std::string& key) const;
-
-template<> bool store<std::string>(const std::string& key, const std::string& val) const noexcept;
-template<> bool store<i18n::json> (const std::string& key, const i18n::json& val) const noexcept;
-template<typename T> bool store(const std::string& key, const T& val) const noexcept;
+class TranslationProvider {
+public:
+  virtual std::string get(const std::string& key,
+                          const std::string& locale = "en") const = 0;
+  virtual void load(const std::string& cwd,
+                    const std::vector<std::string>& locales) = 0;
+  virtual ~TranslationProvider() noexcept;
+};
 ```
-
-Move-only. Copy is deleted.
-
-| Method | Return | Description |
-|--------|--------|-------------|
-| `value<T>(key)` | `std::optional<T>` | Reads and deserialises value from Redis; returns `nullopt` if key absent |
-| `store<T>(key, val)` | `bool` | Serialises and writes value to Redis; returns `true` on success |
 
 ---
 
-## Key format
+## Locale file format
 
-Redis keys are stored as:
+Each locale directory (`locales/<locale>/`) may contain any number of `.json`
+files. Each file must be a JSON array:
+
+```json
+[
+  {
+    "id": "greeting",
+    "value": "Hello, {}!",
+    "category": "General",
+    "creationDate": "2024-01-01",
+    "modificationDate": "2024-06-01",
+    "modificationVersion": 1
+  }
+]
+```
+
+All six fields are required. `id` must not contain `:`.
+
+---
+
+## Redis key format
 
 ```
 i18n:<locale>:<id>
 ```
 
-The format string is defined in `include/i18n/configuration.h` as
-`i18n::kFormatKey` (`inline constexpr std::string_view`).
+Defined in `include/i18n/configuration.h` as `i18n::kFormatKey`.
 
 ---
 
-## Export macros
+## JSON backend
 
-`I18N_REDIS_EXPORT` is generated by CMake via `GenerateExportHeader` and is
-automatically correct for both shared and static builds. For static builds
-the macro expands to nothing; for shared builds it expands to the appropriate
-`__declspec(dllexport)` / `__attribute__((visibility("default")))`.
+Selected at CMake configure time. `simdjson` is the default.
 
-When consuming the installed library, define `I18N_REDIS_STATIC_DEFINE` if
-linking statically.
+```bash
+# simdjson (default)
+cmake --preset linux-gcc-static-release
+
+# yyjson
+cmake --preset linux-gcc-static-release \
+      -DI18N_REDIS_JSON_BACKEND=yyjson \
+      -DVCPKG_MANIFEST_FEATURES=yyjson
+```
+
+The hidden presets `opt-simdjson` and `opt-yyjson` can be inherited in a custom
+`CMakePresets.json`.
+
+---
+
+## CMake integration
+
+```cmake
+find_package(i18n-redis CONFIG REQUIRED)
+target_link_libraries(my-app PRIVATE i18n-redis::i18n-redis)
+```
+
+Transitive dependencies (`redis++`, `fmt`, and the JSON backend) are resolved
+automatically by the package config.
+
+---
+
+## Export macro
+
+`I18N_REDIS_EXPORT` is generated by `GenerateExportHeader`. It expands to the
+correct visibility attribute for shared builds, and to nothing for static builds.
+
+Define `I18N_REDIS_STATIC_DEFINE` when linking against a static install.

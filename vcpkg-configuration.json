@@ -9,21 +9,12 @@
       "kind": "artifact",
       "location": "https://github.com/microsoft/vcpkg-ce-catalog/archive/refs/heads/main.zip",
       "name": "microsoft"
-    },
-    {
-      "kind": "git",
-      "baseline": "1ec5b8ccb764f7ab9067319c5df3e086b9c79655",
-      "repository": "https://github.com/cmachacacordova/vcpkg-registry",
-      "packages": [
-        "uuid-h",
-        "pipes"
-      ]
     }
   ],
   "overlay-ports": [
-    "vcpkg/ports/"
+    "extras/registry/ports/"
   ],
   "overlay-triplets": [
-    "vcpkg/triplets/"
+    "extras/registry/triplets/"
   ]
 }

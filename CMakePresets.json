@@ -9,12 +9,17 @@
     {
       "name": "base",
       "hidden": true,
-      "binaryDir": "${sourceDir}/out/build",
+      "inherits": [
+        "vcpkg",
+        "backend-simdjson"
+      ],
+      "binaryDir": "${sourceDir}/out/build"
+    },
+    {
+      "name": "vcpkg",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": {
-          "value": "$penv{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
-          "type": "FILEPATH"
-        },
+        "CMAKE_TOOLCHAIN_FILE": "$penv{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_INSTALLED_DIR": "${sourceDir}/vcpkg_installed",
         "VCPKG_TARGET_ARCHITECTURE": "x64"
       }
@@ -112,6 +117,22 @@
       "cacheVariables": {
         "I18N_REDIS_BUILD_EXAMPLES": "ON",
         "I18N_REDIS_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "backend-simdjson",
+      "hidden": true,
+      "cacheVariables": {
+        "I18N_REDIS_JSON_BACKEND": "simdjson",
+        "VCPKG_MANIFEST_FEATURES": "simdjson"
+      }
+    },
+    {
+      "name": "backend-yyjson",
+      "hidden": true,
+      "cacheVariables": {
+        "I18N_REDIS_JSON_BACKEND": "yyjson",
+        "VCPKG_MANIFEST_FEATURES": "yyjson"
       }
     },
     {
@@ -435,7 +456,7 @@
     {
       "name": "base",
       "jobs": 8,
-      "verbose": true,
+      "verbose": false,
       "cleanFirst": true,
       "hidden": true
     },

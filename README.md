@@ -1,10 +1,8 @@
 # i18n-redis
 
-A modern C++20 library for internationalisation (i18n) backed by Redis.
-It loads JSON translation files from disk and stores them in Redis, then
-provides fast key-based lookups with optional `{fmt}` format arguments.
-
-Dependencies are managed via [vcpkg](https://github.com/microsoft/vcpkg).
+A C++20 library for internationalisation (i18n) backed by Redis. Loads JSON
+locale files from disk, stores each entry in Redis, and provides fast
+key-based lookups with optional `{fmt}` format arguments.
 
 ## Requirements
 
@@ -12,38 +10,31 @@ Dependencies are managed via [vcpkg](https://github.com/microsoft/vcpkg).
 |------|----------------|
 | CMake | 3.25 |
 | C++ compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
-| Ninja | any recent version |
-| Git | for vcpkg bootstrap |
+| Ninja | any recent |
 
 ## Dependencies
 
-| Library | vcpkg name | Purpose |
-|---------|-----------|---------|
-| [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) | `redis-plus-plus` | Redis client |
-| [nlohmann/json](https://github.com/nlohmann/json) | `nlohmann-json` | JSON parsing |
-| [{fmt}](https://github.com/fmtlib/fmt) | `fmt` | String formatting |
-| [Catch2](https://github.com/catchorg/Catch2) *(optional)* | `catch2` | Test framework |
+| Library | Purpose |
+|---------|---------|
+| [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) | Redis client |
+| [{fmt}](https://github.com/fmtlib/fmt) | String formatting |
+| [simdjson](https://github.com/simdjson/simdjson) *(default)* | JSON parsing |
+| [yyjson](https://github.com/ibireme/yyjson) *(alternative)* | JSON parsing |
+| [Catch2](https://github.com/catchorg/Catch2) *(tests only)* | Test framework |
 
-## Quick start
+## Building
 
-### 1 — Bootstrap vcpkg
+### 1 — Set `VCPKG_HOME`
+
+All presets resolve the vcpkg toolchain through the `VCPKG_HOME` environment
+variable. Set it to the root of a bootstrapped vcpkg installation before
+running any `cmake` command.
 
 ```bash
-# Linux / macOS
-./scripts/install_vcpkg.sh
-
-# Windows (cmd)
-scripts\install_vcpkg.bat
+export VCPKG_HOME=/path/to/vcpkg
 ```
 
-This clones vcpkg into `external/vcpkg/` and builds the bootstrap binary.
-No `VCPKG_ROOT` environment variable is required — the presets point directly
-to `external/vcpkg/scripts/buildsystems/vcpkg.cmake`.
-
 ### 2 — Configure and build
-
-Pick a preset that matches your platform, compiler, library type, and build
-configuration:
 
 ```bash
 cmake --preset linux-gcc-static-release
@@ -53,35 +44,35 @@ cmake --build --preset linux-gcc-static-release
 Or use the convenience script:
 
 ```bash
-# Linux
-./scripts/build_project.sh static release   # linux-gcc-static-release
-./scripts/build_project.sh shared debug     # linux-gcc-shared-debug
+./scripts/build_project.sh static release
+./scripts/build_project.sh shared debug
+```
 
-# Windows
-scripts\build_project.bat static release
+### JSON backend
+
+The JSON backend is selected at configure time. `simdjson` is the default.
+
+```bash
+cmake --preset linux-gcc-static-release
+cmake --preset linux-gcc-static-release -DI18N_REDIS_JSON_BACKEND=yyjson -DVCPKG_MANIFEST_FEATURES=yyjson
 ```
 
 ## CMake Presets
 
 Preset names follow the pattern `<platform>-<compiler>-<type>-<config>`.
 
-### Linux (GCC)
+### Linux
 
-| Preset | Type | Config |
-|--------|------|--------|
-| `linux-gcc-static-debug` | static | Debug |
-| `linux-gcc-static-release` | static | Release |
-| `linux-gcc-shared-debug` | shared | Debug |
-| `linux-gcc-shared-release` | shared | Release |
-
-### Linux (Clang)
-
-| Preset | Type | Config |
-|--------|------|--------|
-| `linux-clang-static-debug` | static | Debug |
-| `linux-clang-static-release` | static | Release |
-| `linux-clang-shared-debug` | shared | Debug |
-| `linux-clang-shared-release` | shared | Release |
+| Preset | Compiler | Type | Config |
+|--------|----------|------|--------|
+| `linux-gcc-static-debug` | GCC | static | Debug |
+| `linux-gcc-static-release` | GCC | static | Release |
+| `linux-gcc-shared-debug` | GCC | shared | Debug |
+| `linux-gcc-shared-release` | GCC | shared | Release |
+| `linux-clang-static-debug` | Clang | static | Debug |
+| `linux-clang-static-release` | Clang | static | Release |
+| `linux-clang-shared-debug` | Clang | shared | Debug |
+| `linux-clang-shared-release` | Clang | shared | Release |
 
 ### Windows (MSVC)
 
@@ -101,61 +92,49 @@ Preset names follow the pattern `<platform>-<compiler>-<type>-<config>`.
 | `macos-clang-shared-debug` | shared | Debug |
 | `macos-clang-shared-release` | shared | Release |
 
-### Sanitizer presets
+### Sanitizers / LTO
 
-| Preset | Sanitizer |
-|--------|-----------|
+| Preset | Notes |
+|--------|-------|
 | `linux-clang-static-asan` | AddressSanitizer |
 | `linux-clang-static-ubsan` | UndefinedBehaviourSanitizer |
 | `linux-gcc-static-asan` | AddressSanitizer |
 | `linux-gcc-static-ubsan` | UndefinedBehaviourSanitizer |
-
-### LTO presets
-
-| Preset | Notes |
-|--------|-------|
-| `linux-clang-static-release-lto` | Release + IPO/LTO |
-| `linux-gcc-static-release-lto` | Release + IPO/LTO |
+| `linux-clang-static-release-lto` | Release + LTO |
+| `linux-gcc-static-release-lto` | Release + LTO |
 
 ## Build options
 
-These CMake cache variables can be passed via `-D` or configured inside your
-own preset:
-
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BUILD_SHARED_LIBS` | `OFF` | Build shared library instead of static |
-| `I18N_REDIS_BUILD_EXAMPLES` | `OFF` | Build the example application |
-| `I18N_REDIS_BUILD_TESTS` | `OFF` | Build the test suite |
-| `I18N_REDIS_ENABLE_LTO` | `ON` | Enable IPO/LTO for Release configs |
+| `I18N_REDIS_JSON_BACKEND` | `simdjson` | JSON backend: `simdjson` or `yyjson` |
+| `BUILD_SHARED_LIBS` | `OFF` | Build shared library |
+| `I18N_REDIS_BUILD_EXAMPLES` | `OFF` | Build example application |
+| `I18N_REDIS_BUILD_TESTS` | `OFF` | Build test suite |
+| `I18N_REDIS_ENABLE_LTO` | `ON` | Enable IPO/LTO for Release |
 | `I18N_REDIS_ENABLE_ASAN` | `OFF` | Enable AddressSanitizer |
 | `I18N_REDIS_ENABLE_UBSAN` | `OFF` | Enable UndefinedBehaviourSanitizer |
 
-## API usage
+## Usage
 
 ```cpp
 #include "i18n/redis/translation_provider.h"
 #include "i18n/translation.h"
 
-// Create provider pointing to a running Redis instance
 auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
 i18n::Translation t(std::move(provider), "en");
 
-// Load all locale JSON files from <cwd>/locales/<locale>/*.json into Redis
 t.store(std::filesystem::current_path().string(), {"en", "es"});
 
-// Simple lookup — returns the key unchanged if not found
-std::string msg = t.translate("greeting");           // uses default locale "en"
-std::string msg2 = t.translate("greeting", "es");   // explicit locale
-
-// Formatted lookup with {fmt} arguments
-std::string msg3 = t.translate("welcome", "en", "Alice");  // "Hello, Alice!"
+std::string msg  = t.translate("greeting");
+std::string msg2 = t.translate("greeting", "es");
+std::string msg3 = t.translate("welcome", "en", "Alice");
 ```
 
-### Translation JSON format
+### Locale file format
 
 Each locale directory (`locales/<locale>/`) may contain any number of `.json`
-files. Each file must be a JSON array of translation objects:
+files. Each file must be a JSON array:
 
 ```json
 [
@@ -170,9 +149,9 @@ files. Each file must be a JSON array of translation objects:
 ]
 ```
 
-Redis keys are stored as `i18n:<locale>:<id>` (e.g. `i18n:en:greeting`).
+Redis keys follow the pattern `i18n:<locale>:<id>` (e.g. `i18n:en:greeting`).
 
-## Downstream integration (CMake)
+## CMake integration
 
 After installing with `cmake --install`:
 
@@ -181,40 +160,28 @@ find_package(i18n-redis CONFIG REQUIRED)
 target_link_libraries(my-app PRIVATE i18n-redis::i18n-redis)
 ```
 
-The package config file automatically locates the transitive dependencies
-(`redis++`, `nlohmann_json`, `fmt`).
-
-### Static linking example
+### Install
 
 ```bash
 cmake --preset linux-gcc-static-release
 cmake --build --preset linux-gcc-static-release
-cmake --install out/build --prefix /opt/i18n-redis
+cmake --install out/build --prefix /usr/local
 ```
 
-### Shared linking example
+## vcpkg
 
-```bash
-cmake --preset linux-gcc-shared-release
-cmake --build --preset linux-gcc-shared-release
-cmake --install out/build --prefix /opt/i18n-redis
-```
+The library can be installed via vcpkg. The `vcpkg.json` manifest declares
+the following features:
+
+| Feature | Description |
+|---------|-------------|
+| `simdjson` | Use simdjson as the JSON backend (default) |
+| `yyjson` | Use yyjson as the JSON backend |
+| `tests` | Build the Catch2 test suite |
 
 ## Running tests
 
-Tests are built when `I18N_REDIS_BUILD_TESTS=ON`. All debug presets enable this
-automatically. Use `--clean-first` to ensure a clean rebuild before each run:
-
 ```bash
-cmake --preset linux-gcc-static-debug
-cmake --build --preset linux-gcc-static-debug --clean-first
-ctest --test-dir out/build --output-on-failure
-```
-
-To enable the Catch2 test framework install the `tests` vcpkg feature first:
-
-```bash
-external/vcpkg/vcpkg install --triplet x64-linux "[tests]"
 cmake --preset linux-gcc-static-debug
 cmake --build --preset linux-gcc-static-debug --clean-first
 ctest --test-dir out/build --output-on-failure
@@ -224,33 +191,28 @@ ctest --test-dir out/build --output-on-failure
 
 ```
 i18n-redis/
-├── CMakeLists.txt          # Root build definition
-├── CMakePresets.json       # All build presets
-├── vcpkg.json              # vcpkg manifest (uses version-string format)
-├── vcpkg-configuration.json # vcpkg registry configuration
-├── vcpkg/                  # git submodule: custom vcpkg registry (branch: vcpkg)
-│   ├── ports/              # overlay ports
-│   └── triplets/           # overlay triplets
+├── CMakeLists.txt
+├── CMakePresets.json
+├── vcpkg.json
+├── vcpkg-configuration.json
+├── vcpkg/                          # git submodule: overlay ports and triplets
+│   ├── ports/
+│   └── triplets/
 ├── include/
 │   └── i18n/
-│       ├── configuration.h        # Export macro + key format
-│       ├── json.h                 # nlohmann::json alias
-│       ├── translation.h          # Public Translation class
-│       ├── translation_provider.h # Abstract provider interface
-│       ├── types.h                # Translation struct
+│       ├── configuration.h
+│       ├── translation.h
+│       ├── translation_provider.h
 │       └── redis/
-│           ├── connection.h            # Redis connection wrapper
-│           └── translation_provider.h  # Redis-backed provider
+│           └── translation_provider.h
 ├── src/
-│   ├── connection.cpp
 │   ├── redis_translation_provider.cpp
 │   ├── translation.cpp
 │   └── translation_provider.cpp
 ├── tests/
 │   ├── CMakeLists.txt
 │   ├── main.cpp
-│   ├── test_translation_key.cpp
-│   └── test_types.cpp
+│   └── test_translation_key.cpp
 ├── example/
 │   └── main.cpp
 ├── locales/
@@ -258,50 +220,27 @@ i18n-redis/
 │       └── messages.json
 ├── cmake/
 │   └── i18n-redisConfig.cmake.in
-├── scripts/
-│   ├── cmake/
-│   │   ├── Dependencies.cmake
-│   │   └── Targets.cmake
-│   ├── build_project.sh      # Build helper (Linux/macOS)
-│   ├── build_project.bat     # Build helper (Windows)
-│   ├── install_vcpkg.sh      # vcpkg installer (Linux/macOS)
-│   ├── install_vcpkg.bat     # vcpkg installer (Windows)
-│   └── version.sh            # Versioning script (creates SNAPSHOT/RELEASE tags)
-└── external/vcpkg/           # Local vcpkg installation (auto-created)
+└── scripts/
+    ├── cmake/
+    │   ├── Dependencies.cmake
+    │   └── Targets.cmake
+    ├── build_project.sh
+    ├── build_project.bat
+    └── version.sh
 ```
 
 ## Platform notes
 
-- **Linux**: GCC and Clang are both fully supported. Static and shared variants
-  use the `x64-linux` vcpkg triplet.
-- **Windows**: MSVC (`cl`) with the `x64-windows-static-md` (static) or
-  `x64-windows` (shared) triplets. The presets use Ninja as the generator.
-- **macOS**: Clang with `x64-osx` / `x64-osx-dynamic` triplets. Requires Xcode
-  Command Line Tools.
+- **Linux**: GCC and Clang fully supported. Uses `x64-linux` vcpkg triplet.
+- **Windows**: MSVC with `x64-windows-static-md` (static) or `x64-windows` (shared).
+- **macOS**: Clang with `x64-osx` / `x64-osx-dynamic`.
 
-## Versioning and Releases
-
-The project uses a custom versioning scheme with two release types:
+## Versioning
 
 | Type | Format | Example |
 |------|--------|---------|
 | SNAPSHOT | `X.Y.Z-<git-hash>-SNAPSHOT` | `0.3.2-abc1234-SNAPSHOT` |
 | RELEASE | `X.Y.Z-RELEASE` | `0.3.2-RELEASE` |
-
-## CI
-
-GitHub Actions workflows:
-
-- **CI** (`.github/workflows/ci.yml`): Builds on every push/PR
-  - Linux / GCC — static + shared, Debug + Release
-  - Linux / Clang — static + shared, Debug + Release
-  - Linux / Clang — ASan + UBSan
-  - Windows / MSVC — static + shared, Debug + Release
-
-- **Release** (`.github/workflows/release.yml`): Triggered on tag push (`*-SNAPSHOT`, `*-RELEASE`)
-  - Builds all release variants
-  - Packages artifacts
-  - Creates GitHub Release automatically
 
 ## License
 

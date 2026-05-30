@@ -22,8 +22,7 @@ if(I18N_REDIS_ENABLE_UBSAN)
 endif()
 
 # ── Source files ─────────────────────────────────────────────────────────────
-file(GLOB I18N_REDIS_SOURCES CONFIGURE_DEPENDS
-    ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB I18N_REDIS_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # ── Object library (compiled once, shared between static/shared targets) ─────
 add_library(i18n-redis-obj OBJECT ${I18N_REDIS_SOURCES})
@@ -48,6 +47,15 @@ else()
     target_link_options(i18n-redis-obj INTERFACE ${I18N_REDIS_SANITIZER_FLAGS})
 endif()
 
+if (I18N_REDIS_JSON_BACKEND STREQUAL "simdjson")
+    target_compile_definitions(i18n-redis-obj PRIVATE I18N_REDIS_USE_SIMDJSON)
+    if (NOT MSVC)
+        target_compile_options(i18n-redis-obj PRIVATE -march=native)
+    endif ()
+elseif (I18N_REDIS_JSON_BACKEND STREQUAL "yyjson")
+    target_compile_definitions(i18n-redis-obj PRIVATE I18N_REDIS_USE_YYJSON YYJSON_DISABLE_NON_STANDARD)
+endif ()
+
 # ── Main library target ───────────────────────────────────────────────────────
 if(BUILD_SHARED_LIBS)
     add_library(i18n-redis SHARED $<TARGET_OBJECTS:i18n-redis-obj>)
@@ -69,7 +77,7 @@ target_include_directories(i18n-redis
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(i18n-redis PUBLIC ${I18N_REDIS_DEPENDENCIES})
 if(I18N_REDIS_SANITIZER_FLAGS)
-    target_link_options(i18n-redis PUBLIC ${I18N_REDIS_SANITIZER_FLAGS})
+  target_link_options(i18n-redis PRIVATE ${I18N_REDIS_SANITIZER_FLAGS})
 endif()
 
 # ── LTO (opt-in, Release configs only) ───────────────────────────────────────
