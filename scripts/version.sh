@@ -6,14 +6,14 @@ printUsage() {
   echo "Usage: $0 <snapshot|release> [version]"
   echo ""
   echo "Arguments:"
-  echo "  snapshot    Create a snapshot version (X.Y.Z-<git-hash>-SNAPSHOT)"
+  echo "  snapshot    Create a snapshot version (X.Y.Z-SNAPSHOT)"
   echo "  release     Create a release version (X.Y.Z-RELEASE)"
   echo "  version     Optional version (e.g., 1.2.3). If omitted, reads from CMakeLists.txt"
   echo ""
   echo "Examples:"
-  echo "  $0 snapshot           # Creates 0.3.2-abc1234-SNAPSHOT"
+  echo "  $0 snapshot           # Creates 0.3.2-SNAPSHOT"
   echo "  $0 release            # Creates 0.3.2-RELEASE"
-  echo "  $0 snapshot 1.2.3     # Creates 1.2.3-abc1234-SNAPSHOT"
+  echo "  $0 snapshot 1.2.3     # Creates 1.2.3-SNAPSHOT"
   echo "  $0 release 2.0.0      # Creates 2.0.0-RELEASE"
   exit 1
 }
@@ -54,8 +54,7 @@ else
 fi
 
 if [[ "$TYPE" == "snapshot" ]]; then
-  GIT_HASH=$(git -C "$PROJECT_DIR" rev-parse --short=7 HEAD 2>/dev/null || echo "unknown")
-  FULL_VERSION="${VERSION}-${GIT_HASH}-SNAPSHOT"
+  FULL_VERSION="${VERSION}-SNAPSHOT"
 else
   FULL_VERSION="${VERSION}-RELEASE"
 fi
@@ -77,10 +76,10 @@ updateVcpkgJson() {
   local tmp_file="${VCPKG_FILE}.tmp"
 
   if command -v jq >/dev/null 2>&1; then
-    jq --arg ver "$VERSION" '."version-string" = $ver | del(.version)' \
+    jq --arg ver "$FULL_VERSION" '."version-string" = $ver | del(.version)' \
       "$VCPKG_FILE" > "$tmp_file"
   else
-    awk -v ver="$VERSION" '
+    awk -v ver="$FULL_VERSION" '
       /^\s*"version"\s*:/ { next }
       /^\s*"version-string"\s*:/ {
         print "  \"version-string\": \"" ver "\","
@@ -90,7 +89,7 @@ updateVcpkgJson() {
     ' "$VCPKG_FILE" > "$tmp_file"
 
     if ! grep -q '"version-string"' "$tmp_file"; then
-      awk -v ver="$VERSION" '
+      awk -v ver="$FULL_VERSION" '
         /^\s*"name"\s*:/ {
           print
           print "  \"version-string\": \"" ver "\","
@@ -103,8 +102,17 @@ updateVcpkgJson() {
   fi
 
   mv "$tmp_file" "$VCPKG_FILE"
-  echo "Updated vcpkg.json: version-string = $VERSION"
+  echo "Updated vcpkg.json: version-string = $FULL_VERSION"
 }
+
+echo "$FULL_VERSION" > "$PROJECT_DIR/.version"
+echo "Generated .version file with: $FULL_VERSION"
+
+echo "$FULL_VERSION" > "$PROJECT_DIR/.version"
+echo "Generated .version file with: $FULL_VERSION"
+
+echo "$FULL_VERSION" > "$PROJECT_DIR/.version"
+echo "Generated .version file with: $FULL_VERSION"
 
 updateCMakeLists
 updateVcpkgJson
@@ -116,7 +124,7 @@ echo "  Full version: $FULL_VERSION"
 echo ""
 
 if ! git -C "$PROJECT_DIR" diff --quiet; then
-  git -C "$PROJECT_DIR" add CMakeLists.txt vcpkg.json
+  git -C "$PROJECT_DIR" add CMakeLists.txt vcpkg.json .version
   git -C "$PROJECT_DIR" commit -m "chore: bump version to $FULL_VERSION"
   echo "Committed version changes"
 fi
@@ -130,10 +138,8 @@ else
 fi
 
 echo ""
-echo "Pushing to origin..."
-git -C "$PROJECT_DIR" push origin HEAD
-git -C "$PROJECT_DIR" push origin "$TAG_NAME"
-
+echo "Version $FULL_VERSION prepared successfully!"
 echo ""
-echo "Version $FULL_VERSION released successfully!"
-echo "CI will build and create GitHub Release automatically."
+echo "Next step - Push manually:"
+echo "  git push origin HEAD"
+echo "  git push origin $TAG_NAME"

@@ -254,13 +254,19 @@ jobs:
           mkdir -p release
           for dir in artifacts/*/; do
             name=$(basename "$dir")
-            tar -czf "release/${name}.tar.gz" -C "$dir" .
+            if [[ "$name" == windows-* ]]; then
+              (cd "$dir" && zip -r "$GITHUB_WORKSPACE/release/${name}.zip" .)
+            else
+              tar -czf "release/${name}.tar.gz" -C "$dir" .
+            fi
           done
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: release/*.tar.gz
+          files: |
+            release/*.tar.gz
+            release/*.zip
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, 'SNAPSHOT') }}
