@@ -6,137 +6,65 @@ on:
       - '*-SNAPSHOT'
       - '*-RELEASE'
 
-env:
-  VCPKG_HOME: ${{ github.workspace }}/extras/vcpkg
-  VCPKG_OVERLAY_PORTS: ${{ github.workspace }}/extras/registry/ports
-  VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/extras/registry/triplets
-
 jobs:
-  # Build and test on Linux GCC (validation only)
-  build-linux-gcc:
-    name: Linux / GCC / ${{ matrix.variant }}
+  package-unix:
+    name: Package Unix Source
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - preset: linux-gcc-static-release
-            variant: static-release-simdjson
-          - preset: linux-gcc-static-release-yyjson
-            variant: static-release-yyjson
-          - preset: linux-gcc-shared-release
-            variant: shared-release-simdjson
-          - preset: linux-gcc-shared-release-yyjson
-            variant: shared-release-yyjson
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create source package
+        run: |
+          chmod +x .github/scripts/package_source_unix.sh
+          .github/scripts/package_source_unix.sh ${{ github.workspace }}/release
+
+      - name: Install system dependencies for validation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            git
+
+      - name: Clone vcpkg and registry for validation
+        run: |
+          git clone --depth=1 https://github.com/microsoft/vcpkg.git validation/vcpkg
+          git clone --depth=1 -b vcpkg https://github.com/cmachacacordova/vcpkg-registry.git validation/registry
+
+      - name: Validate package compiles
+        timeout-minutes: 30
+        env:
+          VCPKG_HOME: ${{ github.workspace }}/validation/vcpkg
+          VCPKG_OVERLAY_PORTS: ${{ github.workspace }}/validation/registry/ports
+          VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/validation/registry/triplets
+        run: |
+          mkdir -p validation/build
+          tar -xzf release/*.tar.gz -C validation/build
+          cd validation/build/i18n-redis-*
+          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          submodules: recursive
+          name: i18n-redis-unix
+          path: release/*.tar.gz
+          if-no-files-found: error
 
-      - name: Verify submodules were populated
-        run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
-
-      - name: Install system dependencies
-        run: .github/scripts/install_deps_unix.sh gcc
-
-      - name: Cache vcpkg
-        uses: actions/cache@v4
-        with:
-          path: extras/vcpkg
-          key: vcpkg-linux-gcc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-          restore-keys: vcpkg-linux-gcc-
-
-      - name: Bootstrap vcpkg
-        run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
-
-      - name: Configure
-        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out/build --output-on-failure
-
-  # Build and test on Linux Clang (validation only)
-  build-linux-clang:
-    name: Linux / Clang / ${{ matrix.variant }}
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - preset: linux-clang-static-release
-            variant: static-release-simdjson
-          - preset: linux-clang-static-release-yyjson
-            variant: static-release-yyjson
-          - preset: linux-clang-shared-release
-            variant: shared-release-simdjson
-          - preset: linux-clang-shared-release-yyjson
-            variant: shared-release-yyjson
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Verify submodules were populated
-        run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
-
-      - name: Install system dependencies
-        run: .github/scripts/install_deps_unix.sh clang
-
-      - name: Cache vcpkg
-        uses: actions/cache@v4
-        with:
-          path: extras/vcpkg
-          key: vcpkg-linux-clang-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-          restore-keys: vcpkg-linux-clang-
-
-      - name: Bootstrap vcpkg
-        run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
-
-      - name: Configure
-        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out/build --output-on-failure
-
-  # Build and test on Windows MSVC (validation only)
-  build-windows-msvc:
-    name: Windows / MSVC / ${{ matrix.variant }}
+  package-windows:
+    name: Package Windows Source
     runs-on: windows-2022
-    env:
-      VCPKG_HOME: ${{ github.workspace }}\extras\vcpkg
-      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\extras\registry\ports
-      VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\extras\registry\triplets
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - preset: windows-msvc-static-release
-            variant: static-release-simdjson
-          - preset: windows-msvc-static-release-yyjson
-            variant: static-release-yyjson
-          - preset: windows-msvc-shared-release
-            variant: shared-release-simdjson
-          - preset: windows-msvc-shared-release-yyjson
-            variant: shared-release-yyjson
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Verify submodules were populated
-        run: .github\scripts\verify_submodules.ps1 extras/vcpkg extras/registry
+      - name: Create source package
         shell: pwsh
+        run: |
+          .github/scripts/package_source_windows.ps1 ${{ github.workspace }}\release
 
       - name: Setup MSVC developer environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -146,80 +74,55 @@ jobs:
       - name: Install Ninja
         run: choco install ninja --no-progress -y
 
-      - name: Cache vcpkg
-        uses: actions/cache@v4
-        with:
-          path: extras/vcpkg
-          key: vcpkg-windows-msvc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-          restore-keys: vcpkg-windows-msvc-
-
-      - name: Bootstrap vcpkg
-        run: .github\scripts\bootstrap_vcpkg_windows.ps1 extras\vcpkg
+      - name: Clone vcpkg and registry for validation
         shell: pwsh
-
-      - name: Configure
-        run: .github\scripts\configure_cmake.ps1 -Preset ${{ matrix.preset }}
-        shell: pwsh
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-        shell: cmd
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out\build --output-on-failure
-        shell: cmd
-
-  # Create source package (contains everything needed to build on Unix and Windows)
-  create-source-package:
-    name: Create Source Package
-    runs-on: ubuntu-24.04
-    needs: [build-linux-gcc, build-linux-clang, build-windows-msvc]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install packaging dependencies
-        run: sudo apt-get install -y --no-install-recommends tar gzip
-
-      - name: Create source package
         run: |
-          chmod +x .github/scripts/package_release.sh
-          .github/scripts/package_release.sh source ${{ github.workspace }}/release
+          git clone --depth=1 https://github.com/microsoft/vcpkg.git validation/vcpkg
+          git clone --depth=1 -b vcpkg https://github.com/cmachacacordova/vcpkg-registry.git validation/registry
 
-      - name: Upload source package
+      - name: Validate package compiles
+        timeout-minutes: 30
+        shell: pwsh
+        env:
+          VCPKG_HOME: ${{ github.workspace }}\validation\vcpkg
+          VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\validation\registry\ports
+          VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\validation\registry\triplets
+        run: |
+          New-Item -ItemType Directory -Path validation/build | Out-Null
+          Expand-Archive -Path "release\*.zip" -DestinationPath validation/build
+          cd validation/build\i18n-redis-*
+          .\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg -ConfigureOnly -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS" -CmakeArgs "-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: i18n-redis-source
-          path: release/*.tar.gz
+          name: i18n-redis-windows
+          path: release/*.zip
           if-no-files-found: error
 
-  # Create GitHub Release with source package
   create-release:
-    name: Create GitHub Release
-    needs: [create-source-package]
+    name: Create Release
+    needs: [package-unix, package-windows]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Download source package
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: i18n-redis-source
           path: release
+          merge-multiple: true
 
       - name: List release files
         run: ls -la release/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: release/*.tar.gz
+          files: release/*
           generate_release_notes: true
           draft: false
-          prerelease: ${{ contains(github.ref_name, 'SNAPSHOT') }}
+          prerelease: ${{ endsWith(github.ref_name, '-SNAPSHOT') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

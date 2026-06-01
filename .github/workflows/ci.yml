@@ -41,11 +41,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Verify submodules were populated
-        run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
-
       - name: Install system dependencies
-        run: .github/scripts/install_deps_unix.sh gcc
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build gcc g++ cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -54,18 +54,12 @@ jobs:
           key: vcpkg-linux-gcc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-gcc-
 
-      - name: Bootstrap vcpkg
-        run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
-
-      - name: Configure
-        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out/build --output-on-failure
+      - name: Configure, build and test
+        run: |
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
+            ctest --test-dir out/build --output-on-failure
+          fi
 
   linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
@@ -96,11 +90,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Verify submodules were populated
-        run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
-
       - name: Install system dependencies
-        run: .github/scripts/install_deps_unix.sh clang
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build clang cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -109,18 +103,12 @@ jobs:
           key: vcpkg-linux-clang-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-clang-
 
-      - name: Bootstrap vcpkg
-        run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
-
-      - name: Configure
-        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out/build --output-on-failure
+      - name: Configure, build and test
+        run: |
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
+            ctest --test-dir out/build --output-on-failure
+          fi
 
   linux-clang-sanitizers:
     name: Linux / Clang / ${{ matrix.variant }}
@@ -143,11 +131,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Verify submodules were populated
-        run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
-
       - name: Install system dependencies
-        run: .github/scripts/install_deps_unix.sh clang
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build clang cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -156,17 +144,10 @@ jobs:
           key: vcpkg-linux-clang-san-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-linux-clang-san-
 
-      - name: Bootstrap vcpkg
-        run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
-
-      - name: Configure
-        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-
-      - name: Test
-        run: ctest --test-dir out/build --output-on-failure
+      - name: Configure, build and test
+        run: |
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          ctest --test-dir out/build --output-on-failure
 
   windows-msvc:
     name: Windows / MSVC / ${{ matrix.variant }}
@@ -201,10 +182,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Verify submodules were populated
-        run: .github\scripts\verify_submodules.ps1 extras/vcpkg extras/registry
-        shell: pwsh
-
       - name: Setup MSVC developer environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -220,19 +197,10 @@ jobs:
           key: vcpkg-windows-msvc-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: vcpkg-windows-msvc-
 
-      - name: Bootstrap vcpkg
-        run: .github\scripts\bootstrap_vcpkg_windows.ps1 extras\vcpkg
+      - name: Configure, build and test
         shell: pwsh
-
-      - name: Configure
-        run: .github\scripts\configure_cmake.ps1 -Preset ${{ matrix.preset }}
-        shell: pwsh
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.preset }} --parallel
-        shell: cmd
-
-      - name: Test
-        if: ${{ !contains(matrix.preset, 'shared') }}
-        run: ctest --test-dir out\build --output-on-failure
-        shell: cmd
+        run: |
+          .\configure.ps1 -Preset ${{ matrix.preset }} -UseVcpkg -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS" -CmakeArgs "-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
+          if ("${{ matrix.preset }}" -notlike "*shared*") {
+            ctest --test-dir out\build --output-on-failure
+          }
