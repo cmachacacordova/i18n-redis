@@ -43,8 +43,10 @@ jobs:
         run: |
           mkdir -p validation/build
           tar -xzf release/*.tar.gz -C validation/build
-          cd validation/build/i18n-redis-*
-          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          extracted_dir=$(find validation/build -maxdepth 1 -type d -name "i18n-redis-*" | head -1)
+          echo "Extracted directory: $extracted_dir"
+          cd "$extracted_dir"
+          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -90,8 +92,10 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path validation/build | Out-Null
           Expand-Archive -Path "release\*.zip" -DestinationPath validation/build
-          cd validation/build\i18n-redis-*
-          .\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg -ConfigureOnly -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS" -CmakeArgs "-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
+          $extractedDir = Get-ChildItem -Path validation/build -Directory | Select-Object -First 1
+          Write-Host "Extracted directory: $($extractedDir.FullName)"
+          Set-Location $extractedDir.FullName
+          .\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg -ConfigureOnly -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS","-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
