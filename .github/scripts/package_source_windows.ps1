@@ -13,6 +13,8 @@ $ProjectRoot = Split-Path -Parent $GithubDir
 if (-not $OutputDir) {
     $OutputDir = Join-Path $ProjectRoot "release"
 }
+# Convert to absolute path for use after Push-Location
+$OutputDir = Resolve-Path $OutputDir
 
 $VersionFile = Join-Path $ProjectRoot ".version"
 if (-not (Test-Path $VersionFile)) {
@@ -71,8 +73,10 @@ foreach ($pattern in $BinaryPatterns) {
     Get-ChildItem -Path $StagingDir -Recurse -Filter $pattern -ErrorAction SilentlyContinue | Remove-Item -Force
 }
 
-# Create zip
-Compress-Archive -Path "$StagingDir\*" -DestinationPath $PkgPath -Force
+# Create zip from the parent directory to include the versioned folder as root
+Push-Location $TempStaging
+Compress-Archive -Path $StagingDirName -DestinationPath $PkgPath -Force
+Pop-Location
 
 Remove-Item -Recurse -Force $TempStaging
 
