@@ -9,23 +9,12 @@
     {
       "name": "base",
       "hidden": true,
-      "inherits": "vcpkg",
       "binaryDir": "${sourceDir}/out/build"
-    },
-    {
-      "name": "vcpkg",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_INSTALLED_DIR": "${sourceDir}/vcpkg_installed",
-        "VCPKG_TARGET_ARCHITECTURE": "x64"
-      }
     },
     {
       "name": "backend-simdjson",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": "simdjson",
         "I18N_REDIS_JSON_BACKEND": "simdjson"
       }
     },
@@ -33,21 +22,8 @@
       "name": "backend-yyjson",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": "yyjson",
         "I18N_REDIS_JSON_BACKEND": "yyjson"
       }
-    },
-    {
-      "name": "base-ninja",
-      "hidden": true,
-      "inherits": "base",
-      "generator": "Ninja"
-    },
-    {
-      "name": "base-windows",
-      "hidden": true,
-      "inherits": "base",
-      "generator": "Ninja"
     },
     {
       "name": "base-linux",
@@ -60,11 +36,16 @@
       "inherits": "base-ninja"
     },
     {
-      "name": "base-static",
+      "name": "base-windows",
       "hidden": true,
-      "cacheVariables": {
-        "BUILD_SHARED_LIBS": "OFF"
-      }
+      "inherits": "base",
+      "generator": "Ninja"
+    },
+    {
+      "name": "base-ninja",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Ninja"
     },
     {
       "name": "base-shared",
@@ -74,10 +55,24 @@
       }
     },
     {
+      "name": "base-static",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
       "name": "cfg-debug",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "cfg-minsizerel",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "MinSizeRel"
       }
     },
     {
@@ -95,32 +90,10 @@
       }
     },
     {
-      "name": "cfg-minsizerel",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "MinSizeRel"
-      }
-    },
-    {
-      "name": "opt-lto",
-      "hidden": true,
-      "cacheVariables": {
-        "I18N_REDIS_ENABLE_LTO": "ON"
-      }
-    },
-    {
       "name": "opt-asan",
       "hidden": true,
       "cacheVariables": {
         "I18N_REDIS_ENABLE_ASAN": "ON",
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "opt-ubsan",
-      "hidden": true,
-      "cacheVariables": {
-        "I18N_REDIS_ENABLE_UBSAN": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -133,20 +106,18 @@
       }
     },
     {
-      "name": "compiler-msvc",
+      "name": "opt-lto",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "cl",
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+        "I18N_REDIS_ENABLE_LTO": "ON"
       }
     },
     {
-      "name": "compiler-gcc",
+      "name": "opt-ubsan",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_CXX_COMPILER_AR": "ar",
-        "CMAKE_CXX_COMPILER_RANLIB": "ranlib"
+        "I18N_REDIS_ENABLE_UBSAN": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -159,10 +130,20 @@
       }
     },
     {
-      "name": "triplet-linux-static",
+      "name": "compiler-gcc",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_CXX_COMPILER_AR": "ar",
+        "CMAKE_CXX_COMPILER_RANLIB": "ranlib"
+      }
+    },
+    {
+      "name": "compiler-msvc",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
       }
     },
     {
@@ -173,10 +154,10 @@
       }
     },
     {
-      "name": "triplet-macos-static",
+      "name": "triplet-linux-static",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx"
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
       }
     },
     {
@@ -187,10 +168,10 @@
       }
     },
     {
-      "name": "triplet-windows-static",
+      "name": "triplet-macos-static",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
       }
     },
     {
@@ -201,111 +182,94 @@
       }
     },
     {
-      "name": "windows-msvc-static-debug",
-      "displayName": "Windows / MSVC / Static / Debug [simdjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-static",
-        "base-static",
-        "cfg-debug",
-        "opt-dev",
-        "backend-simdjson"
-      ]
+      "name": "triplet-windows-static",
+      "hidden": true,
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
     },
     {
-      "name": "windows-msvc-static-debug-yyjson",
-      "displayName": "Windows / MSVC / Static / Debug [yyjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-static",
-        "base-static",
-        "cfg-debug",
-        "opt-dev",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-static-release",
-      "displayName": "Windows / MSVC / Static / Release [simdjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-static",
-        "base-static",
-        "cfg-release",
-        "backend-simdjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-static-release-yyjson",
-      "displayName": "Windows / MSVC / Static / Release [yyjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-static",
-        "base-static",
-        "cfg-release",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-shared-debug",
-      "displayName": "Windows / MSVC / Shared / Debug [simdjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-dynamic",
-        "base-shared",
-        "cfg-debug",
-        "opt-dev",
-        "backend-simdjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-shared-debug-yyjson",
-      "displayName": "Windows / MSVC / Shared / Debug [yyjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-dynamic",
-        "base-shared",
-        "cfg-debug",
-        "opt-dev",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-shared-release",
-      "displayName": "Windows / MSVC / Shared / Release [simdjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-dynamic",
-        "base-shared",
-        "cfg-release",
-        "backend-simdjson"
-      ]
-    },
-    {
-      "name": "windows-msvc-shared-release-yyjson",
-      "displayName": "Windows / MSVC / Shared / Release [yyjson]",
-      "inherits": [
-        "base-windows",
-        "compiler-msvc",
-        "triplet-windows-dynamic",
-        "base-shared",
-        "cfg-release",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-debug",
-      "displayName": "Linux / GCC / Static / Debug [simdjson]",
+      "name": "linux-clang-shared-debug",
+      "displayName": "Linux / Clang / Shared / Debug [simdjson]",
       "inherits": [
         "base-linux",
-        "compiler-gcc",
+        "compiler-clang",
+        "triplet-linux-dynamic",
+        "base-shared",
+        "cfg-debug",
+        "opt-dev",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-clang-shared-debug-yyjson",
+      "displayName": "Linux / Clang / Shared / Debug [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-dynamic",
+        "base-shared",
+        "cfg-debug",
+        "opt-dev",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "linux-clang-shared-release",
+      "displayName": "Linux / Clang / Shared / Release [simdjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-dynamic",
+        "base-shared",
+        "cfg-release",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-clang-shared-release-yyjson",
+      "displayName": "Linux / Clang / Shared / Release [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-dynamic",
+        "base-shared",
+        "cfg-release",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "linux-clang-static-asan",
+      "displayName": "Linux / Clang / Static / ASan [simdjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-static",
+        "base-static",
+        "opt-asan",
+        "opt-dev",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-clang-static-asan-yyjson",
+      "displayName": "Linux / Clang / Static / ASan [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-static",
+        "base-static",
+        "opt-asan",
+        "opt-dev",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "linux-clang-static-debug",
+      "displayName": "Linux / Clang / Static / Debug [simdjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
         "triplet-linux-static",
         "base-static",
         "cfg-debug",
@@ -314,11 +278,11 @@
       ]
     },
     {
-      "name": "linux-gcc-static-debug-yyjson",
-      "displayName": "Linux / GCC / Static / Debug [yyjson]",
+      "name": "linux-clang-static-debug-yyjson",
+      "displayName": "Linux / Clang / Static / Debug [yyjson]",
       "inherits": [
         "base-linux",
-        "compiler-gcc",
+        "compiler-clang",
         "triplet-linux-static",
         "base-static",
         "cfg-debug",
@@ -327,11 +291,11 @@
       ]
     },
     {
-      "name": "linux-gcc-static-release",
-      "displayName": "Linux / GCC / Static / Release [simdjson]",
+      "name": "linux-clang-static-release",
+      "displayName": "Linux / Clang / Static / Release [simdjson]",
       "inherits": [
         "base-linux",
-        "compiler-gcc",
+        "compiler-clang",
         "triplet-linux-static",
         "base-static",
         "cfg-release",
@@ -339,14 +303,56 @@
       ]
     },
     {
-      "name": "linux-gcc-static-release-yyjson",
-      "displayName": "Linux / GCC / Static / Release [yyjson]",
+      "name": "linux-clang-static-release-lto",
+      "displayName": "Linux / Clang / Static / Release + LTO [simdjson]",
+      "inherits": [
+        "linux-clang-static-release",
+        "opt-lto"
+      ]
+    },
+    {
+      "name": "linux-clang-static-release-lto-yyjson",
+      "displayName": "Linux / Clang / Static / Release + LTO [yyjson]",
+      "inherits": [
+        "linux-clang-static-release-yyjson",
+        "opt-lto"
+      ]
+    },
+    {
+      "name": "linux-clang-static-release-yyjson",
+      "displayName": "Linux / Clang / Static / Release [yyjson]",
       "inherits": [
         "base-linux",
-        "compiler-gcc",
+        "compiler-clang",
         "triplet-linux-static",
         "base-static",
         "cfg-release",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "linux-clang-static-ubsan",
+      "displayName": "Linux / Clang / Static / UBSan [simdjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-static",
+        "base-static",
+        "opt-ubsan",
+        "opt-dev",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-clang-static-ubsan-yyjson",
+      "displayName": "Linux / Clang / Static / UBSan [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-clang",
+        "triplet-linux-static",
+        "base-static",
+        "opt-ubsan",
+        "opt-dev",
         "backend-yyjson"
       ]
     },
@@ -401,11 +407,37 @@
       ]
     },
     {
-      "name": "linux-clang-static-debug",
-      "displayName": "Linux / Clang / Static / Debug [simdjson]",
+      "name": "linux-gcc-static-asan",
+      "displayName": "Linux / GCC / Static / ASan [simdjson]",
       "inherits": [
         "base-linux",
-        "compiler-clang",
+        "compiler-gcc",
+        "triplet-linux-static",
+        "base-static",
+        "opt-asan",
+        "opt-dev",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-gcc-static-asan-yyjson",
+      "displayName": "Linux / GCC / Static / ASan [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-gcc",
+        "triplet-linux-static",
+        "base-static",
+        "opt-asan",
+        "opt-dev",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "linux-gcc-static-debug",
+      "displayName": "Linux / GCC / Static / Debug [simdjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-gcc",
         "triplet-linux-static",
         "base-static",
         "cfg-debug",
@@ -414,11 +446,11 @@
       ]
     },
     {
-      "name": "linux-clang-static-debug-yyjson",
-      "displayName": "Linux / Clang / Static / Debug [yyjson]",
+      "name": "linux-gcc-static-debug-yyjson",
+      "displayName": "Linux / GCC / Static / Debug [yyjson]",
       "inherits": [
         "base-linux",
-        "compiler-clang",
+        "compiler-gcc",
         "triplet-linux-static",
         "base-static",
         "cfg-debug",
@@ -427,11 +459,11 @@
       ]
     },
     {
-      "name": "linux-clang-static-release",
-      "displayName": "Linux / Clang / Static / Release [simdjson]",
+      "name": "linux-gcc-static-release",
+      "displayName": "Linux / GCC / Static / Release [simdjson]",
       "inherits": [
         "base-linux",
-        "compiler-clang",
+        "compiler-gcc",
         "triplet-linux-static",
         "base-static",
         "cfg-release",
@@ -439,11 +471,27 @@
       ]
     },
     {
-      "name": "linux-clang-static-release-yyjson",
-      "displayName": "Linux / Clang / Static / Release [yyjson]",
+      "name": "linux-gcc-static-release-lto",
+      "displayName": "Linux / GCC / Static / Release + LTO [simdjson]",
+      "inherits": [
+        "linux-gcc-static-release",
+        "opt-lto"
+      ]
+    },
+    {
+      "name": "linux-gcc-static-release-lto-yyjson",
+      "displayName": "Linux / GCC / Static / Release + LTO [yyjson]",
+      "inherits": [
+        "linux-gcc-static-release-yyjson",
+        "opt-lto"
+      ]
+    },
+    {
+      "name": "linux-gcc-static-release-yyjson",
+      "displayName": "Linux / GCC / Static / Release [yyjson]",
       "inherits": [
         "base-linux",
-        "compiler-clang",
+        "compiler-gcc",
         "triplet-linux-static",
         "base-static",
         "cfg-release",
@@ -451,12 +499,38 @@
       ]
     },
     {
-      "name": "linux-clang-shared-debug",
-      "displayName": "Linux / Clang / Shared / Debug [simdjson]",
+      "name": "linux-gcc-static-ubsan",
+      "displayName": "Linux / GCC / Static / UBSan [simdjson]",
       "inherits": [
         "base-linux",
+        "compiler-gcc",
+        "triplet-linux-static",
+        "base-static",
+        "opt-ubsan",
+        "opt-dev",
+        "backend-simdjson"
+      ]
+    },
+    {
+      "name": "linux-gcc-static-ubsan-yyjson",
+      "displayName": "Linux / GCC / Static / UBSan [yyjson]",
+      "inherits": [
+        "base-linux",
+        "compiler-gcc",
+        "triplet-linux-static",
+        "base-static",
+        "opt-ubsan",
+        "opt-dev",
+        "backend-yyjson"
+      ]
+    },
+    {
+      "name": "macos-clang-shared-debug",
+      "displayName": "macOS / Clang / Shared / Debug [simdjson]",
+      "inherits": [
+        "base-macos",
         "compiler-clang",
-        "triplet-linux-dynamic",
+        "triplet-macos-dynamic",
         "base-shared",
         "cfg-debug",
         "opt-dev",
@@ -464,12 +538,12 @@
       ]
     },
     {
-      "name": "linux-clang-shared-debug-yyjson",
-      "displayName": "Linux / Clang / Shared / Debug [yyjson]",
+      "name": "macos-clang-shared-debug-yyjson",
+      "displayName": "macOS / Clang / Shared / Debug [yyjson]",
       "inherits": [
-        "base-linux",
+        "base-macos",
         "compiler-clang",
-        "triplet-linux-dynamic",
+        "triplet-macos-dynamic",
         "base-shared",
         "cfg-debug",
         "opt-dev",
@@ -477,24 +551,24 @@
       ]
     },
     {
-      "name": "linux-clang-shared-release",
-      "displayName": "Linux / Clang / Shared / Release [simdjson]",
+      "name": "macos-clang-shared-release",
+      "displayName": "macOS / Clang / Shared / Release [simdjson]",
       "inherits": [
-        "base-linux",
+        "base-macos",
         "compiler-clang",
-        "triplet-linux-dynamic",
+        "triplet-macos-dynamic",
         "base-shared",
         "cfg-release",
         "backend-simdjson"
       ]
     },
     {
-      "name": "linux-clang-shared-release-yyjson",
-      "displayName": "Linux / Clang / Shared / Release [yyjson]",
+      "name": "macos-clang-shared-release-yyjson",
+      "displayName": "macOS / Clang / Shared / Release [yyjson]",
       "inherits": [
-        "base-linux",
+        "base-macos",
         "compiler-clang",
-        "triplet-linux-dynamic",
+        "triplet-macos-dynamic",
         "base-shared",
         "cfg-release",
         "backend-yyjson"
@@ -551,12 +625,12 @@
       ]
     },
     {
-      "name": "macos-clang-shared-debug",
-      "displayName": "macOS / Clang / Shared / Debug [simdjson]",
+      "name": "windows-msvc-shared-debug",
+      "displayName": "Windows / MSVC / Shared / Debug [simdjson]",
       "inherits": [
-        "base-macos",
-        "compiler-clang",
-        "triplet-macos-dynamic",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-dynamic",
         "base-shared",
         "cfg-debug",
         "opt-dev",
@@ -564,12 +638,12 @@
       ]
     },
     {
-      "name": "macos-clang-shared-debug-yyjson",
-      "displayName": "macOS / Clang / Shared / Debug [yyjson]",
+      "name": "windows-msvc-shared-debug-yyjson",
+      "displayName": "Windows / MSVC / Shared / Debug [yyjson]",
       "inherits": [
-        "base-macos",
-        "compiler-clang",
-        "triplet-macos-dynamic",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-dynamic",
         "base-shared",
         "cfg-debug",
         "opt-dev",
@@ -577,163 +651,77 @@
       ]
     },
     {
-      "name": "macos-clang-shared-release",
-      "displayName": "macOS / Clang / Shared / Release [simdjson]",
+      "name": "windows-msvc-shared-release",
+      "displayName": "Windows / MSVC / Shared / Release [simdjson]",
       "inherits": [
-        "base-macos",
-        "compiler-clang",
-        "triplet-macos-dynamic",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-dynamic",
         "base-shared",
         "cfg-release",
         "backend-simdjson"
       ]
     },
     {
-      "name": "macos-clang-shared-release-yyjson",
-      "displayName": "macOS / Clang / Shared / Release [yyjson]",
+      "name": "windows-msvc-shared-release-yyjson",
+      "displayName": "Windows / MSVC / Shared / Release [yyjson]",
       "inherits": [
-        "base-macos",
-        "compiler-clang",
-        "triplet-macos-dynamic",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-dynamic",
         "base-shared",
         "cfg-release",
         "backend-yyjson"
       ]
     },
     {
-      "name": "linux-clang-static-asan",
-      "displayName": "Linux / Clang / Static / ASan [simdjson]",
+      "name": "windows-msvc-static-debug",
+      "displayName": "Windows / MSVC / Static / Debug [simdjson]",
       "inherits": [
-        "base-linux",
-        "compiler-clang",
-        "triplet-linux-static",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-static",
         "base-static",
-        "opt-asan",
+        "cfg-debug",
         "opt-dev",
         "backend-simdjson"
       ]
     },
     {
-      "name": "linux-clang-static-asan-yyjson",
-      "displayName": "Linux / Clang / Static / ASan [yyjson]",
+      "name": "windows-msvc-static-debug-yyjson",
+      "displayName": "Windows / MSVC / Static / Debug [yyjson]",
       "inherits": [
-        "base-linux",
-        "compiler-clang",
-        "triplet-linux-static",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-static",
         "base-static",
-        "opt-asan",
+        "cfg-debug",
         "opt-dev",
         "backend-yyjson"
       ]
     },
     {
-      "name": "linux-clang-static-ubsan",
-      "displayName": "Linux / Clang / Static / UBSan [simdjson]",
+      "name": "windows-msvc-static-release",
+      "displayName": "Windows / MSVC / Static / Release [simdjson]",
       "inherits": [
-        "base-linux",
-        "compiler-clang",
-        "triplet-linux-static",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-static",
         "base-static",
-        "opt-ubsan",
-        "opt-dev",
+        "cfg-release",
         "backend-simdjson"
       ]
     },
     {
-      "name": "linux-clang-static-ubsan-yyjson",
-      "displayName": "Linux / Clang / Static / UBSan [yyjson]",
+      "name": "windows-msvc-static-release-yyjson",
+      "displayName": "Windows / MSVC / Static / Release [yyjson]",
       "inherits": [
-        "base-linux",
-        "compiler-clang",
-        "triplet-linux-static",
+        "base-windows",
+        "compiler-msvc",
+        "triplet-windows-static",
         "base-static",
-        "opt-ubsan",
-        "opt-dev",
+        "cfg-release",
         "backend-yyjson"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-asan",
-      "displayName": "Linux / GCC / Static / ASan [simdjson]",
-      "inherits": [
-        "base-linux",
-        "compiler-gcc",
-        "triplet-linux-static",
-        "base-static",
-        "opt-asan",
-        "opt-dev",
-        "backend-simdjson"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-asan-yyjson",
-      "displayName": "Linux / GCC / Static / ASan [yyjson]",
-      "inherits": [
-        "base-linux",
-        "compiler-gcc",
-        "triplet-linux-static",
-        "base-static",
-        "opt-asan",
-        "opt-dev",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-ubsan",
-      "displayName": "Linux / GCC / Static / UBSan [simdjson]",
-      "inherits": [
-        "base-linux",
-        "compiler-gcc",
-        "triplet-linux-static",
-        "base-static",
-        "opt-ubsan",
-        "opt-dev",
-        "backend-simdjson"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-ubsan-yyjson",
-      "displayName": "Linux / GCC / Static / UBSan [yyjson]",
-      "inherits": [
-        "base-linux",
-        "compiler-gcc",
-        "triplet-linux-static",
-        "base-static",
-        "opt-ubsan",
-        "opt-dev",
-        "backend-yyjson"
-      ]
-    },
-    {
-      "name": "linux-clang-static-release-lto",
-      "displayName": "Linux / Clang / Static / Release + LTO [simdjson]",
-      "inherits": [
-        "linux-clang-static-release",
-        "opt-lto"
-      ]
-    },
-    {
-      "name": "linux-clang-static-release-lto-yyjson",
-      "displayName": "Linux / Clang / Static / Release + LTO [yyjson]",
-      "inherits": [
-        "linux-clang-static-release-yyjson",
-        "opt-lto"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-release-lto",
-      "displayName": "Linux / GCC / Static / Release + LTO [simdjson]",
-      "inherits": [
-        "linux-gcc-static-release",
-        "opt-lto"
-      ]
-    },
-    {
-      "name": "linux-gcc-static-release-lto-yyjson",
-      "displayName": "Linux / GCC / Static / Release + LTO [yyjson]",
-      "inherits": [
-        "linux-gcc-static-release-yyjson",
-        "opt-lto"
       ]
     }
   ],
@@ -746,75 +734,87 @@
       "hidden": true
     },
     {
-      "name": "windows-msvc-static-debug",
-      "displayName": "Windows / MSVC / Static / Debug [simdjson]",
-      "configurePreset": "windows-msvc-static-debug",
+      "name": "linux-clang-shared-debug",
+      "displayName": "Linux / Clang / Shared / Debug [simdjson]",
+      "configurePreset": "linux-clang-shared-debug",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-static-debug-yyjson",
-      "displayName": "Windows / MSVC / Static / Debug [yyjson]",
-      "configurePreset": "windows-msvc-static-debug-yyjson",
+      "name": "linux-clang-shared-debug-yyjson",
+      "displayName": "Linux / Clang / Shared / Debug [yyjson]",
+      "configurePreset": "linux-clang-shared-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-static-release",
-      "displayName": "Windows / MSVC / Static / Release [simdjson]",
-      "configurePreset": "windows-msvc-static-release",
+      "name": "linux-clang-shared-release",
+      "displayName": "Linux / Clang / Shared / Release [simdjson]",
+      "configurePreset": "linux-clang-shared-release",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-static-release-yyjson",
-      "displayName": "Windows / MSVC / Static / Release [yyjson]",
-      "configurePreset": "windows-msvc-static-release-yyjson",
+      "name": "linux-clang-shared-release-yyjson",
+      "displayName": "Linux / Clang / Shared / Release [yyjson]",
+      "configurePreset": "linux-clang-shared-release-yyjson",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-shared-debug",
-      "displayName": "Windows / MSVC / Shared / Debug [simdjson]",
-      "configurePreset": "windows-msvc-shared-debug",
+      "name": "linux-clang-static-asan",
+      "displayName": "Linux / Clang / Static / ASan [simdjson]",
+      "configurePreset": "linux-clang-static-asan",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-shared-debug-yyjson",
-      "displayName": "Windows / MSVC / Shared / Debug [yyjson]",
-      "configurePreset": "windows-msvc-shared-debug-yyjson",
+      "name": "linux-clang-static-asan-yyjson",
+      "displayName": "Linux / Clang / Static / ASan [yyjson]",
+      "configurePreset": "linux-clang-static-asan-yyjson",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-shared-release",
-      "displayName": "Windows / MSVC / Shared / Release [simdjson]",
-      "configurePreset": "windows-msvc-shared-release",
+      "name": "linux-clang-static-debug",
+      "displayName": "Linux / Clang / Static / Debug [simdjson]",
+      "configurePreset": "linux-clang-static-debug",
       "inherits": "base"
     },
     {
-      "name": "windows-msvc-shared-release-yyjson",
-      "displayName": "Windows / MSVC / Shared / Release [yyjson]",
-      "configurePreset": "windows-msvc-shared-release-yyjson",
+      "name": "linux-clang-static-debug-yyjson",
+      "displayName": "Linux / Clang / Static / Debug [yyjson]",
+      "configurePreset": "linux-clang-static-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-debug",
-      "displayName": "Linux / GCC / Static / Debug [simdjson]",
-      "configurePreset": "linux-gcc-static-debug",
+      "name": "linux-clang-static-release",
+      "displayName": "Linux / Clang / Static / Release [simdjson]",
+      "configurePreset": "linux-clang-static-release",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-debug-yyjson",
-      "displayName": "Linux / GCC / Static / Debug [yyjson]",
-      "configurePreset": "linux-gcc-static-debug-yyjson",
+      "name": "linux-clang-static-release-lto",
+      "displayName": "Linux / Clang / Static / Release + LTO [simdjson]",
+      "configurePreset": "linux-clang-static-release-lto",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-release",
-      "displayName": "Linux / GCC / Static / Release [simdjson]",
-      "configurePreset": "linux-gcc-static-release",
+      "name": "linux-clang-static-release-lto-yyjson",
+      "displayName": "Linux / Clang / Static / Release + LTO [yyjson]",
+      "configurePreset": "linux-clang-static-release-lto-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-release-yyjson",
-      "displayName": "Linux / GCC / Static / Release [yyjson]",
-      "configurePreset": "linux-gcc-static-release-yyjson",
+      "name": "linux-clang-static-release-yyjson",
+      "displayName": "Linux / Clang / Static / Release [yyjson]",
+      "configurePreset": "linux-clang-static-release-yyjson",
+      "inherits": "base"
+    },
+    {
+      "name": "linux-clang-static-ubsan",
+      "displayName": "Linux / Clang / Static / UBSan [simdjson]",
+      "configurePreset": "linux-clang-static-ubsan",
+      "inherits": "base"
+    },
+    {
+      "name": "linux-clang-static-ubsan-yyjson",
+      "displayName": "Linux / Clang / Static / UBSan [yyjson]",
+      "configurePreset": "linux-clang-static-ubsan-yyjson",
       "inherits": "base"
     },
     {
@@ -842,75 +842,63 @@
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-debug",
-      "displayName": "Linux / Clang / Static / Debug [simdjson]",
-      "configurePreset": "linux-clang-static-debug",
+      "name": "linux-gcc-static-asan",
+      "displayName": "Linux / GCC / Static / ASan [simdjson]",
+      "configurePreset": "linux-gcc-static-asan",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-debug-yyjson",
-      "displayName": "Linux / Clang / Static / Debug [yyjson]",
-      "configurePreset": "linux-clang-static-debug-yyjson",
+      "name": "linux-gcc-static-asan-yyjson",
+      "displayName": "Linux / GCC / Static / ASan [yyjson]",
+      "configurePreset": "linux-gcc-static-asan-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-release",
-      "displayName": "Linux / Clang / Static / Release [simdjson]",
-      "configurePreset": "linux-clang-static-release",
+      "name": "linux-gcc-static-debug",
+      "displayName": "Linux / GCC / Static / Debug [simdjson]",
+      "configurePreset": "linux-gcc-static-debug",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-release-yyjson",
-      "displayName": "Linux / Clang / Static / Release [yyjson]",
-      "configurePreset": "linux-clang-static-release-yyjson",
+      "name": "linux-gcc-static-debug-yyjson",
+      "displayName": "Linux / GCC / Static / Debug [yyjson]",
+      "configurePreset": "linux-gcc-static-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-shared-debug",
-      "displayName": "Linux / Clang / Shared / Debug [simdjson]",
-      "configurePreset": "linux-clang-shared-debug",
+      "name": "linux-gcc-static-release",
+      "displayName": "Linux / GCC / Static / Release [simdjson]",
+      "configurePreset": "linux-gcc-static-release",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-shared-debug-yyjson",
-      "displayName": "Linux / Clang / Shared / Debug [yyjson]",
-      "configurePreset": "linux-clang-shared-debug-yyjson",
+      "name": "linux-gcc-static-release-lto",
+      "displayName": "Linux / GCC / Static / Release + LTO [simdjson]",
+      "configurePreset": "linux-gcc-static-release-lto",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-shared-release",
-      "displayName": "Linux / Clang / Shared / Release [simdjson]",
-      "configurePreset": "linux-clang-shared-release",
+      "name": "linux-gcc-static-release-lto-yyjson",
+      "displayName": "Linux / GCC / Static / Release + LTO [yyjson]",
+      "configurePreset": "linux-gcc-static-release-lto-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-shared-release-yyjson",
-      "displayName": "Linux / Clang / Shared / Release [yyjson]",
-      "configurePreset": "linux-clang-shared-release-yyjson",
+      "name": "linux-gcc-static-release-yyjson",
+      "displayName": "Linux / GCC / Static / Release [yyjson]",
+      "configurePreset": "linux-gcc-static-release-yyjson",
       "inherits": "base"
     },
     {
-      "name": "macos-clang-static-debug",
-      "displayName": "macOS / Clang / Static / Debug [simdjson]",
-      "configurePreset": "macos-clang-static-debug",
+      "name": "linux-gcc-static-ubsan",
+      "displayName": "Linux / GCC / Static / UBSan [simdjson]",
+      "configurePreset": "linux-gcc-static-ubsan",
       "inherits": "base"
     },
     {
-      "name": "macos-clang-static-debug-yyjson",
-      "displayName": "macOS / Clang / Static / Debug [yyjson]",
-      "configurePreset": "macos-clang-static-debug-yyjson",
-      "inherits": "base"
-    },
-    {
-      "name": "macos-clang-static-release",
-      "displayName": "macOS / Clang / Static / Release [simdjson]",
-      "configurePreset": "macos-clang-static-release",
-      "inherits": "base"
-    },
-    {
-      "name": "macos-clang-static-release-yyjson",
-      "displayName": "macOS / Clang / Static / Release [yyjson]",
-      "configurePreset": "macos-clang-static-release-yyjson",
+      "name": "linux-gcc-static-ubsan-yyjson",
+      "displayName": "Linux / GCC / Static / UBSan [yyjson]",
+      "configurePreset": "linux-gcc-static-ubsan-yyjson",
       "inherits": "base"
     },
     {
@@ -938,75 +926,75 @@
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-asan",
-      "displayName": "Linux / Clang / Static / ASan [simdjson]",
-      "configurePreset": "linux-clang-static-asan",
+      "name": "macos-clang-static-debug",
+      "displayName": "macOS / Clang / Static / Debug [simdjson]",
+      "configurePreset": "macos-clang-static-debug",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-asan-yyjson",
-      "displayName": "Linux / Clang / Static / ASan [yyjson]",
-      "configurePreset": "linux-clang-static-asan-yyjson",
+      "name": "macos-clang-static-debug-yyjson",
+      "displayName": "macOS / Clang / Static / Debug [yyjson]",
+      "configurePreset": "macos-clang-static-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-ubsan",
-      "displayName": "Linux / Clang / Static / UBSan [simdjson]",
-      "configurePreset": "linux-clang-static-ubsan",
+      "name": "macos-clang-static-release",
+      "displayName": "macOS / Clang / Static / Release [simdjson]",
+      "configurePreset": "macos-clang-static-release",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-ubsan-yyjson",
-      "displayName": "Linux / Clang / Static / UBSan [yyjson]",
-      "configurePreset": "linux-clang-static-ubsan-yyjson",
+      "name": "macos-clang-static-release-yyjson",
+      "displayName": "macOS / Clang / Static / Release [yyjson]",
+      "configurePreset": "macos-clang-static-release-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-asan",
-      "displayName": "Linux / GCC / Static / ASan [simdjson]",
-      "configurePreset": "linux-gcc-static-asan",
+      "name": "windows-msvc-shared-debug",
+      "displayName": "Windows / MSVC / Shared / Debug [simdjson]",
+      "configurePreset": "windows-msvc-shared-debug",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-asan-yyjson",
-      "displayName": "Linux / GCC / Static / ASan [yyjson]",
-      "configurePreset": "linux-gcc-static-asan-yyjson",
+      "name": "windows-msvc-shared-debug-yyjson",
+      "displayName": "Windows / MSVC / Shared / Debug [yyjson]",
+      "configurePreset": "windows-msvc-shared-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-ubsan",
-      "displayName": "Linux / GCC / Static / UBSan [simdjson]",
-      "configurePreset": "linux-gcc-static-ubsan",
+      "name": "windows-msvc-shared-release",
+      "displayName": "Windows / MSVC / Shared / Release [simdjson]",
+      "configurePreset": "windows-msvc-shared-release",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-ubsan-yyjson",
-      "displayName": "Linux / GCC / Static / UBSan [yyjson]",
-      "configurePreset": "linux-gcc-static-ubsan-yyjson",
+      "name": "windows-msvc-shared-release-yyjson",
+      "displayName": "Windows / MSVC / Shared / Release [yyjson]",
+      "configurePreset": "windows-msvc-shared-release-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-release-lto",
-      "displayName": "Linux / Clang / Static / Release + LTO [simdjson]",
-      "configurePreset": "linux-clang-static-release-lto",
+      "name": "windows-msvc-static-debug",
+      "displayName": "Windows / MSVC / Static / Debug [simdjson]",
+      "configurePreset": "windows-msvc-static-debug",
       "inherits": "base"
     },
     {
-      "name": "linux-clang-static-release-lto-yyjson",
-      "displayName": "Linux / Clang / Static / Release + LTO [yyjson]",
-      "configurePreset": "linux-clang-static-release-lto-yyjson",
+      "name": "windows-msvc-static-debug-yyjson",
+      "displayName": "Windows / MSVC / Static / Debug [yyjson]",
+      "configurePreset": "windows-msvc-static-debug-yyjson",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-release-lto",
-      "displayName": "Linux / GCC / Static / Release + LTO [simdjson]",
-      "configurePreset": "linux-gcc-static-release-lto",
+      "name": "windows-msvc-static-release",
+      "displayName": "Windows / MSVC / Static / Release [simdjson]",
+      "configurePreset": "windows-msvc-static-release",
       "inherits": "base"
     },
     {
-      "name": "linux-gcc-static-release-lto-yyjson",
-      "displayName": "Linux / GCC / Static / Release + LTO [yyjson]",
-      "configurePreset": "linux-gcc-static-release-lto-yyjson",
+      "name": "windows-msvc-static-release-yyjson",
+      "displayName": "Windows / MSVC / Static / Release [yyjson]",
+      "configurePreset": "windows-msvc-static-release-yyjson",
       "inherits": "base"
     }
   ]

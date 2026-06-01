@@ -173,50 +173,38 @@ if [[ "$PACKAGE_TYPE" == "source" ]]; then
 
   # Create filtered source package
   # Note: .github/scripts/ is excluded but we're running from there
-  tar -czf "$PKG_PATH" \
-    --exclude='.git' \
-    --exclude='.github' \
-    --exclude='.vscode' \
-    --exclude='.windsurf' \
-    --exclude='.actrc' \
-    --exclude='.clang-format' \
-    --exclude='.clangd' \
-    --exclude='.gitignore' \
-    --exclude='.gitmodules' \
-    --exclude='.gitattributes' \
-    --exclude='out' \
-    --exclude='vcpkg_installed' \
-    --exclude='*.o' \
-    --exclude='*.a' \
-    --exclude='*.so' \
-    --exclude='*.so.*' \
-    --exclude='*.dll' \
-    --exclude='*.exe' \
-    --exclude='*.lib' \
-    --exclude='*.pdb' \
-    --exclude='*.ilk' \
-    --exclude='extras/vcpkg' \
-    --exclude='extras/registry' \
-    --exclude='scripts' \
-    --transform "s,^,i18n-redis-${VERSION}/," \
-    -C "$PROJECT_ROOT" \
-    CMakeLists.txt \
-    CMakePresets.json \
-    vcpkg.json \
-    vcpkg-configuration.json \
-    configure \
-    configure.ps1 \
-    LICENSE \
-    README.md \
-    .version \
-    include \
-    src \
-    cmake \
-    locales \
-    example \
-    docs \
-    tests \
-    cmake
+
+  # Create temp staging directory to prepare files
+  TEMP_STAGING=$(mktemp -d)
+  mkdir -p "$TEMP_STAGING/i18n-redis-${VERSION}"
+
+  # Copy all required files to staging
+  cp "$PROJECT_ROOT/CMakeLists.txt" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/CMakePresets.json" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/vcpkg.json" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/vcpkg-configuration.json" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/configure" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/configure.ps1" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/LICENSE" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp "$PROJECT_ROOT/.version" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+
+  # Copy package README as main README.md
+  cp "$PROJECT_ROOT/.github/templates/README_PACKAGE.md" "$TEMP_STAGING/i18n-redis-${VERSION}/README.md"
+
+  # Copy directories
+  cp -r "$PROJECT_ROOT/include" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/src" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/cmake" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/locales" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/example" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/docs" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+  cp -r "$PROJECT_ROOT/tests" "$TEMP_STAGING/i18n-redis-${VERSION}/"
+
+  # Create tar.gz from staging directory
+  tar -czf "$PKG_PATH" -C "$TEMP_STAGING" "i18n-redis-${VERSION}"
+
+  # Clean up staging
+  rm -rf "$TEMP_STAGING"
 
   echo "[PACKAGER] Source package created: $PKG_PATH"
   ls -lh "$PKG_PATH"

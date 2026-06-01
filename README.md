@@ -4,287 +4,313 @@ A C++20 library for internationalisation (i18n) backed by Redis. Loads JSON
 locale files from disk, stores each entry in Redis, and provides fast
 key-based lookups with optional `{fmt}` format arguments.
 
-## Table of contents
+## Table of Contents
 
+- [Overview](#overview)
 - [Requirements](#requirements)
 - [Dependencies](#dependencies)
-- [Setup](#setup)
-  - [1 — Install vcpkg](#1--install-vcpkg)
-  - [2 — Set VCPKG_HOME persistently](#2--set-vcpkg_home-persistently)
-  - [3 — Install a compiler and Ninja](#3--install-a-compiler-and-ninja)
+  - [System Packages](#system-packages)
+  - [vcpkg](#vcpkg)
 - [Building](#building)
-  - [Quick start (convenience script)](#quick-start-convenience-script)
-  - [Manual (cmake --preset)](#manual-cmake---preset)
-- [JSON backend](#json-backend)
-  - [Choosing the backend in VS Code](#choosing-the-backend-in-vs-code)
+  - [Quick Start](#quick-start)
+  - [Using System Packages](#using-system-packages-1)
+  - [Using vcpkg](#using-vcpkg-1)
+  - [Manual CMake](#manual-cmake)
+- [JSON Backend](#json-backend)
 - [CMake Presets](#cmake-presets)
   - [Linux](#linux)
-  - [Windows (MSVC)](#windows-msvc)
-  - [macOS (Clang)](#macos-clang)
+  - [Windows](#windows)
+  - [macOS](#macos)
   - [Sanitizers / LTO](#sanitizers--lto)
-- [Build options](#build-options)
+- [Build Options](#build-options)
 - [Usage](#usage)
-  - [Locale file format](#locale-file-format)
-- [CMake integration](#cmake-integration)
-- [Running tests](#running-tests)
-- [Project structure](#project-structure)
+  - [Example](#example)
+  - [Locale File Format](#locale-file-format)
+- [CMake Integration](#cmake-integration)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
-- [Platform notes](#platform-notes)
+- [Platform Notes](#platform-notes)
 - [Versioning](#versioning)
 - [License](#license)
 
+## Overview
+
+This library provides a translation service that:
+- Loads locale files from disk (JSON format)
+- Stores translations in Redis for fast lookups
+- Supports parameterized translations using `{fmt}` syntax
+- Works with multiple JSON backends (simdjson, yyjson)
+
 ## Requirements
 
-| Tool | Minimum version |
-|------|----------------|
+| Tool | Minimum Version |
+|------|-----------------|
 | CMake | 3.25 |
-| C++ compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
+| C++ Compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
 | Ninja | any recent |
-| vcpkg | any recent |
+| Redis Server | 5.0+ |
+
+Optional:
+| Tool | Purpose |
+|------|---------|
+| vcpkg | Dependency management (alternative to system packages) |
 
 ## Dependencies
 
-All dependencies are managed automatically by **vcpkg** via the `vcpkg.json`
-manifest. No manual installation is required.
+| Library | Purpose | Repository |
+|---------|---------|------------|
+| [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) | Redis client | https://github.com/sewenew/redis-plus-plus |
+| [{fmt}](https://github.com/fmtlib/fmt) | String formatting | https://github.com/fmtlib/fmt |
+| [simdjson](https://github.com/simdjson/simdjson) | JSON parsing | https://github.com/simdjson/simdjson |
+| [yyjson](https://github.com/ibireme/yyjson) | JSON parsing (alternative) | https://github.com/ibireme/yyjson |
+| [Catch2](https://github.com/catchorg/Catch2) | Testing framework | https://github.com/catchorg/Catch2 |
 
-| Library | Purpose | vcpkg feature |
-|---------|---------|---------------|
-| [redis-plus-plus](https://github.com/sewenew/redis-plus-plus) | Redis client | *(core)* |
-| [{fmt}](https://github.com/fmtlib/fmt) | String formatting | *(core)* |
-| [simdjson](https://github.com/simdjson/simdjson) | JSON parsing (default) | `simdjson` |
-| [yyjson](https://github.com/ibireme/yyjson) | JSON parsing (alternative) | `yyjson` |
-| [Catch2](https://github.com/catchorg/Catch2) | Test framework | `tests` |
+Two dependency management modes are supported:
 
-## Setup
+| Mode | Best For |
+|------|----------|
+| **System packages** | Distribution packaging, CI/CD, minimal environments |
+| **vcpkg** | Development, cross-platform builds, Windows |
 
-### 1 — Install vcpkg
+### System Packages
 
-**Option A — use the bundled submodule (recommended)**
+Install dependencies via your system package manager:
 
-The repository ships vcpkg as a git submodule under `extras/vcpkg`.
-No external clone needed — just initialise the submodule and bootstrap:
+**Ubuntu / Debian:**
+```bash
+sudo apt-get install -y cmake ninja-build g++ \
+  libhiredis-dev libredis++-dev libfmt-dev \
+  libyyjson-dev catch2
 
+# simdjson may need manual installation:
+# See https://github.com/simdjson/simdjson/releases
+```
+
+**Fedora / RHEL:**
+```bash
+sudo dnf install cmake ninja-build gcc-c++ \
+  hiredis-devel fmt-devel yyjson-devel catch2-devel
+
+# redis-plus-plus and simdjson may need manual build:
+# https://github.com/sewenew/redis-plus-plus
+# https://github.com/simdjson/simdjson
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S cmake ninja gcc clang hiredis fmt yyjson catch2
+
+# From AUR:
+yay -S redis-plus-plus simdjson
+```
+
+**macOS (Homebrew):**
+```bash
+brew install cmake ninja hiredis redis-plus-plus fmt yyjson simdjson catch2
+```
+
+### vcpkg
+
+For automatic dependency management, use vcpkg:
+
+**Using the bundled submodule (recommended for development):**
 ```bash
 git submodule update --init extras/vcpkg
-extras/vcpkg/bootstrap-vcpkg.sh     # Linux / macOS
+extras/vcpkg/bootstrap-vcpkg.sh  # Linux/macOS
 # extras\vcpkg\bootstrap-vcpkg.bat  # Windows
 export VCPKG_HOME=$(pwd)/extras/vcpkg
 ```
 
-**Option B — bring your own vcpkg**
-
+**Using your own vcpkg installation:**
 ```bash
 git clone https://github.com/microsoft/vcpkg.git ~/vcpkg
 ~/vcpkg/bootstrap-vcpkg.sh
 export VCPKG_HOME=~/vcpkg
 ```
 
-### 2 — Set VCPKG_HOME persistently
-
-Add the export to your shell profile so every new session picks it up:
-
-```bash
-# Bundled submodule — absolute path required
-echo 'export VCPKG_HOME=/path/to/i18n-redis/extras/vcpkg' >> ~/.bashrc
-
-# External clone
-echo 'export VCPKG_HOME=~/vcpkg' >> ~/.bashrc
-```
-
-On Windows set `VCPKG_HOME` permanently via *System Properties → Environment Variables*.
-
-### 3 — Install a compiler and Ninja
-
-**Ubuntu / Debian:**
-```bash
-sudo apt-get install -y cmake ninja-build g++ clang
-```
-
-**Fedora / RHEL:**
-```bash
-sudo dnf install cmake ninja-build gcc-c++ clang
-```
-
-**macOS:**
-```bash
-brew install cmake ninja
-```
-
-**Windows:** Install Visual Studio 2022 with the *C++ Desktop* workload.
-
 ## Building
 
-### Quick start (convenience script)
+### Quick Start
+
+The `configure` scripts provide the easiest way to build:
 
 ```bash
-# Linux / macOS
+# Linux / macOS - System packages
 ./configure -p linux-gcc-static-release
-./configure -p linux-clang-static-release
-./configure -p linux-gcc-static-release-yyjson
-./configure -p linux-clang-shared-debug-yyjson
 
-# Windows (PowerShell)
-.\configure.ps1 -Preset windows-msvc-static-release
-.\configure.ps1 -Preset windows-msvc-static-release-yyjson
+# Linux / macOS - With vcpkg
+./configure -p linux-gcc-static-release --use-vcpkg
+
+# Windows (PowerShell) - With vcpkg
+.\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg
 ```
 
-If `VCPKG_HOME` is not set the configure script automatically initialises the
-`extras/vcpkg` submodule and bootstraps vcpkg before building.
-vcpkg then installs the selected JSON backend via the `vcpkg.json` manifest.
-
-### Manual (cmake --preset)
+### Using System Packages
 
 ```bash
-# Configure + build — simdjson (default)
+# Configure and build
+./configure -p linux-gcc-static-release
+
+# Or manually:
 cmake --preset linux-gcc-static-release
 cmake --build --preset linux-gcc-static-release
-
-# Configure + build — yyjson
-cmake --preset linux-gcc-static-release-yyjson
-cmake --build --preset linux-gcc-static-release-yyjson
 ```
 
-If you run `cmake --preset` directly and need the overlay registry, pass the
-paths explicitly (or export them once per shell):
+### Using vcpkg
 
 ```bash
+# Ensure VCPKG_HOME is set
+export VCPKG_HOME=/path/to/vcpkg
+
+# Configure and build
+./configure -p linux-gcc-static-release --use-vcpkg
+```
+
+The script will:
+1. Detect vcpkg from `VCPKG_HOME`
+2. Initialize the submodule if needed
+3. Bootstrap vcpkg if not already done
+4. Pass the correct toolchain and features to CMake
+
+### Manual CMake
+
+**With system packages:**
+```bash
+cmake --preset linux-gcc-static-release
+cmake --build --preset linux-gcc-static-release
+```
+
+**With vcpkg:**
+```bash
 cmake --preset linux-gcc-static-release \
+  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake" \
+  -DVCPKG_MANIFEST_FEATURES="simdjson"
+cmake --build --preset linux-gcc-static-release
+```
+
+**With overlays (CI setup):**
+```bash
+cmake --preset linux-gcc-static-release \
+  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake" \
+  -DVCPKG_MANIFEST_FEATURES="simdjson" \
   -DVCPKG_OVERLAY_PORTS="$PWD/extras/registry/ports" \
   -DVCPKG_OVERLAY_TRIPLETS="$PWD/extras/registry/triplets"
 ```
 
-> Overlays are intentionally passed explicitly so the project stays compatible
-> with plain CMake + vcpkg configurations.
+## JSON Backend
 
-## JSON backend
+The JSON backend is selected by the preset name:
 
-The JSON backend is selected **per preset**. Both `VCPKG_MANIFEST_FEATURES`
-and `I18N_REDIS_JSON_BACKEND` are set automatically — no extra `-D` flags
-needed.
+| Preset Pattern | Backend | vcpkg Feature |
+|----------------|---------|---------------|
+| `<preset>` (base) | simdjson | `simdjson` |
+| `<preset>-yyjson` | yyjson | `yyjson` |
 
-| Preset suffix | Backend | vcpkg feature |
-|---------------|---------|---------------|
-| *(none)* | simdjson | `simdjson` |
-| `-yyjson` | yyjson | `yyjson` |
-
-### Choosing the backend in VS Code
-
-The CMake Tools extension lists every non-hidden preset. Select the one you
-want from the status bar or the *CMake: Select Configure Preset* command:
-
-```
-Linux / GCC / Static / Debug [simdjson]
-Linux / GCC / Static / Debug [yyjson]
-Linux / Clang / Static / Release [simdjson]
-Linux / Clang / Static / Release [yyjson]
-...
-```
-
-The extension will configure, install dependencies via vcpkg, and build with
-the chosen backend automatically.
+Examples:
+- `linux-gcc-static-release` → simdjson
+- `linux-gcc-static-release-yyjson` → yyjson
 
 ## CMake Presets
 
-Preset names follow the pattern `<platform>-<compiler>-<type>-<config>[-yyjson]`.
-Every preset exists in both a `simdjson` (default) and `yyjson` variant.
+Preset naming: `<platform>-<compiler>-<linkage>-<config>[-yyjson]`
 
-### Linux
+All presets support both `simdjson` (base) and `yyjson` (append `-yyjson`) backends.
 
-| Preset | Compiler | Type | Config | Backend |
-|--------|----------|------|--------|---------|
-| `linux-gcc-static-debug` | GCC | static | Debug | simdjson |
-| `linux-gcc-static-debug-yyjson` | GCC | static | Debug | yyjson |
-| `linux-gcc-static-release` | GCC | static | Release | simdjson |
-| `linux-gcc-static-release-yyjson` | GCC | static | Release | yyjson |
-| `linux-gcc-shared-debug` | GCC | shared | Debug | simdjson |
-| `linux-gcc-shared-debug-yyjson` | GCC | shared | Debug | yyjson |
-| `linux-gcc-shared-release` | GCC | shared | Release | simdjson |
-| `linux-gcc-shared-release-yyjson` | GCC | shared | Release | yyjson |
-| `linux-clang-static-debug` | Clang | static | Debug | simdjson |
-| `linux-clang-static-debug-yyjson` | Clang | static | Debug | yyjson |
-| `linux-clang-static-release` | Clang | static | Release | simdjson |
-| `linux-clang-static-release-yyjson` | Clang | static | Release | yyjson |
-| `linux-clang-shared-debug` | Clang | shared | Debug | simdjson |
-| `linux-clang-shared-debug-yyjson` | Clang | shared | Debug | yyjson |
-| `linux-clang-shared-release` | Clang | shared | Release | simdjson |
-| `linux-clang-shared-release-yyjson` | Clang | shared | Release | yyjson |
+### Linux — GCC
 
-### Windows (MSVC)
+| Preset | Linkage | Config | Notes |
+|--------|---------|--------|-------|
+| `linux-gcc-static-release` | static | Release | Production builds |
+| `linux-gcc-shared-release` | shared | Release | Shared library |
+| `linux-gcc-static-debug` | static | Debug | Development |
+| `linux-gcc-shared-debug` | shared | Debug | Development |
+| `linux-gcc-static-asan` | static | Debug | AddressSanitizer |
+| `linux-gcc-static-ubsan` | static | Debug | UndefinedBehaviorSanitizer |
+| `linux-gcc-static-release-lto` | static | Release | Link-time optimization |
 
-| Preset | Type | Config | Backend |
-|--------|------|--------|---------|
-| `windows-msvc-static-debug` | static | Debug | simdjson |
-| `windows-msvc-static-debug-yyjson` | static | Debug | yyjson |
-| `windows-msvc-static-release` | static | Release | simdjson |
-| `windows-msvc-static-release-yyjson` | static | Release | yyjson |
-| `windows-msvc-shared-debug` | shared | Debug | simdjson |
-| `windows-msvc-shared-debug-yyjson` | shared | Debug | yyjson |
-| `windows-msvc-shared-release` | shared | Release | simdjson |
-| `windows-msvc-shared-release-yyjson` | shared | Release | yyjson |
+### Linux — Clang
 
-### macOS (Clang)
+| Preset | Linkage | Config | Notes |
+|--------|---------|--------|-------|
+| `linux-clang-static-release` | static | Release | Production builds |
+| `linux-clang-shared-release` | shared | Release | Shared library |
+| `linux-clang-static-debug` | static | Debug | Development |
+| `linux-clang-shared-debug` | shared | Debug | Development |
+| `linux-clang-static-asan` | static | Debug | AddressSanitizer |
+| `linux-clang-static-ubsan` | static | Debug | UndefinedBehaviorSanitizer |
+| `linux-clang-static-release-lto` | static | Release | Link-time optimization |
 
-| Preset | Type | Config | Backend |
-|--------|------|--------|---------|
-| `macos-clang-static-debug` | static | Debug | simdjson |
-| `macos-clang-static-debug-yyjson` | static | Debug | yyjson |
-| `macos-clang-static-release` | static | Release | simdjson |
-| `macos-clang-static-release-yyjson` | static | Release | yyjson |
-| `macos-clang-shared-debug` | shared | Debug | simdjson |
-| `macos-clang-shared-debug-yyjson` | shared | Debug | yyjson |
-| `macos-clang-shared-release` | shared | Release | simdjson |
-| `macos-clang-shared-release-yyjson` | shared | Release | yyjson |
+### Windows — MSVC
 
-### Sanitizers / LTO
+| Preset | Linkage | Config | Notes |
+|--------|---------|--------|-------|
+| `windows-msvc-static-release` | static | Release | Production builds |
+| `windows-msvc-shared-release` | shared | Release | Shared library |
+| `windows-msvc-static-debug` | static | Debug | Development |
+| `windows-msvc-shared-debug` | shared | Debug | Development |
 
-| Preset | Notes | Backend |
-|--------|-------|---------|
-| `linux-clang-static-asan` | AddressSanitizer | simdjson |
-| `linux-clang-static-asan-yyjson` | AddressSanitizer | yyjson |
-| `linux-clang-static-ubsan` | UndefinedBehaviourSanitizer | simdjson |
-| `linux-clang-static-ubsan-yyjson` | UndefinedBehaviourSanitizer | yyjson |
-| `linux-gcc-static-asan` | AddressSanitizer | simdjson |
-| `linux-gcc-static-asan-yyjson` | AddressSanitizer | yyjson |
-| `linux-gcc-static-ubsan` | UndefinedBehaviourSanitizer | simdjson |
-| `linux-gcc-static-ubsan-yyjson` | UndefinedBehaviourSanitizer | yyjson |
-| `linux-clang-static-release-lto` | Release + LTO | simdjson |
-| `linux-clang-static-release-lto-yyjson` | Release + LTO | yyjson |
-| `linux-gcc-static-release-lto` | Release + LTO | simdjson |
-| `linux-gcc-static-release-lto-yyjson` | Release + LTO | yyjson |
+### macOS — Clang
 
-## Build options
+| Preset | Linkage | Config | Notes |
+|--------|---------|--------|-------|
+| `macos-clang-static-release` | static | Release | Production builds |
+| `macos-clang-shared-release` | shared | Release | Shared library |
+| `macos-clang-static-debug` | static | Debug | Development |
+| `macos-clang-shared-debug` | shared | Debug | Development |
+
+### All Available Variants
+
+Every preset above has a corresponding `-yyjson` variant for the yyjson backend:
+- `linux-gcc-static-release` → `linux-gcc-static-release-yyjson`
+- `linux-clang-static-asan` → `linux-clang-static-asan-yyjson`
+- `windows-msvc-static-debug` → `windows-msvc-static-debug-yyjson`
+- etc.
+
+For the complete list, see `CMakePresets.json`.
+
+## Build Options
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `I18N_REDIS_JSON_BACKEND` | `simdjson` | JSON backend: `simdjson` or `yyjson` (set by preset) |
-| `VCPKG_MANIFEST_FEATURES` | `simdjson` | vcpkg feature to install (set by preset) |
+| `I18N_REDIS_JSON_BACKEND` | `simdjson` | JSON backend: `simdjson` or `yyjson` |
 | `BUILD_SHARED_LIBS` | `OFF` | Build shared library |
 | `I18N_REDIS_BUILD_EXAMPLES` | `OFF` | Build example application |
 | `I18N_REDIS_BUILD_TESTS` | `OFF` | Build test suite |
-| `I18N_REDIS_ENABLE_LTO` | `ON` | Enable IPO/LTO for Release |
+| `I18N_REDIS_ENABLE_LTO` | `ON` (Release) | Enable IPO/LTO |
 | `I18N_REDIS_ENABLE_ASAN` | `OFF` | Enable AddressSanitizer |
 | `I18N_REDIS_ENABLE_UBSAN` | `OFF` | Enable UndefinedBehaviourSanitizer |
 
+vcpkg-specific:
+| Variable | Description |
+|----------|-------------|
+| `VCPKG_MANIFEST_FEATURES` | Features to install: `simdjson`, `yyjson`, `tests` |
+| `CMAKE_TOOLCHAIN_FILE` | Path to vcpkg.cmake |
+
 ## Usage
+
+### Example
 
 ```cpp
 #include "i18n/redis/RedisTranslationProvider.h"
 #include "i18n/Translation.h"
 
+// Create provider
 auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
 i18n::Translation t(std::move(provider), "en");
 
+// Load locale files into Redis
 t.store(std::filesystem::current_path().string(), {"en", "es"});
 
-std::string msg  = t.translate("greeting");
-std::string msg2 = t.translate("greeting", "es");
-std::string msg3 = t.translate("welcome", "en", "Alice");
+// Translate
+std::string msg = t.translate("greeting");              // "Hello!"
+std::string msg2 = t.translate("greeting", "es");      // "¡Hola!"
+std::string msg3 = t.translate("welcome", "en", "Alice");  // "Welcome, Alice!"
 ```
 
-### Locale file format
+### Locale File Format
 
-Each locale directory (`locales/<locale>/`) may contain any number of `.json`
-files. Each file must be a JSON array:
+Place JSON files in `locales/<locale>/` directories:
 
 ```json
 [
@@ -299,128 +325,114 @@ files. Each file must be a JSON array:
 ]
 ```
 
-Redis keys follow the pattern `i18n:<locale>:<id>` (e.g. `i18n:en:greeting`).
+Redis keys: `i18n:<locale>:<id>` (e.g., `i18n:en:greeting`)
 
-## CMake integration
+## CMake Integration
 
-After installing with `cmake --install`:
+After installation:
 
 ```cmake
 find_package(i18n-redis CONFIG REQUIRED)
 target_link_libraries(my-app PRIVATE i18n-redis::i18n-redis)
 ```
 
-### Install
-
+Install:
 ```bash
-cmake --preset linux-gcc-static-release
-cmake --build --preset linux-gcc-static-release
 cmake --install out/build --prefix /usr/local
 ```
 
-## Running tests
+## Testing
 
 ```bash
-cmake --preset linux-gcc-static-debug
-cmake --build --preset linux-gcc-static-debug
+# Build with tests
+./configure -p linux-gcc-static-debug
+
+# Run tests
 ctest --test-dir out/build --output-on-failure
 ```
 
-## Project structure
+## Project Structure
 
 ```
 i18n-redis/
-├── CMakeLists.txt
-├── CMakePresets.json
-├── .version                      # release/CI marker
-├── LICENSE
-├── vcpkg.json                    # vcpkg manifest — declares dependencies
-├── vcpkg-configuration.json      # vcpkg registry/baseline config
-├── configure                     # Unix helper (wraps CMake presets)
-├── configure.ps1                 # Windows helper (wraps CMake presets)
-├── cmake/
-│   ├── i18n-redisConfig.cmake.in
-│   ├── Modules/
-│   │   ├── Dependencies.cmake
-│   │   └── Targets.cmake
-├── docs/
-│   └── api.md
-├── example/
-│   └── Main.cpp
-├── include/
-│   └── i18n/
-│       ├── Configuration.h
-│       ├── Translation.h
-│       ├── TranslationProvider.h
-│       └── redis/RedisTranslationProvider.h
-├── locales/
-│   └── en/messages.json
-├── scripts/
-│   ├── update-port.sh            # sync overlay port in extras/registry
-│   └── version.sh                # bump repo + manifest versions
-├── src/
-│   ├── RedisTranslationProvider.cpp
-│   ├── Translation.cpp
-│   └── TranslationProvider.cpp
-├── tests/
-│   ├── CMakeLists.txt
-│   ├── Main.cpp
-│   └── TestTranslationKey.cpp
-└── extras/ (optional checkout for contributors)
-    ├── vcpkg/                    # bundled vcpkg clone
-    └── registry/                 # private overlay ports/triplets used in CI
+├── CMakeLists.txt              # Main build configuration
+├── CMakePresets.json           # Build presets
+├── vcpkg.json                  # vcpkg manifest
+├── configure                   # Unix build helper
+├── configure.ps1               # Windows build helper
+├── cmake/                      # CMake modules
+│   └── Modules/
+│       ├── Dependencies.cmake
+│       └── Targets.cmake
+├── include/i18n/               # Public headers
+│   ├── Translation.h
+│   ├── Configuration.h
+│   └── redis/RedisTranslationProvider.h
+├── src/                        # Implementation
+├── tests/                      # Test suite
+├── example/                    # Example application
+├── docs/                       # Documentation
+├── locales/                    # Sample locale files
+└── extras/                     # vcpkg and registry (submodules)
+    ├── vcpkg/
+    └── registry/
 ```
 
 ## Troubleshooting
 
-### VCPKG_HOME is not set
+### Dependencies Not Found
 
-`VCPKG_HOME` is **optional** — when unset, `configure` / `configure.ps1`
-automatically initialises the `extras/vcpkg` submodule and bootstraps vcpkg.
-
-To set it persistently:
-
+**Check installation:**
 ```bash
-# Bundled submodule
-export VCPKG_HOME=/absolute/path/to/i18n-redis/extras/vcpkg
+# Ubuntu/Debian
+dpkg -l | grep -E "hiredis|fmt|simdjson|yyjson"
 
-# External clone
-export VCPKG_HOME=~/vcpkg
+# Fedora/RHEL
+rpm -qa | grep -E "hiredis|fmt|simdjson|yyjson"
 
-# Windows (cmd) — bundled submodule
-set VCPKG_HOME=%CD%\extras\vcpkg
+# Arch
+pacman -Q | grep -E "hiredis|fmt|simdjson|yyjson"
 ```
 
-### vcpkg submodule not initialised (manual cmake workflow)
+**Custom paths:**
+```bash
+cmake --preset linux-gcc-static-release \
+  -DCMAKE_PREFIX_PATH="/custom/path"
+```
 
-If using `cmake --preset` directly without the convenience script:
+### vcpkg Issues
 
+**Submodule not initialized:**
 ```bash
 git submodule update --init extras/vcpkg
-extras/vcpkg/bootstrap-vcpkg.sh
-export VCPKG_HOME=$(pwd)/extras/vcpkg
 ```
 
-### CMake cannot find packages after vcpkg install
-
-Verify that `VCPKG_HOME` is set and that the toolchain file is being picked up:
-
+**Verify toolchain:**
 ```bash
-cmake --preset linux-gcc-static-release -DVCPKG_VERBOSE=ON
+cmake --preset linux-gcc-static-release \
+  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake" \
+  -DVCPKG_VERBOSE=ON
 ```
 
-## Platform notes
+### Redis Connection
 
-- **Linux**: GCC and Clang fully supported
-- **Windows**: MSVC with static or shared libraries
-- **macOS**: Clang supported
+Verify Redis is running:
+```bash
+redis-cli ping  # Should return PONG
+```
+
+## Platform Notes
+
+- **Linux**: GCC and Clang fully supported. System packages recommended for production builds.
+- **Windows**: MSVC recommended. vcpkg is the easiest way to manage dependencies.
+- **macOS**: Clang via Xcode or Homebrew. Both system packages and vcpkg work well.
 
 ## Versioning
 
 | Type | Format | Example |
 |------|--------|---------|
-| SNAPSHOT | `X.Y.Z-<git-hash>-SNAPSHOT` | `0.3.2-abc1234-SNAPSHOT` |
-| RELEASE | `X.Y.Z-RELEASE` | `0.3.2-RELEASE` |
+| Release | `X.Y.Z-RELEASE` | `0.3.2-RELEASE` |
+| Snapshot | `X.Y.Z-<hash>-SNAPSHOT` | `0.3.2-abc1234-SNAPSHOT` |
 
 ## License
 

@@ -45,10 +45,7 @@ jobs:
         run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
 
       - name: Install system dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            ninja-build gcc g++ cmake curl zip unzip tar pkg-config
+        run: .github/scripts/install_deps_unix.sh gcc
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -61,7 +58,7 @@ jobs:
         run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" -DVCPKG_OVERLAY_PORTS="$VCPKG_OVERLAY_PORTS"
+        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -103,10 +100,7 @@ jobs:
         run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
 
       - name: Install system dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            ninja-build clang cmake curl zip unzip tar pkg-config
+        run: .github/scripts/install_deps_unix.sh clang
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -119,7 +113,7 @@ jobs:
         run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" -DVCPKG_OVERLAY_PORTS="$VCPKG_OVERLAY_PORTS"
+        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -153,10 +147,7 @@ jobs:
         run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
 
       - name: Install system dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            ninja-build clang cmake curl zip unzip tar pkg-config
+        run: .github/scripts/install_deps_unix.sh clang
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -169,7 +160,7 @@ jobs:
         run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" -DVCPKG_OVERLAY_PORTS="$VCPKG_OVERLAY_PORTS"
+        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -234,8 +225,8 @@ jobs:
         shell: pwsh
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="%VCPKG_OVERLAY_TRIPLETS%" -DVCPKG_OVERLAY_PORTS="%VCPKG_OVERLAY_PORTS%"
-        shell: cmd
+        run: .github\scripts\configure_cmake.ps1 -Preset ${{ matrix.preset }}
+        shell: pwsh
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel

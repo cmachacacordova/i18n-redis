@@ -12,7 +12,7 @@ env:
   VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/extras/registry/triplets
 
 jobs:
-  # Build and test on Linux GCC - NO artifacts uploaded (only validation)
+  # Build and test on Linux GCC (validation only)
   build-linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
     runs-on: ubuntu-24.04
@@ -38,10 +38,7 @@ jobs:
         run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
 
       - name: Install system dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            ninja-build gcc g++ cmake curl zip unzip tar pkg-config
+        run: .github/scripts/install_deps_unix.sh gcc
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -54,7 +51,7 @@ jobs:
         run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" -DVCPKG_OVERLAY_PORTS="$VCPKG_OVERLAY_PORTS"
+        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -63,7 +60,7 @@ jobs:
         if: ${{ !contains(matrix.preset, 'shared') }}
         run: ctest --test-dir out/build --output-on-failure
 
-  # Build and test on Linux Clang - NO artifacts uploaded (only validation)
+  # Build and test on Linux Clang (validation only)
   build-linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
     runs-on: ubuntu-24.04
@@ -89,10 +86,7 @@ jobs:
         run: .github/scripts/verify_submodules.sh extras/vcpkg extras/registry
 
       - name: Install system dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends \
-            ninja-build clang cmake curl zip unzip tar pkg-config
+        run: .github/scripts/install_deps_unix.sh clang
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -105,7 +99,7 @@ jobs:
         run: .github/scripts/bootstrap_vcpkg_unix.sh extras/vcpkg
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="$VCPKG_OVERLAY_TRIPLETS" -DVCPKG_OVERLAY_PORTS="$VCPKG_OVERLAY_PORTS"
+        run: .github/scripts/configure_cmake.sh ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -114,7 +108,7 @@ jobs:
         if: ${{ !contains(matrix.preset, 'shared') }}
         run: ctest --test-dir out/build --output-on-failure
 
-  # Build on Windows MSVC - Upload binary artifacts
+  # Build and test on Windows MSVC (validation only)
   build-windows-msvc:
     name: Windows / MSVC / ${{ matrix.variant }}
     runs-on: windows-2022
@@ -164,8 +158,8 @@ jobs:
         shell: pwsh
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DVCPKG_OVERLAY_TRIPLETS="%VCPKG_OVERLAY_TRIPLETS%" -DVCPKG_OVERLAY_PORTS="%VCPKG_OVERLAY_PORTS%"
-        shell: cmd
+        run: .github\scripts\configure_cmake.ps1 -Preset ${{ matrix.preset }}
+        shell: pwsh
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel
@@ -176,27 +170,11 @@ jobs:
         run: ctest --test-dir out\build --output-on-failure
         shell: cmd
 
-      - name: Install
-        run: cmake --install out\build --prefix out\install\${{ matrix.variant }}
-        shell: cmd
-
-      - name: Create binary package with headers and config
-        run: |
-          .github\scripts\package_windows.ps1 -Variant "${{ matrix.variant }}" -OutputDir "release" -InstallDir "out\install"
-        shell: pwsh
-
-      - name: Upload binary package
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-msvc-${{ matrix.variant }}
-          path: release/*.zip
-          if-no-files-found: error
-
-  # Create source package for Unix (source code only, no compiled artifacts)
+  # Create source package (contains everything needed to build on Unix and Windows)
   create-source-package:
-    name: Create Unix Source Package
+    name: Create Source Package
     runs-on: ubuntu-24.04
-    needs: [build-linux-gcc, build-linux-clang]
+    needs: [build-linux-gcc, build-linux-clang, build-windows-msvc]
 
     steps:
       - uses: actions/checkout@v4
@@ -204,7 +182,7 @@ jobs:
       - name: Install packaging dependencies
         run: sudo apt-get install -y --no-install-recommends tar gzip
 
-      - name: Create and validate source package
+      - name: Create source package
         run: |
           chmod +x .github/scripts/package_release.sh
           .github/scripts/package_release.sh source ${{ github.workspace }}/release
@@ -216,10 +194,10 @@ jobs:
           path: release/*.tar.gz
           if-no-files-found: error
 
-  # Create release with all packages
+  # Create GitHub Release with source package
   create-release:
     name: Create GitHub Release
-    needs: [create-source-package, build-windows-msvc]
+    needs: [create-source-package]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -227,77 +205,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download source package
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          pattern: "*"
+          name: i18n-redis-source
+          path: release
 
-      - name: Organize release files
-        run: |
-          mkdir -p release
-
-          # Move source package
-          if [ -f "artifacts/i18n-redis-source/"*.tar.gz ]; then
-            cp artifacts/i18n-redis-source/*.tar.gz release/
-          fi
-
-          # Move Windows binary packages
-          for dir in artifacts/windows-msvc-*/; do
-            if [ -d "$dir" ]; then
-              cp "$dir"/*.zip release/ 2>/dev/null || true
-            fi
-          done
-
-          echo "Release files:"
-          ls -la release/
-
-      - name: Validate packages
-        run: |
-          echo "[RELEASE] Validating release packages..."
-
-          # Re-download and run validation script on source packages
-          for pkg in release/*.tar.gz; do
-            if [ -f "$pkg" ]; then
-              echo "[RELEASE] Checking source package: $pkg"
-              # Verify no excluded files
-              if tar -tzf "$pkg" | grep -qE "(\.vscode/|\.windsurf/|\.github/|out/|vcpkg_installed/|extras/registry)"; then
-                echo "[RELEASE] ERROR: Found excluded directories in $pkg"
-                tar -tzf "$pkg" | grep -E "(\.vscode/|\.windsurf/|\.github/|out/|vcpkg_installed/|extras/registry)"
-                exit 1
-              fi
-              # Verify configure script exists
-              if ! tar -tzf "$pkg" | grep -qE "configure$"; then
-                echo "[RELEASE] ERROR: configure script not found in $pkg"
-                exit 1
-              fi
-              echo "[RELEASE] Source package validation: PASSED"
-            fi
-          done
-
-          for pkg in release/*.zip; do
-            if [ -f "$pkg" ]; then
-              echo "[RELEASE] Checking binary package: $pkg"
-              # Verify it has binary files
-              if ! unzip -l "$pkg" 2>/dev/null | grep -qE "\.(lib|dll|exe)$"; then
-                echo "[RELEASE] ERROR: No binary files (.lib, .dll, .exe) found in $pkg"
-                exit 1
-              fi
-              if unzip -l "$pkg" 2>/dev/null | grep -qE "(src/.*\.cpp$|extras/registry|\.github/|vcpkg_installed/|out/|CMakeLists\.txt|CMakePresets\.json|vcpkg\.json|vcpkg-configuration\.json)"; then
-                echo "[RELEASE] ERROR: Found source or internal build files in $pkg"
-                unzip -l "$pkg" 2>/dev/null | grep -E "(src/.*\.cpp$|extras/registry|\.github/|vcpkg_installed/|out/|CMakeLists\.txt|CMakePresets\.json|vcpkg\.json|vcpkg-configuration\.json)"
-                exit 1
-              fi
-              echo "[RELEASE] Binary package validation: PASSED"
-            fi
-          done
+      - name: List release files
+        run: ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            release/*.tar.gz
-            release/*.zip
+          files: release/*.tar.gz
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, 'SNAPSHOT') }}

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Configure and build script for i18n-redis
-# Usage: ./configure [--preset <name> | -p <name>] [-- <cmake-args>...]
+# Usage: ./configure [--preset <name> | -p <name>] [--use-vcpkg] [-- <cmake-args>...]
 #   --preset, -p <name>  Use specific CMake preset
+#   --use-vcpkg          Use vcpkg for dependency management
 #   --configure-only     Only configure, don't build
 #   -- <cmake-args>      Extra arguments forwarded to cmake (e.g. -DFOO=BAR)
 # If no preset specified, shows interactive selection menu
@@ -12,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 VCPKG_DIR=""
 PRESET_MODE=false
+USE_VCPKG=false
 
 # Colors for output
 RED='\033[0;31m'
@@ -68,6 +70,10 @@ parse_args() {
                 PRESET_MODE=true
                 shift 2
                 ;;
+            --use-vcpkg)
+                USE_VCPKG=true
+                shift
+                ;;
             --configure-only)
                 CONFIGURE_ONLY=true
                 shift
@@ -101,13 +107,14 @@ Usage: ./configure [OPTIONS]
 
 Options:
   -p, --preset <name>   Use specific CMake preset
+  --use-vcpkg           Use vcpkg for dependency management
   --configure-only      Only configure, don't build
   -h, --help            Show this help message
   -- <cmake-args>       Extra arguments forwarded to cmake configure step
 
 Examples:
-  ./configure                                        # Interactive mode
-  ./configure -p linux-gcc-static-release
+  ./configure                                        # Interactive mode (system deps)
+  ./configure -p linux-gcc-static-release --use-vcpkg # Use vcpkg
   ./configure --preset linux-gcc-static-release -- -DFOO=BAR -DBAZ=1
   ./configure -p linux-gcc-static-release -DFOO=BAR
 
@@ -150,6 +157,84 @@ init_vcpkg_submodule() {
     info "Git repository detected. Updating vcpkg submodule..."
     git submodule update --init --recursive extras/vcpkg
     info "vcpkg submodule initialized successfully."
+}
+
+# Initialize registry submodule when needed for custom triplets
+init_registry_submodule() {
+    local registry_dir="$PROJECT_ROOT/extras/registry"
+
+    if [ -d "$registry_dir/.git" ] || [ -f "$registry_dir/triplets/x64-linux-dynamic.cmake" ]; then
+        info "Registry already available at $registry_dir"
+        return 0
+    fi
+
+    if is_git_repo "$PROJECT_ROOT"; then
+        info "Initializing registry submodule..."
+        git submodule update --init extras/registry
+        if [ $? -eq 0 ]; then
+            info "Registry submodule initialized successfully."
+        else
+            warn "Failed to initialize registry submodule. Will try to clone..."
+            clone_registry
+        fi
+    else
+        clone_registry
+    fi
+}
+
+# Clone registry directly when no git repository
+clone_registry() {
+    local registry_dir="$PROJECT_ROOT/extras/registry"
+
+    if [ -d "$registry_dir/.git" ]; then
+        info "Registry already exists at $registry_dir"
+        return 0
+    fi
+
+    if [ -d "$registry_dir" ]; then
+        warn "Registry directory exists but is not a git repo. Removing..."
+        rm -rf "$registry_dir"
+    fi
+
+    info "Cloning vcpkg-registry from GitHub..."
+    git clone --depth=1 -b vcpkg https://github.com/cmachacacordova/vcpkg-registry.git "$registry_dir"
+    info "Registry cloned successfully."
+}
+
+# List of custom triplets that require the overlay registry
+get_custom_triplets() {
+    echo "x64-linux-dynamic x64-linux-clang x64-linux-clang-dynamic x64-linux-one-api x64-linux-one-api-dynamic x64-osx-dynamic"
+}
+
+# Check if a triplet requires the overlay registry
+is_custom_triplet() {
+    local triplet="$1"
+    local custom_triplets
+    custom_triplets=$(get_custom_triplets)
+
+    for custom in $custom_triplets; do
+        if [ "$triplet" = "$custom" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Extract VCPKG_TARGET_TRIPLET from a preset
+get_preset_triplet() {
+    local preset="$1"
+
+    # Query cmake for the VCPKG_TARGET_TRIPLET cache variable
+    local triplet
+    triplet=$(cmake --preset "$preset" 2>/dev/null | grep -oP 'VCPKG_TARGET_TRIPLET=\K[^ ]+' | head -1)
+
+    # If not found via cmake, try parsing CMakePresets.json directly
+    if [ -z "$triplet" ]; then
+        triplet=$(grep -A 20 '"name": "'"$preset"'"' "$PROJECT_ROOT/CMakePresets.json" 2>/dev/null | \
+                  grep -oP '"VCPKG_TARGET_TRIPLET": "\K[^"]+' | head -1)
+    fi
+
+    echo "$triplet"
 }
 
 # Clone vcpkg directly when no git repository (source distribution)
@@ -328,14 +413,54 @@ validate_preset() {
     fi
 }
 
+# Determine vcpkg feature from preset name
+get_vcpkg_feature() {
+    local preset=$1
+    if [[ "$preset" == *"-yyjson"* ]]; then
+        echo "yyjson"
+    else
+        echo "simdjson"
+    fi
+}
+
 # Configure with CMake
 configure_cmake() {
     local preset=$1
+    local vcpkg_args=()
 
-    progress "Configuring with preset: $preset"
-    export VCPKG_HOME="$VCPKG_DIR"
+    if [[ "$USE_VCPKG" == true ]]; then
+        local feature
+        feature=$(get_vcpkg_feature "$preset")
+        local toolchain_file="$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake"
 
-    if ! run_with_info_prefix cmake --fresh --preset "$preset" "${CMAKE_ARGS[@]}"; then
+        vcpkg_args+=(
+            "-DCMAKE_TOOLCHAIN_FILE=$toolchain_file"
+            "-DVCPKG_MANIFEST_FEATURES=$feature"
+        )
+
+        # Check if preset uses a custom triplet that needs overlay
+        local triplet
+        triplet=$(get_preset_triplet "$preset")
+
+        if [ -n "$triplet" ] && is_custom_triplet "$triplet"; then
+            info "Preset uses custom triplet: $triplet"
+            init_registry_submodule
+
+            local registry_dir="$PROJECT_ROOT/extras/registry"
+            vcpkg_args+=(
+                "-DVCPKG_OVERLAY_TRIPLETS=$registry_dir/triplets"
+                "-DVCPKG_OVERLAY_PORTS=$registry_dir/ports"
+            )
+            info "Using overlay registry for custom triplet"
+        fi
+
+        export VCPKG_HOME="$VCPKG_DIR"
+        progress "Configuring with preset: $preset (vcpkg enabled, feature: $feature)"
+    else
+        progress "Configuring with preset: $preset (system deps)"
+    fi
+
+    if ! run_with_info_prefix cmake --fresh --preset "$preset" "${vcpkg_args[@]}" "${CMAKE_ARGS[@]}"; then
         die "CMake configuration failed"
     fi
 
@@ -363,12 +488,12 @@ main() {
         echo "========================================"
         echo "i18n-redis Configure & Build"
         echo "========================================"
+        if [[ "$USE_VCPKG" == true ]]; then
+            echo "Mode: Using vcpkg for dependencies"
+        else
+            echo "Mode: Using system packages (default)"
+        fi
         echo ""
-    fi
-
-    # Check git is installed (required)
-    if ! command -v git &> /dev/null; then
-        die "git is not installed. git is required to obtain vcpkg dependencies."
     fi
 
     # Check for required files
@@ -376,28 +501,37 @@ main() {
         die "CMakeLists.txt not found. Are you in the right directory?"
     fi
 
-    if [[ ! -f "$PROJECT_ROOT/vcpkg.json" ]]; then
-        die "vcpkg.json not found. Are you in the right directory?"
-    fi
-
     if [[ ! -f "$PROJECT_ROOT/CMakePresets.json" ]]; then
         die "CMakePresets.json not found."
     fi
 
-    if [ -d "$PROJECT_ROOT/.git" ]; then
-        info "Project git repository detected at $PROJECT_ROOT/.git"
-    else
-        info "Project git repository not detected at $PROJECT_ROOT/.git"
+    # vcpkg operations only when --use-vcpkg is specified
+    if [[ "$USE_VCPKG" == true ]]; then
+        # Check git is installed (required for vcpkg)
+        if ! command -v git &> /dev/null; then
+            die "git is not installed. git is required to obtain vcpkg dependencies."
+        fi
+
+        # Check vcpkg.json exists
+        if [[ ! -f "$PROJECT_ROOT/vcpkg.json" ]]; then
+            die "vcpkg.json not found. Are you in the right directory?"
+        fi
+
+        if [ -d "$PROJECT_ROOT/.git" ]; then
+            info "Project git repository detected at $PROJECT_ROOT/.git"
+        else
+            info "Project git repository not detected at $PROJECT_ROOT/.git"
+        fi
+
+        if [[ "$PRESET_MODE" == true ]]; then
+            progress "Preparing vcpkg..."
+        fi
+
+        resolve_vcpkg
+
+        # Bootstrap vcpkg
+        bootstrap_vcpkg
     fi
-
-    if [[ "$PRESET_MODE" == true ]]; then
-        progress "Preparing vcpkg..."
-    fi
-
-    resolve_vcpkg
-
-    # Bootstrap vcpkg
-    bootstrap_vcpkg
 
     # Select preset
     if [[ -z "$PRESET" ]]; then

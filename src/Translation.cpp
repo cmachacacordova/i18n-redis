@@ -2,13 +2,10 @@
 
 namespace i18n {
 
-Translation::Translation(std::unique_ptr<TranslationProvider> provider,
-                         std::string defaultLocale)
-    : m_provider(std::move(provider)),
-      m_default_locale(std::move(defaultLocale)) {}
+Translation::Translation(std::unique_ptr<TranslationProvider> provider, std::string defaultLocale) : m_provider(std::move(provider)), m_default_locale(std::move(defaultLocale)) {
+}
 
-bool Translation::store(const std::string &cwd,
-                        const std::vector<std::string> &locales) {
+bool Translation::store(const std::string &cwd, const std::vector<std::string> &locales) {
   if (!m_provider) {
     return false;
   }
@@ -17,8 +14,7 @@ bool Translation::store(const std::string &cwd,
   return true;
 }
 
-std::string Translation::translate(const std::string &key,
-                                   const std::string &locale) const {
+std::string Translation::translate(const std::string &key, const std::string &locale) const {
   const std::string &usedLocale = locale.empty() ? m_default_locale : locale;
   return m_provider->get(key, usedLocale);
 }

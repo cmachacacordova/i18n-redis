@@ -7,6 +7,7 @@
 
 param(
     [string]$Preset = "",
+    [switch]$UseVcpkg,
     [switch]$ConfigureOnly,
     [string[]]$CmakeArgs = @(),
     [switch]$Help
@@ -20,13 +21,14 @@ Usage: .\configure.ps1 [OPTIONS]
 
 Options:
   -Preset <name>         Use specific CMake preset
+  -UseVcpkg              Use vcpkg for dependency management
   -ConfigureOnly         Only configure, don't build
   -CmakeArgs <args>      Extra arguments forwarded to cmake configure step
   -Help                  Show this help message
 
 Examples:
-  .\configure.ps1                                                         # Interactive mode
-  .\configure.ps1 -Preset windows-msvc-static-release
+  .\configure.ps1                                                         # Interactive mode (system deps)
+  .\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg          # Use vcpkg
   .\configure.ps1 -Preset windows-msvc-static-release -CmakeArgs "-DFOO=BAR","-DBAZ=1"
 
 Available presets can be found in CMakePresets.json
@@ -133,6 +135,91 @@ function Init-VcpkgSubmodule {
         Error-Exit "Failed to initialize vcpkg submodule"
     }
     Info "vcpkg submodule initialized successfully."
+}
+
+# Initialize registry submodule for custom triplets
+function Init-RegistrySubmodule {
+    $registryDir = Join-PathSegments $PROJECT_ROOT, "extras", "registry"
+
+    if ((Test-Path (Join-Path $registryDir ".git")) -or (Test-Path (Join-Path $registryDir "triplets"))) {
+        Info "Registry already available at $registryDir"
+        return
+    }
+
+    if (Test-GitRepo $PROJECT_ROOT) {
+        Info "Initializing registry submodule..."
+        git submodule update --init extras/registry
+        if ($LASTEXITCODE -ne 0) {
+            Warn "Failed to initialize registry submodule. Will try to clone..."
+            Clone-Registry
+        } else {
+            Info "Registry submodule initialized successfully."
+        }
+    } else {
+        Clone-Registry
+    }
+}
+
+# Clone registry directly
+function Clone-Registry {
+    $registryDir = Join-PathSegments $PROJECT_ROOT, "extras", "registry"
+
+    if (Test-Path (Join-Path $registryDir ".git")) {
+        Info "Registry already exists at $registryDir"
+        return
+    }
+
+    if (Test-Path $registryDir) {
+        Warn "Registry directory exists but is not a git repo. Removing..."
+        Remove-Item -Recurse -Force $registryDir
+    }
+
+    Info "Cloning vcpkg-registry from GitHub..."
+    git clone --depth=1 -b vcpkg https://github.com/cmachacacordova/vcpkg-registry.git $registryDir
+    if ($LASTEXITCODE -ne 0) {
+        Error-Exit "Failed to clone registry"
+    }
+    Info "Registry cloned successfully."
+}
+
+# List of custom triplets that require the overlay registry
+function Get-CustomTriplets {
+    return @("x64-linux-dynamic", "x64-linux-clang", "x64-linux-clang-dynamic", "x64-linux-one-api", "x64-linux-one-api-dynamic", "x64-osx-dynamic")
+}
+
+# Check if a triplet requires the overlay registry
+function Test-CustomTriplet($triplet) {
+    $customTriplets = Get-CustomTriplets
+    return $customTriplets -contains $triplet
+}
+
+# Extract VCPKG_TARGET_TRIPLET from a preset using cmake
+function Get-PresetTriplet($preset) {
+    # Try to get triplet from cmake preset output
+    $output = cmake --preset $preset 2>&1
+    $triplet = $null
+
+    foreach ($line in $output) {
+        if ($line -match 'VCPKG_TARGET_TRIPLET=(\S+)') {
+            $triplet = $matches[1]
+            break
+        }
+    }
+
+    # If not found, try parsing CMakePresets.json
+    if (-not $triplet) {
+        $presetsFile = Join-Path $PROJECT_ROOT "CMakePresets.json"
+        if (Test-Path $presetsFile) {
+            $content = Get-Content $presetsFile -Raw
+            # Simple regex to find VCPKG_TARGET_TRIPLET in the preset
+            $pattern = '"name":\s*"' + [regex]::Escape($preset) + '".*?(?:"VCPKG_TARGET_TRIPLET":\s*"([^"]+)")'
+            if ($content -match $pattern) {
+                $triplet = $matches[1]
+            }
+        }
+    }
+
+    return $triplet
 }
 
 # Clone vcpkg
@@ -332,12 +419,45 @@ function Select-PresetInteractive {
     }
 }
 
+# Determine vcpkg feature from preset name
+function Get-VcpkgFeature($preset) {
+    if ($preset -match "yyjson") {
+        return "yyjson"
+    }
+    return "simdjson"
+}
+
 # Configure with CMake
 function Configure-CMake($preset) {
-    Progress "Configuring with preset: $preset"
-    $env:VCPKG_HOME = $VCPKG_DIR
+    $vcpkgArgs = @()
 
-    $cmakeInvokeArgs = @("--fresh", "--preset", $preset) + $CmakeArgs
+    if ($UseVcpkg) {
+        $feature = Get-VcpkgFeature $preset
+        $toolchainFile = Join-Path $VCPKG_DIR "scripts\buildsystems\vcpkg.cmake"
+
+        $vcpkgArgs += "-DCMAKE_TOOLCHAIN_FILE=$toolchainFile"
+        $vcpkgArgs += "-DVCPKG_MANIFEST_FEATURES=$feature"
+
+        # Check if preset uses a custom triplet that needs overlay
+        $triplet = Get-PresetTriplet $preset
+
+        if ($triplet -and (Test-CustomTriplet $triplet)) {
+            Info "Preset uses custom triplet: $triplet"
+            Init-RegistrySubmodule
+
+            $registryDir = Join-PathSegments $PROJECT_ROOT, "extras", "registry"
+            $vcpkgArgs += "-DVCPKG_OVERLAY_TRIPLETS=$registryDir\triplets"
+            $vcpkgArgs += "-DVCPKG_OVERLAY_PORTS=$registryDir\ports"
+            Info "Using overlay registry for custom triplet"
+        }
+
+        $env:VCPKG_HOME = $VCPKG_DIR
+        Progress "Configuring with preset: $preset (vcpkg enabled, feature: $feature)"
+    } else {
+        Progress "Configuring with preset: $preset (system deps)"
+    }
+
+    $cmakeInvokeArgs = @("--fresh", "--preset", $preset) + $vcpkgArgs + $CmakeArgs
     $exitCode = Invoke-WithInfoPrefix "cmake" $cmakeInvokeArgs
     if ($exitCode -ne 0) {
         Error-Exit "CMake configuration failed"
@@ -361,39 +481,49 @@ if (-not $PRESET_MODE) {
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host "i18n-redis Configure & Build" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
+    if ($UseVcpkg) {
+        Write-Host "Mode: Using vcpkg for dependencies" -ForegroundColor Green
+    } else {
+        Write-Host "Mode: Using system packages (default)" -ForegroundColor Green
+    }
     Write-Host ""
 }
 
-# Check requirements
-Test-Git
-
+# Check for required files
 if (-not (Test-Path (Join-Path $PROJECT_ROOT "CMakeLists.txt"))) {
     Error-Exit "CMakeLists.txt not found. Are you in the right directory?"
-}
-
-if (-not (Test-Path (Join-Path $PROJECT_ROOT "vcpkg.json"))) {
-    Error-Exit "vcpkg.json not found. Are you in the right directory?"
 }
 
 if (-not (Test-Path (Join-Path $PROJECT_ROOT "CMakePresets.json"))) {
     Error-Exit "CMakePresets.json not found."
 }
 
-$gitDir = Join-Path $PROJECT_ROOT ".git"
-if (Test-GitRepo $PROJECT_ROOT) {
-    Info "Project git repository detected at $gitDir"
-} else {
-    Info "Project git repository not detected at $gitDir"
+# vcpkg operations only when -UseVcpkg is specified
+if ($UseVcpkg) {
+    # Check git is installed (required for vcpkg)
+    Test-Git
+
+    # Check vcpkg.json exists
+    if (-not (Test-Path (Join-Path $PROJECT_ROOT "vcpkg.json"))) {
+        Error-Exit "vcpkg.json not found. Are you in the right directory?"
+    }
+
+    $gitDir = Join-Path $PROJECT_ROOT ".git"
+    if (Test-GitRepo $PROJECT_ROOT) {
+        Info "Project git repository detected at $gitDir"
+    } else {
+        Info "Project git repository not detected at $gitDir"
+    }
+
+    if ($PRESET_MODE) {
+        Progress "Preparing vcpkg..."
+    }
+
+    Resolve-Vcpkg
+
+    # Bootstrap vcpkg
+    Bootstrap-Vcpkg
 }
-
-if ($PRESET_MODE) {
-    Progress "Preparing vcpkg..."
-}
-
-Resolve-Vcpkg
-
-# Bootstrap vcpkg
-Bootstrap-Vcpkg
 
 # Select preset
 if ([string]::IsNullOrEmpty($Preset)) {

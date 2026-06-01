@@ -49,9 +49,9 @@ New-Item -ItemType Directory -Force -Path $TempPkgDir | Out-Null
 Write-Host "[PACKAGER] Copying install tree..." -ForegroundColor Green
 Copy-Item -Path (Join-Path $InstallPath "*") -Destination $TempPkgDir -Recurse -Force
 
-# Copy license and readme
-Copy-Item -Path "LICENSE" -Destination "$TempPkgDir\" -Force
-Copy-Item -Path "README.md" -Destination "$TempPkgDir\" -Force
+# Copy license and package readme (README for developers using the library)
+Copy-Item -Path "LICENSE" -Destination "$TempPkgDir\LICENSE" -Force
+Copy-Item -Path ".github\templates\README_PACKAGE.md" -Destination "$TempPkgDir\README.md" -Force
 
 # Create the zip package
 Write-Host "[PACKAGER] Creating zip archive..." -ForegroundColor Green

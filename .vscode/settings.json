@@ -8,9 +8,6 @@
     "cwd": "${workspaceFolder}",
   },
   "editor.fontSize": 15,
-  "cmake.configureSettings": {
-    "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake"
-  },
   "editor.codeActionsOnSave": {},
   "clangd.path": "/usr/sbin/clangd",
   "clangd.arguments": [
