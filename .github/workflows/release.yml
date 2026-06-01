@@ -95,6 +95,7 @@ jobs:
           $extractedDir = Get-ChildItem -Path validation/build -Directory | Select-Object -First 1
           Write-Host "Extracted directory: $($extractedDir.FullName)"
           Set-Location $extractedDir.FullName
+          Unblock-File -Path .\configure.ps1
           .\configure.ps1 -Preset windows-msvc-static-release -UseVcpkg -ConfigureOnly -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS","-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
 
       - name: Upload artifact
