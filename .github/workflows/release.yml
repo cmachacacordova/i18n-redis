@@ -90,8 +90,9 @@ jobs:
           VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\validation\registry\ports
           VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\validation\registry\triplets
         run: |
-          New-Item -ItemType Directory -Path validation/build | Out-Null
-          Expand-Archive -Path "release\*.zip" -DestinationPath validation/build
+          New-Item -ItemType Directory -Force -Path validation/build | Out-Null
+          $zipFile = Get-ChildItem -Path release -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
+          Expand-Archive -Path $zipFile -DestinationPath validation/build
           $extractedDir = Get-ChildItem -Path validation/build -Directory | Select-Object -First 1
           Write-Host "Extracted directory: $($extractedDir.FullName)"
           Set-Location $extractedDir.FullName

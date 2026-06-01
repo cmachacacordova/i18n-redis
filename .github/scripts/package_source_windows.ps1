@@ -13,8 +13,8 @@ $ProjectRoot = Split-Path -Parent $GithubDir
 if (-not $OutputDir) {
     $OutputDir = Join-Path $ProjectRoot "release"
 }
-# Convert to absolute path for use after Push-Location
-$OutputDir = Resolve-Path $OutputDir
+# Convert to absolute path for use after Push-Location (directory may not exist yet)
+$OutputDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputDir)
 
 $VersionFile = Join-Path $ProjectRoot ".version"
 if (-not (Test-Path $VersionFile)) {
