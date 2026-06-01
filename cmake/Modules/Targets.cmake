@@ -101,11 +101,9 @@ install(TARGETS i18n-redis
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${PROJECT_BINARY_DIR}/i18n_redis_export.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT i18n-redis-targets
     NAMESPACE i18n-redis::
     FILE i18n-redisTargets.cmake
@@ -127,7 +125,7 @@ install(FILES
 
 # ── Example ───────────────────────────────────────────────────────────────────
 if(I18N_REDIS_BUILD_EXAMPLES)
-    add_executable(i18n-redis-example ${PROJECT_SOURCE_DIR}/example/main.cpp)
+    add_executable(i18n-redis-example ${PROJECT_SOURCE_DIR}/example/Main.cpp)
     target_link_libraries(i18n-redis-example PRIVATE i18n-redis::i18n-redis)
 endif()
 

@@ -1,8 +1,8 @@
 #include <filesystem>
 #include <iostream>
 
-#include "i18n/redis/translation_provider.h"
-#include "i18n/translation.h"
+#include "i18n/redis/RedisTranslationProvider.h"
+#include "i18n/Translation.h"
 
 int main() {
   std::string host = "localhost";

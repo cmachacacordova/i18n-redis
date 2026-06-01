@@ -16,5 +16,5 @@ set_property(CACHE I18N_REDIS_JSON_BACKEND PROPERTY STRINGS simdjson yyjson)
 
 include(CTest)
 
-include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/Dependencies.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/scripts/cmake/Targets.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/Dependencies.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/Targets.cmake)

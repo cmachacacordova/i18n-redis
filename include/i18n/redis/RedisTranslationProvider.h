@@ -2,7 +2,7 @@
 
 #include "i18n_redis_export.h"
 
-#include "i18n/translation_provider.h"
+#include "i18n/TranslationProvider.h"
 
 #include <sw/redis++/redis++.h>
 

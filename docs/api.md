@@ -1,6 +1,6 @@
 # i18n-redis API Reference
 
-## `class Translation`  *(i18n/translation.h)*
+## `class Translation`  *(i18n/Translation.h)*
 
 High-level facade. Owns a `TranslationProvider` and exposes all public lookups.
 Calls `load()` on the provider via friend access — callers only interact with
@@ -46,8 +46,8 @@ The translation string may contain `{fmt}` placeholders (e.g. `{}`).
 ### Example
 
 ```cpp
-#include "i18n/redis/translation_provider.h"
-#include "i18n/translation.h"
+#include "i18n/redis/RedisTranslationProvider.h"
+#include "i18n/Translation.h"
 
 i18n::Translation t(
     std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379), "en");
@@ -61,7 +61,7 @@ std::string s3 = t.translate("welcome", "en", "Alice"); // fmt formatting
 
 ---
 
-## `class RedisTranslationProvider`  *(i18n/redis/translation_provider.h)*
+## `class RedisTranslationProvider`  *(i18n/redis/RedisTranslationProvider.h)*
 
 Concrete `TranslationProvider` backed by Redis via `redis-plus-plus`.
 Inherits from `i18n::TranslationProvider`.
@@ -109,7 +109,7 @@ std::unique_ptr<sw::redis::Redis> m_redis;
 
 ---
 
-## `class TranslationProvider`  *(i18n/translation_provider.h)*
+## `class TranslationProvider`  *(i18n/TranslationProvider.h)*
 
 Abstract base class. Implement this to provide a custom backend.
 
@@ -134,7 +134,7 @@ public:
 
 ---
 
-## `configuration.h`  *(i18n/configuration.h)*
+## `Configuration.h`  *(i18n/Configuration.h)*
 
 ```cpp
 namespace i18n {
@@ -194,11 +194,12 @@ The hidden presets `backend-simdjson` and `backend-yyjson` defined in
 
 ### Convenience script
 
-`build_project.sh` / `build_project.bat` select the correct preset automatically:
+`configure` / `configure.ps1` select the requested preset, prepare vcpkg, and
+then configure and build:
 
 ```bash
-./scripts/build_project.sh static release gcc simdjson
-./scripts/build_project.sh static release gcc yyjson
+./configure -p linux-gcc-static-release
+./configure -p linux-gcc-static-release-yyjson
 ```
 
 If `VCPKG_HOME` is unset, the script initialises the `extras/vcpkg` submodule

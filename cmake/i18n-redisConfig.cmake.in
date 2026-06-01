@@ -4,10 +4,8 @@ include(CMakeFindDependencyMacro)
 find_dependency(redis++ CONFIG)
 find_dependency(fmt CONFIG)
 
-# JSON backend is detected from what was used at build time
-# The consuming project should ensure the same backend is available
 if (NOT DEFINED I18N_REDIS_JSON_BACKEND)
-    set(I18N_REDIS_JSON_BACKEND "simdjson")
+    set(I18N_REDIS_JSON_BACKEND "@I18N_REDIS_JSON_BACKEND@")
 endif()
 
 if (I18N_REDIS_JSON_BACKEND STREQUAL "simdjson")

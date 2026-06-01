@@ -118,17 +118,17 @@ brew install cmake ninja
 
 ```bash
 # Linux / macOS
-./scripts/build_project.sh static release          # GCC + simdjson
-./scripts/build_project.sh static release clang    # Clang + simdjson
-./scripts/build_project.sh static release gcc yyjson   # GCC + yyjson
-./scripts/build_project.sh shared debug clang yyjson   # Clang + yyjson
+./configure -p linux-gcc-static-release
+./configure -p linux-clang-static-release
+./configure -p linux-gcc-static-release-yyjson
+./configure -p linux-clang-shared-debug-yyjson
 
-# Windows (cmd)
-scripts\build_project.bat static release           # MSVC + simdjson
-scripts\build_project.bat static release yyjson    # MSVC + yyjson
+# Windows (PowerShell)
+.\configure.ps1 -Preset windows-msvc-static-release
+.\configure.ps1 -Preset windows-msvc-static-release-yyjson
 ```
 
-If `VCPKG_HOME` is not set the script automatically initialises the
+If `VCPKG_HOME` is not set the configure script automatically initialises the
 `extras/vcpkg` submodule and bootstraps vcpkg before building.
 vcpkg then installs the selected JSON backend via the `vcpkg.json` manifest.
 
@@ -143,6 +143,18 @@ cmake --build --preset linux-gcc-static-release
 cmake --preset linux-gcc-static-release-yyjson
 cmake --build --preset linux-gcc-static-release-yyjson
 ```
+
+If you run `cmake --preset` directly and need the overlay registry, pass the
+paths explicitly (or export them once per shell):
+
+```bash
+cmake --preset linux-gcc-static-release \
+  -DVCPKG_OVERLAY_PORTS="$PWD/extras/registry/ports" \
+  -DVCPKG_OVERLAY_TRIPLETS="$PWD/extras/registry/triplets"
+```
+
+> Overlays are intentionally passed explicitly so the project stays compatible
+> with plain CMake + vcpkg configurations.
 
 ## JSON backend
 
@@ -256,8 +268,8 @@ Every preset exists in both a `simdjson` (default) and `yyjson` variant.
 ## Usage
 
 ```cpp
-#include "i18n/redis/translation_provider.h"
-#include "i18n/translation.h"
+#include "i18n/redis/RedisTranslationProvider.h"
+#include "i18n/Translation.h"
 
 auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
 i18n::Translation t(std::move(provider), "en");
@@ -318,62 +330,52 @@ ctest --test-dir out/build --output-on-failure
 
 ```
 i18n-redis/
-├── .clang-format                 # clang-format style configuration
-├── .clangd                       # clangd LSP settings
-├── .actrc                        # act (local GitHub Actions runner) config
-├── .gitmodules                   # git submodules declaration
 ├── CMakeLists.txt
 ├── CMakePresets.json
+├── .version                      # release/CI marker
 ├── LICENSE
-├── vcpkg.json                    # vcpkg manifest — declares all dependencies
-├── vcpkg-configuration.json      # vcpkg baseline and port configuration
-├── vcpkg_installed/              # vcpkg installed packages (generated, gitignored)
-├── .github/
-│   └── workflows/
-│       ├── ci.yml
-│       └── release.yml
-├── .vscode/
-│   └── settings.json             # CMake Tools, clangd, clang-format settings
+├── vcpkg.json                    # vcpkg manifest — declares dependencies
+├── vcpkg-configuration.json      # vcpkg registry/baseline config
+├── configure                     # Unix helper (wraps CMake presets)
+├── configure.ps1                 # Windows helper (wraps CMake presets)
 ├── cmake/
-│   └── i18n-redisConfig.cmake.in
+│   ├── i18n-redisConfig.cmake.in
+│   ├── Modules/
+│   │   ├── Dependencies.cmake
+│   │   └── Targets.cmake
 ├── docs/
 │   └── api.md
 ├── example/
-│   └── main.cpp
-├── extras/
-│   └── vcpkg/                    # vcpkg submodule (git submodule update --init extras/vcpkg)
+│   └── Main.cpp
 ├── include/
 │   └── i18n/
-│       ├── configuration.h
-│       ├── translation.h
-│       ├── translation_provider.h
-│       └── redis/
-│           └── translation_provider.h
+│       ├── Configuration.h
+│       ├── Translation.h
+│       ├── TranslationProvider.h
+│       └── redis/RedisTranslationProvider.h
 ├── locales/
-│   └── en/
-│       └── messages.json
+│   └── en/messages.json
 ├── scripts/
-│   ├── cmake/
-│   │   ├── Dependencies.cmake
-│   │   └── Targets.cmake
-│   ├── build_project.sh
-│   ├── build_project.bat
-│   └── version.sh
+│   ├── update-port.sh            # sync overlay port in extras/registry
+│   └── version.sh                # bump repo + manifest versions
 ├── src/
-│   ├── redis_translation_provider.cpp
-│   ├── translation.cpp
-│   └── translation_provider.cpp
-└── tests/
-    ├── CMakeLists.txt
-    ├── main.cpp
-    └── test_translation_key.cpp
+│   ├── RedisTranslationProvider.cpp
+│   ├── Translation.cpp
+│   └── TranslationProvider.cpp
+├── tests/
+│   ├── CMakeLists.txt
+│   ├── Main.cpp
+│   └── TestTranslationKey.cpp
+└── extras/ (optional checkout for contributors)
+    ├── vcpkg/                    # bundled vcpkg clone
+    └── registry/                 # private overlay ports/triplets used in CI
 ```
 
 ## Troubleshooting
 
 ### VCPKG_HOME is not set
 
-`VCPKG_HOME` is **optional** — when unset, `build_project.sh` / `build_project.bat`
+`VCPKG_HOME` is **optional** — when unset, `configure` / `configure.ps1`
 automatically initialises the `extras/vcpkg` submodule and bootstraps vcpkg.
 
 To set it persistently:

@@ -1,4 +1,4 @@
-#include "i18n/configuration.h"
+#include "i18n/Configuration.h"
 
 #include <cassert>
 #include <cstdlib>

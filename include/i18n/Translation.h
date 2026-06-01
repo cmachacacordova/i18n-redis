@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "i18n/translation_provider.h"
+#include "i18n/TranslationProvider.h"
 
 #include <fmt/core.h>
 

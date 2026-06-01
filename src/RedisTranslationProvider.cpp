@@ -1,8 +1,8 @@
 #include <filesystem>
 #include <stdexcept>
 
-#include "i18n/configuration.h"
-#include "i18n/redis/translation_provider.h"
+#include "i18n/Configuration.h"
+#include "i18n/redis/RedisTranslationProvider.h"
 
 #include <fmt/core.h>
 #ifdef I18N_REDIS_USE_SIMDJSON
