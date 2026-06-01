@@ -200,7 +200,7 @@ jobs:
       - name: Configure, build and test
         shell: pwsh
         run: |
-          .\configure.ps1 -Preset ${{ matrix.preset }} -UseVcpkg -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS" -CmakeArgs "-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
+          .\configure.ps1 -Preset ${{ matrix.preset }} -UseVcpkg -CmakeArgs "-DVCPKG_OVERLAY_PORTS=$env:VCPKG_OVERLAY_PORTS","-DVCPKG_OVERLAY_TRIPLETS=$env:VCPKG_OVERLAY_TRIPLETS"
           if ("${{ matrix.preset }}" -notlike "*shared*") {
             ctest --test-dir out\build --output-on-failure
           }
