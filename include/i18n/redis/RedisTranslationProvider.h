@@ -4,7 +4,7 @@
 
 #include "i18n/TranslationProvider.h"
 
-#include <sw/redis++/redis++.h>
+#include "sw/redis++/redis++.h"
 
 namespace i18n {
 

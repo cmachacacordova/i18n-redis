@@ -1,9 +1,9 @@
 #pragma once
 
-#include "i18n_redis_export.h"
-
 #include <string>
 #include <vector>
+
+#include "i18n_redis_export.h"
 
 namespace i18n {
 
@@ -13,7 +13,6 @@ namespace i18n {
 /// loading locale files into the backing store and retrieving
 /// individual translated strings by key.
 class I18N_REDIS_EXPORT TranslationProvider {
-
 public:
   TranslationProvider();
 

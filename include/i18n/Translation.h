@@ -1,14 +1,14 @@
 #pragma once
 
-#include "i18n_redis_export.h"
-
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "i18n_redis_export.h"
+
 #include "i18n/TranslationProvider.h"
 
-#include <fmt/core.h>
+#include "fmt/core.h"
 
 namespace i18n {
 
@@ -18,10 +18,6 @@ namespace i18n {
 /// Callers use @c store() once to load locale files and then @c translate()
 /// for every lookup.
 class I18N_REDIS_EXPORT Translation {
-private:
-  std::unique_ptr<TranslationProvider> m_provider; ///< Backing store (e.g. Redis).
-  std::string m_default_locale;                    ///< Fallback locale when none is specified.
-
 public:
   /// @brief Constructs a Translation with the given backend and default locale.
   /// @param provider Owning pointer to the translation backend.
@@ -58,6 +54,10 @@ public:
   std::string translate(const std::string &key, const std::string &locale = "") const;
 
   ~Translation() noexcept;
+
+private:
+  std::unique_ptr<TranslationProvider> m_provider; ///< Backing store (e.g. Redis).
+  std::string m_default_locale;                    ///< Fallback locale when none is specified.
 };
 
 } // namespace i18n
