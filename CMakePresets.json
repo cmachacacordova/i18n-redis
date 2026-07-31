@@ -28,21 +28,17 @@
     {
       "name": "base-linux",
       "hidden": true,
-      "inherits": "base-ninja"
+      "inherits": "base",
+      "generator": "Unix Makefiles"
     },
     {
       "name": "base-macos",
       "hidden": true,
-      "inherits": "base-ninja"
+      "inherits": "base",
+      "generator": "Unix Makefiles"
     },
     {
       "name": "base-windows",
-      "hidden": true,
-      "inherits": "base",
-      "generator": "Ninja"
-    },
-    {
-      "name": "base-ninja",
       "hidden": true,
       "inherits": "base",
       "generator": "Ninja"

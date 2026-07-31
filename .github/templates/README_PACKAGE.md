@@ -18,14 +18,15 @@ key-based lookups with optional `{fmt}` format arguments.
 |------|-----------------|
 | CMake | 3.25 |
 | C++ Compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
-| Ninja | any recent |
+| Unix Makefiles | any recent (Linux/macOS) |
+| Ninja | any recent (Windows) |
 | Redis Server | 5.0+ |
 
 ### Install Dependencies
 
 **Ubuntu / Debian:**
 ```bash
-sudo apt-get install -y cmake ninja-build g++ \
+sudo apt-get install -y cmake g++ \
   libhiredis-dev libredis++-dev libfmt-dev \
   libyyjson-dev libsimdjson-dev
 ```

@@ -172,10 +172,10 @@
   "cmake.buildBeforeRun": true,
   "cmake.configureOnEdit": false,
   "cmake.options.statusBarVisibility": "compact",
-  "cmake.generator": "Ninja",
+  "cmake.generator": "Unix Makefiles",
   "cmake.preferredGenerators": [
-    "Ninja",
-    "Unix Makefiles"
+    "Unix Makefiles",
+    "Ninja"
   ],
   "cmake.cmakePath": "cmake",
   "formatFiles.excludedFolders": [
