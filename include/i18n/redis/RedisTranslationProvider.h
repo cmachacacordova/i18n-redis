@@ -8,12 +8,22 @@
 #include <string>
 
 namespace sw::redis {
+
 class ConnectionOptions;
+
 class ConnectionPoolOptions;
+
 class Redis;
-}
+
+} // namespace sw::redis
 
 namespace i18n {
+
+namespace redis {
+
+using namespace sw::redis;
+
+};
 
 class I18N_REDIS_EXPORT Translation;
 
@@ -38,7 +48,7 @@ public:
   /// @param connection_opts Redis connection options (host, port, password, etc.).
   /// @param pool_opts        Connection pool options (size, timeouts, etc.).
   /// @throws std::runtime_error if the connection cannot be established.
-  explicit RedisTranslationProvider(const sw::redis::ConnectionOptions &connection_opts, const sw::redis::ConnectionPoolOptions &pool_opts);
+  explicit RedisTranslationProvider(const i18n::redis::ConnectionOptions &connection_opts, const i18n::redis::ConnectionPoolOptions &pool_opts);
 
   /// @brief Queries Redis for "i18n:<locale>:<key>" and extracts the value field.
   /// @param key    Translation identifier (no colons allowed).
@@ -68,7 +78,7 @@ protected:
   bool load(const std::string &cwd, const std::vector<std::string> &locales) override;
 
 private:
-  std::unique_ptr<sw::redis::Redis> m_redis; ///< Underlying redis++ client.
+  std::unique_ptr<i18n::redis::Redis> m_redis; ///< Underlying redis++ client.
   friend class i18n::Translation;
 };
 

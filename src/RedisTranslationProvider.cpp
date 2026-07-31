@@ -12,33 +12,35 @@
 #include <yyjson.h>
 #endif
 
-i18n::RedisTranslationProvider::RedisTranslationProvider(const std::string &host, int port) {
+namespace i18n {
+
+RedisTranslationProvider::RedisTranslationProvider(const std::string &host, int port) {
   try {
-    sw::redis::ConnectionOptions connection_opts;
+    redis::ConnectionOptions connection_opts;
     connection_opts.host = host;
     connection_opts.port = port;
 
-    sw::redis::ConnectionPoolOptions pool_opts;
+    redis::ConnectionPoolOptions pool_opts;
     pool_opts.size = 4;
     pool_opts.wait_timeout = std::chrono::milliseconds(1000);
     pool_opts.connection_lifetime = std::chrono::milliseconds(60000);
     pool_opts.connection_idle_time = std::chrono::milliseconds(30000);
 
-    m_redis = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
+    m_redis = std::make_unique<redis::Redis>(connection_opts, pool_opts);
   } catch (const std::exception &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); } catch (...) {
     throw std::runtime_error("Failed to connect to Redis: unknown error");
   }
 }
 
-i18n::RedisTranslationProvider::RedisTranslationProvider(const sw::redis::ConnectionOptions &connection_opts, const sw::redis::ConnectionPoolOptions &pool_opts) {
+RedisTranslationProvider::RedisTranslationProvider(const redis::ConnectionOptions &connection_opts, const redis::ConnectionPoolOptions &pool_opts) {
   try {
-    m_redis = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
+    m_redis = std::make_unique<redis::Redis>(connection_opts, pool_opts);
   } catch (const std::exception &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); } catch (...) {
     throw std::runtime_error("Failed to connect to Redis: unknown error");
   }
 }
 
-bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vector<std::string> &locales) {
+bool RedisTranslationProvider::load(const std::string &cwd, const std::vector<std::string> &locales) {
   bool all_locales_loaded = locales.size() > 0;
   for (const auto &locale : locales) {
     const std::filesystem::path locale_path = (std::filesystem::path(cwd) / "locales" / locale).lexically_normal();
@@ -92,7 +94,7 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
           throw std::runtime_error(fmt::format("Translation 'modificationVersion' missing for ID '{}' in file {}, index {}", id_str, entry.path().string(), index));
         }
 
-        const std::string redis_key = fmt::format(i18n::kFormatKey, locale, id_str);
+        const std::string redis_key = fmt::format(kFormatKey, locale, id_str);
         this->m_redis->set(redis_key, raw_json);
         ++index;
       }
@@ -146,7 +148,7 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
           throw std::runtime_error(fmt::format("Translation 'modificationVersion' missing or not an integer for ID '{}' in file {}, index {}", id, entry.path().string(), index));
         }
 
-        const std::string redis_key = fmt::format(i18n::kFormatKey, locale, id);
+        const std::string redis_key = fmt::format(kFormatKey, locale, id);
         size_t json_len = 0;
         char *json_str = yyjson_val_write(obj, YYJSON_WRITE_NOFLAG, &json_len);
         this->m_redis->set(redis_key, std::string(json_str, json_len));
@@ -160,8 +162,8 @@ bool i18n::RedisTranslationProvider::load(const std::string &cwd, const std::vec
   return all_locales_loaded;
 }
 
-std::string i18n::RedisTranslationProvider::get(const std::string &key, const std::string &locale) const {
-  auto raw = this->m_redis->get(fmt::format(i18n::kFormatKey, locale, key));
+std::string RedisTranslationProvider::get(const std::string &key, const std::string &locale) const {
+  auto raw = this->m_redis->get(fmt::format(kFormatKey, locale, key));
   if (!raw) {
     return key;
   }
@@ -189,4 +191,6 @@ std::string i18n::RedisTranslationProvider::get(const std::string &key, const st
 #endif
 }
 
-i18n::RedisTranslationProvider::~RedisTranslationProvider() noexcept = default;
+RedisTranslationProvider::~RedisTranslationProvider() noexcept = default;
+
+} // namespace i18n
