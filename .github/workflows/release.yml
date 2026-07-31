@@ -29,6 +29,18 @@ jobs:
             ninja-build \
             git
 
+      - name: Verify / install Ninja
+        run: |
+          # Make sure ninja is installed and visible; install if missing and show diagnostics
+          if ! command -v ninja >/dev/null 2>&1; then
+            echo "Ninja not found. Installing ninja-build..."
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ninja-build
+          fi
+          echo "Ninja location and version:"
+          which ninja || true
+          ninja --version || true
+
       - name: Clone vcpkg and registry for validation
         run: |
           git clone --depth=1 https://github.com/microsoft/vcpkg.git validation/vcpkg
@@ -46,7 +58,8 @@ jobs:
           extracted_dir=$(find validation/build -maxdepth 1 -type d -name "i18n-redis-*" | head -1)
           echo "Extracted directory: $extracted_dir"
           cd "$extracted_dir"
-          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          # Prefer Ninja (preset likely uses it); if not available, force Unix Makefiles as a fallback
+          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
