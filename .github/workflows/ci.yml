@@ -45,7 +45,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            gcc g++ cmake curl zip unzip tar pkg-config
+            gcc g++ make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -94,7 +94,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            clang cmake curl zip unzip tar pkg-config
+            clang make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -135,7 +135,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            clang cmake curl zip unzip tar pkg-config
+            clang make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
