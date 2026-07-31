@@ -27,6 +27,7 @@ jobs:
             build-essential \
             cmake \
             make \
+            ninja-build \
             git
 
       - name: Clone vcpkg and registry for validation
@@ -46,7 +47,7 @@ jobs:
           extracted_dir=$(find validation/build -maxdepth 1 -type d -name "i18n-redis-*" | head -1)
           echo "Extracted directory: $extracted_dir"
           cd "$extracted_dir"
-          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
+          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

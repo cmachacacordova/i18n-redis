@@ -45,7 +45,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            gcc g++ make cmake curl zip unzip tar pkg-config
+            ninja-build gcc g++ make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -56,7 +56,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -94,7 +94,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            clang make cmake curl zip unzip tar pkg-config
+            ninja-build clang make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -105,7 +105,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -135,7 +135,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            clang make cmake curl zip unzip tar pkg-config
+            ninja-build clang make cmake curl zip unzip tar pkg-config
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -146,7 +146,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
           ctest --test-dir out/build --output-on-failure
 
   windows-msvc:
