@@ -29,19 +29,28 @@
       "name": "base-linux",
       "hidden": true,
       "inherits": "base",
-      "generator": "Unix Makefiles"
+      "generator": "Unix Makefiles",
+      "environment": {
+        "CMAKE_MAKE_PROGRAM": "make"
+      }
     },
     {
       "name": "base-macos",
       "hidden": true,
       "inherits": "base",
-      "generator": "Unix Makefiles"
+      "generator": "Unix Makefiles",
+      "environment": {
+        "CMAKE_MAKE_PROGRAM": "make"
+      }
     },
     {
       "name": "base-windows",
       "hidden": true,
       "inherits": "base",
-      "generator": "Ninja"
+      "generator": "Ninja",
+      "environment": {
+        "CMAKE_MAKE_PROGRAM": "ninja"
+      }
     },
     {
       "name": "base-shared",
