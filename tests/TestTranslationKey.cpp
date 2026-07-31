@@ -20,6 +20,11 @@ TEST_CASE("kFormatKey with different locale", "[configuration]") {
   REQUIRE(key == "i18n:es:error");
 }
 
+TEST_CASE("kFormatKey with different key", "[configuration]") {
+  const std::string key = fmt::format(i18n::kFormatKey, "fr", "welcome");
+  REQUIRE(key == "i18n:fr:welcome");
+}
+
 #else
 
 int runKeyTests() {
@@ -32,6 +37,11 @@ int runKeyTests() {
     const std::string key = fmt::format(i18n::kFormatKey, "es", "error");
     assert(key == "i18n:es:error");
     std::cout << "[PASS] kFormatKey es:error\n";
+  }
+  {
+    const std::string key = fmt::format(i18n::kFormatKey, "fr", "welcome");
+    assert(key == "i18n:fr:welcome");
+    std::cout << "[PASS] kFormatKey fr:welcome\n";
   }
   return EXIT_SUCCESS;
 }

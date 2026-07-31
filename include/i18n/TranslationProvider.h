@@ -14,7 +14,9 @@ namespace i18n {
 /// individual translated strings by key.
 class I18N_REDIS_EXPORT TranslationProvider {
 public:
-  TranslationProvider();
+  /// @brief Default constructor.
+  /// @note This constructor is provided for convenience and does not perform any initialization.
+  TranslationProvider() = default;
 
   /// @brief Retrieves the translated string for a given key and locale.
   /// @param key    Translation identifier (no colons allowed).
@@ -29,7 +31,9 @@ public:
   /// @throws std::runtime_error on parsing errors or invalid translation data.
   virtual bool load(const std::string &cwd, const std::vector<std::string> &locales) = 0;
 
-  virtual ~TranslationProvider() noexcept;
+  /// @brief Virtual destructor for proper cleanup of derived classes.
+  /// @note This destructor is noexcept and will not throw exceptions.
+  virtual ~TranslationProvider() noexcept = default;
 };
 
 } // namespace i18n

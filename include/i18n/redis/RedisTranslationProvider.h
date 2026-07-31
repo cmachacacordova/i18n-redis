@@ -4,7 +4,14 @@
 
 #include "i18n/TranslationProvider.h"
 
-#include "sw/redis++/redis++.h"
+#include <memory>
+#include <string>
+
+namespace sw::redis {
+class ConnectionOptions;
+class ConnectionPoolOptions;
+class Redis;
+}
 
 namespace i18n {
 
@@ -20,26 +27,44 @@ class I18N_REDIS_EXPORT Translation;
 /// @c load() is protected; @c i18n::Translation calls it via friend access.
 class I18N_REDIS_EXPORT RedisTranslationProvider : public TranslationProvider {
 public:
-  /// @brief Creates a Redis connection pool.
+  /// @brief Creates a Redis connection pool with default connection settings.
   /// @param host Hostname or IP address.
   /// @param port TCP port.
   /// @throws std::runtime_error if the connection cannot be established.
+  /// @note Default pool settings: size=4, wait_timeout=1000ms, connection_lifetime=60000ms, connection_idle_time=30000ms.
   explicit RedisTranslationProvider(const std::string &host, int port);
+
+  /// @brief Creates a Redis connection pool with custom connection and pool options.
+  /// @param connection_opts Redis connection options (host, port, password, etc.).
+  /// @param pool_opts        Connection pool options (size, timeouts, etc.).
+  /// @throws std::runtime_error if the connection cannot be established.
+  explicit RedisTranslationProvider(const sw::redis::ConnectionOptions &connection_opts, const sw::redis::ConnectionPoolOptions &pool_opts);
 
   /// @brief Queries Redis for "i18n:<locale>:<key>" and extracts the value field.
   /// @param key    Translation identifier (no colons allowed).
   /// @param locale BCP-47 locale tag (e.g. "en").
   /// @return The @c value field from the stored JSON, or @p key if not found/malformed.
+  /// @note If the key does not exist in Redis or the JSON is malformed, returns @p key unchanged.
+  ///       This method supports both simdjson and yyjson backends depending on compilation flags.
   std::string get(const std::string &key, const std::string &locale) const override;
 
+  /// @brief Destructor that closes the Redis connection pool.
+  /// @note This destructor is noexcept and will not throw exceptions.
   ~RedisTranslationProvider() noexcept override;
 
 protected:
   /// @brief Parses locale JSON files and stores each entry in Redis.
   /// @param cwd     Directory containing the "locales/<locale>/" folder tree.
   /// @param locales List of locale tags to process.
-  /// @return @c true if all requested locales exist and were processed.
-  /// @throws std::runtime_error if a required field is missing or @c id contains @c :.
+  /// @return @c true if all requested locales exist and were processed, @c false if any locale directory is missing.
+  /// @throws std::runtime_error if a required field is missing, @c id contains @c :, or JSON parsing fails.
+  /// @note Expects JSON files in "locales/<locale>/" directory with array of objects containing:
+  ///       - @c id (string): Translation identifier
+  ///       - @c value (string): Translated text
+  ///       - @c category (any): Translation category
+  ///       - @c creationDate (any): Creation timestamp
+  ///       - @c modificationDate (any): Last modification timestamp
+  ///       - @c modificationVersion (integer): Version number
   bool load(const std::string &cwd, const std::vector<std::string> &locales) override;
 
 private:

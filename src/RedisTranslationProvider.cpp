@@ -5,6 +5,7 @@
 #include "i18n/redis/RedisTranslationProvider.h"
 
 #include <fmt/core.h>
+#include <sw/redis++/redis++.h>
 #ifdef I18N_REDIS_USE_SIMDJSON
 #include <simdjson.h>
 #elif defined(I18N_REDIS_USE_YYJSON)
@@ -23,6 +24,14 @@ i18n::RedisTranslationProvider::RedisTranslationProvider(const std::string &host
     pool_opts.connection_lifetime = std::chrono::milliseconds(60000);
     pool_opts.connection_idle_time = std::chrono::milliseconds(30000);
 
+    m_redis = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
+  } catch (const std::exception &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); } catch (...) {
+    throw std::runtime_error("Failed to connect to Redis: unknown error");
+  }
+}
+
+i18n::RedisTranslationProvider::RedisTranslationProvider(const sw::redis::ConnectionOptions &connection_opts, const sw::redis::ConnectionPoolOptions &pool_opts) {
+  try {
     m_redis = std::make_unique<sw::redis::Redis>(connection_opts, pool_opts);
   } catch (const std::exception &e) { throw std::runtime_error(std::string("Failed to connect to Redis: ") + e.what()); } catch (...) {
     throw std::runtime_error("Failed to connect to Redis: unknown error");

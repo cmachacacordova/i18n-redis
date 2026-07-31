@@ -302,10 +302,35 @@ i18n::Translation t(std::move(provider), "en");
 // Load locale files into Redis
 t.store(std::filesystem::current_path().string(), {"en", "es"});
 
-// Translate
+// Translate using default locale
 std::string msg = t.translate("greeting");              // "Hello!"
+
+// Translate with explicit locale
 std::string msg2 = t.translate("greeting", "es");      // "¡Hola!"
-std::string msg3 = t.translate("welcome", "en", "Alice");  // "Welcome, Alice!"
+
+// Translate with formatting (uses default locale)
+std::string msg3 = t.translate("welcome", "Alice");    // "Welcome, Alice!"
+
+// Translate with formatting and explicit locale
+std::string msg4 = t.translate("welcome", "es", "Alice"); // "¡Bienvenida, Alice!"
+```
+
+**Note:** The `Translation` constructor now defaults to `"en"` if no locale is specified:
+```cpp
+i18n::Translation t(std::move(provider)); // Uses "en" as default locale
+```
+
+**Advanced Redis connection:** For custom Redis connection options, use the connection options constructor:
+```cpp
+sw::redis::ConnectionOptions conn_opts;
+conn_opts.host = "localhost";
+conn_opts.port = 6379;
+conn_opts.password = "secret";
+
+sw::redis::ConnectionPoolOptions pool_opts;
+pool_opts.size = 10;
+
+auto provider = std::make_unique<i18n::RedisTranslationProvider>(conn_opts, pool_opts);
 ```
 
 ### Locale File Format
@@ -324,6 +349,14 @@ Place JSON files in `locales/<locale>/` directories:
   }
 ]
 ```
+
+**Required fields:**
+- `id`: Translation identifier (must not contain colons)
+- `value`: Translated string (may contain `{fmt}` placeholders)
+- `category`: Translation category
+- `creationDate`: ISO 8601 date string
+- `modificationDate`: ISO 8601 date string
+- `modificationVersion`: Integer version number
 
 Redis keys: `i18n:<locale>:<id>` (e.g., `i18n:en:greeting`)
 
@@ -351,6 +384,11 @@ cmake --install out/build --prefix /usr/local
 ctest --test-dir out/build --output-on-failure
 ```
 
+Tests use Catch2 framework and verify:
+- Configuration key formatting
+- Translation lookup functionality
+- JSON parsing for both simdjson and yyjson backends
+
 ## Project Structure
 
 ```
@@ -365,13 +403,20 @@ i18n-redis/
 │       ├── Dependencies.cmake
 │       └── Targets.cmake
 ├── include/i18n/               # Public headers
-│   ├── Translation.h
-│   ├── Configuration.h
-│   └── redis/RedisTranslationProvider.h
-├── src/                        # Implementation
+│   ├── Translation.h           # Main facade class
+│   ├── TranslationProvider.h   # Abstract provider interface
+│   ├── Configuration.h         # Configuration constants
+│   └── redis/RedisTranslationProvider.h  # Redis implementation
+├── src/                        # Implementation files
+│   ├── Translation.cpp
+│   ├── TranslationProvider.cpp
+│   └── RedisTranslationProvider.cpp
 ├── tests/                      # Test suite
+│   ├── Main.cpp
+│   └── TestTranslationKey.cpp
 ├── example/                    # Example application
 ├── docs/                       # Documentation
+│   └── api.md                  # API reference
 ├── locales/                    # Sample locale files
 └── extras/                     # vcpkg and registry (submodules)
     ├── vcpkg/

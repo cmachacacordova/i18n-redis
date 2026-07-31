@@ -96,10 +96,17 @@ i18n::Translation t(std::move(provider), "en");
 // Load locale files into Redis
 t.store(std::filesystem::current_path().string(), {"en", "es"});
 
-// Translate
+// Translate using default locale
 std::string msg = t.translate("greeting");              // "Hello!"
+
+// Translate with explicit locale
 std::string msg2 = t.translate("greeting", "es");        // "¡Hola!"
-std::string msg3 = t.translate("welcome", "en", "Alice"); // "Welcome, Alice!"
+
+// Translate with formatting (uses default locale)
+std::string msg3 = t.translate("welcome", "Alice");     // "Welcome, Alice!"
+
+// Translate with formatting and explicit locale
+std::string msg4 = t.translate("welcome", "es", "Alice"); // "¡Bienvenida, Alice!"
 ```
 
 ### Locale File Format

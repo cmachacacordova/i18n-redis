@@ -92,16 +92,23 @@ i18n-redis is a C++20 internationalization library that stores translations in R
 // 1. Create provider with Redis connection
 auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
 
-// 2. Create Translation facade with default locale
+// 2. Create Translation facade with default locale (or use default "en")
 i18n::Translation t(std::move(provider), "en");
 
 // 3. Load locale files from disk to Redis
 t.store("/app/locales", {"en", "es", "fr"});
 
-// 4. Translate
+// 4. Translate using default locale
 std::string greeting = t.translate("greeting");           // "Hello!"
-std::string greek = t.translate("greeting", "es");          // "¡Hola!"
-std::string welcome = t.translate("welcome", "en", "Alice"); // "Welcome, Alice!"
+
+// 5. Translate with explicit locale
+std::string greek = t.translate("greeting", "es");     // "¡Hola!"
+
+// 6. Translate with formatting (uses default locale)
+std::string welcome = t.translate("welcome", "Alice");   // "Welcome, Alice!"
+
+// 7. Translate with formatting and explicit locale
+std::string welcome_es = t.translate("welcome", "es", "Alice"); // "¡Bienvenida, Alice!"
 ```
 
 ### Translation with Parameters
@@ -116,8 +123,8 @@ Locale file:
 
 Code:
 ```cpp
-std::string msg = t.translate("welcome", "en", "Alice", 5);
-// Result: "Welcome, Alice! You have 5 messages."
+std::string msg = t.translate("welcome", "Alice", 5);
+// Result: "Welcome, Alice! You have 5 messages." (using default locale)
 ```
 
 ---
@@ -134,18 +141,19 @@ The main interface for your application. Owns a `TranslationProvider` and provid
 
 ```cpp
 Translation(std::unique_ptr<TranslationProvider> provider,
-            std::string locale);
+            std::string locale = "en");
 ```
 
 | Parameter | Description |
 |-----------|-------------|
 | `provider` | Unique pointer to a `TranslationProvider` implementation (e.g., `RedisTranslationProvider`) |
-| `locale` | Default BCP-47 locale tag (e.g., `"en"`, `"es-ES"`, `"zh-Hans"`) |
+| `locale` | Default BCP-47 locale tag (e.g., `"en"`, `"es-ES"`, `"zh-Hans"`). Defaults to `"en"` if not specified |
 
 **Example:**
 ```cpp
 auto redis = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
-i18n::Translation t(std::move(redis), "en");
+i18n::Translation t(std::move(redis), "en");  // Explicit default locale
+i18n::Translation t2(std::move(redis));       // Uses "en" as default locale
 ```
 
 ---
@@ -187,31 +195,77 @@ t.store("/app", {"en", "es", "fr"});
 
 ---
 
-#### Method: `translate()` (simple)
+#### Method: `translate()` (simple, no locale)
 
 ```cpp
-std::string translate(const std::string& key,
-                      const std::string& locale = "") const;
+std::string translate(const std::string& key) const;
 ```
 
-Retrieves a translation by key.
+Retrieves a translation by key using the default locale.
 
 | Parameter | Description |
 |-----------|-------------|
 | `key` | Translation identifier (e.g., `"greeting"`) |
-| `locale` | Target locale (empty = use default locale from constructor) |
 
 **Returns:** Translated string, or `key` unchanged if not found
 
 **Example:**
 ```cpp
-std::string msg = t.translate("greeting");       // uses default "en"
+std::string msg = t.translate("greeting");       // uses default locale from constructor
+```
+
+---
+
+#### Method: `translate()` (with locale)
+
+```cpp
+std::string translate(const std::string& key,
+                      const std::string& locale) const;
+```
+
+Retrieves a translation by key with an explicit locale.
+
+| Parameter | Description |
+|-----------|-------------|
+| `key` | Translation identifier (e.g., `"greeting"`) |
+| `locale` | Target locale (e.g., `"es"`, `"fr-FR"`) |
+
+**Returns:** Translated string, or `key` unchanged if not found
+
+**Example:**
+```cpp
 std::string msg = t.translate("greeting", "es"); // explicit locale
 ```
 
 ---
 
-#### Method: `translate()` (with formatting)
+#### Method: `translate()` (with formatting, uses default locale)
+
+```cpp
+template <typename... Args>
+std::string translate(const std::string& key,
+                      Args&&... args) const;
+```
+
+Retrieves and formats a translation using `{fmt}` syntax with the default locale.
+
+| Parameter | Description |
+|-----------|-------------|
+| `key` | Translation identifier |
+| `args` | Format arguments for `{fmt}` placeholders |
+
+**Returns:** Formatted translated string
+
+**Example:**
+```cpp
+// Locale file: { "value": "Hello, {0}! You have {1} new messages." }
+std::string msg = t.translate("welcome", "Alice", 5);
+// Result: "Hello, Alice! You have 5 new messages." (using default locale)
+```
+
+---
+
+#### Method: `translate()` (with formatting and explicit locale)
 
 ```cpp
 template <typename... Args>
@@ -220,21 +274,21 @@ std::string translate(const std::string& key,
                       Args&&... args) const;
 ```
 
-Retrieves and formats a translation using `{fmt}` syntax.
+Retrieves and formats a translation using `{fmt}` syntax with an explicit locale.
 
 | Parameter | Description |
 |-----------|-------------|
 | `key` | Translation identifier |
-| `locale` | Target locale (cannot be defaulted here) |
+| `locale` | Target locale (e.g., `"es"`, `"fr-FR"`) |
 | `args` | Format arguments for `{fmt}` placeholders |
 
 **Returns:** Formatted translated string
 
 **Example:**
 ```cpp
-// Locale file: { "value": "Hello, {0}! You have {1} new messages." }
-std::string msg = t.translate("welcome", "en", "Alice", 5);
-// Result: "Hello, Alice! You have 5 new messages."
+// Locale file: { "value": "¡Hola, {0}! Tienes {1} mensajes nuevos." }
+std::string msg = t.translate("welcome", "es", "Alice", 5);
+// Result: "¡Hola, Alice! Tienes 5 mensajes nuevos."
 ```
 
 ---
@@ -292,7 +346,7 @@ private:
 
 Concrete implementation of `TranslationProvider` using Redis as the storage backend.
 
-#### Constructor
+#### Constructor (simple)
 
 ```cpp
 explicit RedisTranslationProvider(const std::string& host, int port);
@@ -303,13 +357,88 @@ explicit RedisTranslationProvider(const std::string& host, int port);
 | `host` | Redis server hostname or IP address |
 | `port` | Redis server port (typically 6379) |
 
-**Throws:** `std::runtime_error` if connection fails
+**Example:**
+```cpp
+auto provider = std::make_unique<i18n::RedisTranslationProvider>("localhost", 6379);
+```
+
+---
+
+#### Constructor (with connection options)
+
+```cpp
+explicit RedisTranslationProvider(const sw::redis::ConnectionOptions& connection_opts,
+                                  const sw::redis::ConnectionPoolOptions& pool_opts);
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| `connection_opts` | Redis connection options (host, port, password, etc.) |
+| `pool_opts` | Redis connection pool options (size, timeouts, etc.) |
+
+**Default pool settings** (when using simple constructor):
+- Pool size: 4 connections
+- Wait timeout: 1000ms
+- Connection lifetime: 60000ms
+- Connection idle time: 30000ms
 
 **Example:**
 ```cpp
-auto provider = std::make_unique<i18n::RedisTranslationProvider>(
-    "redis.example.com", 6380);
+sw::redis::ConnectionOptions conn_opts;
+conn_opts.host = "localhost";
+conn_opts.port = 6379;
+conn_opts.password = "secret";
+
+sw::redis::ConnectionPoolOptions pool_opts;
+pool_opts.size = 10;
+
+auto provider = std::make_unique<i18n::RedisTranslationProvider>(conn_opts, pool_opts);
 ```
+
+**Throws:** `std::runtime_error` if connection fails
+
+---
+
+#### Method: `get()`
+
+```cpp
+std::string get(const std::string& key, const std::string& locale) const override;
+```
+
+Retrieves the translation value from Redis for a given key and locale.
+
+| Parameter | Description |
+|-----------|-------------|
+| `key` | Translation identifier (must not contain colons) |
+| `locale` | BCP-47 locale tag (e.g., `"en"`, `"es"`) |
+
+**Returns:** The `value` field from the stored JSON, or `key` unchanged if not found or malformed
+
+**Note:** This method is protected and called internally by `Translation.translate()`
+
+---
+
+#### Method: `load()`
+
+```cpp
+bool load(const std::string& cwd, const std::vector<std::string>& locales) override;
+```
+
+Parses locale JSON files and stores each entry in Redis.
+
+| Parameter | Description |
+|-----------|-------------|
+| `cwd` | Directory containing the `locales/<locale>/` folder tree |
+| `locales` | List of locale tags to process |
+
+**Returns:** `true` if all requested locales exist and were processed, `false` otherwise
+
+**Throws:** `std::runtime_error` if:
+- A required field is missing from the JSON
+- The `id` field contains a colon (`:`)
+- JSON parsing fails
+
+**Note:** This method is protected and called internally by `Translation.store()`
 
 ---
 
@@ -358,17 +487,17 @@ Each locale directory (`locales/<locale>/`) contains `.json` files with translat
     "creationDate": "2024-01-01",
     "modificationDate": "2024-06-01",
     "modificationVersion": 1
-  },
-  {
-    "id": "farewell",
-    "value": "Goodbye, {0}!",
-    "category": "General",
-    "creationDate": "2024-01-01",
-    "modificationDate": "2024-06-01",
-    "modificationVersion": 2
   }
 ]
 ```
+
+**Required fields:**
+- `id`: Translation identifier (must not contain colons)
+- `value`: Translated string (may contain `{fmt}` placeholders)
+- `category`: Translation category
+- `creationDate`: ISO 8601 date string
+- `modificationDate`: ISO 8601 date string
+- `modificationVersion`: Integer version number
 
 ### Field Requirements
 
@@ -523,10 +652,10 @@ try {
 
 ### Optimization Tips
 
-1. **Connection pooling**: `RedisTranslationProvider` maintains one persistent connection
-2. **Pipeline loads**: The `load()` method uses Redis pipelines for batch insertion
-3. **Lazy loading**: Consider loading locales only when first accessed
-4. **JSON backend**: Use simdjson for maximum throughput
+1. **Connection pooling**: `RedisTranslationProvider` maintains a connection pool (default size: 4)
+2. **Batch operations**: The `load()` method processes JSON files sequentially but stores each entry individually
+3. **JSON backend**: Use simdjson for maximum throughput
+4. **Redis configuration**: Consider Redis persistence settings for production deployments
 
 ### Benchmark Reference
 

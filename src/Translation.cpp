@@ -10,13 +10,16 @@ bool Translation::store(const std::string &cwd, const std::vector<std::string> &
     return false;
   }
 
-  m_provider->load(cwd, locales);
+  this->m_provider->load(cwd, locales);
   return true;
 }
 
 std::string Translation::translate(const std::string &key, const std::string &locale) const {
-  const std::string &usedLocale = locale.empty() ? m_default_locale : locale;
-  return m_provider->get(key, usedLocale);
+  return this->m_provider->get(key, locale);
+}
+
+std::string Translation::translate(const std::string &key) const {
+  return this->m_provider->get(key, this->m_default_locale);
 }
 
 Translation::~Translation() noexcept = default;
