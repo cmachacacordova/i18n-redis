@@ -56,7 +56,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -105,7 +105,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -146,7 +146,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=make
           ctest --test-dir out/build --output-on-failure
 
   windows-msvc:
