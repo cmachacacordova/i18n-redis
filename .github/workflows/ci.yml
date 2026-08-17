@@ -14,9 +14,7 @@ env:
 jobs:
   linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
-    runs-on: ubuntu-24.04
-    env:
-      VCPKG_FORCE_SYSTEM_BINARIES: "1"
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -47,7 +45,14 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build gcc g++ make cmake curl zip unzip tar pkg-config
+            ninja-build gcc g++ make curl zip unzip tar pkg-config
+
+      # vcpkg's latest scripts require CMake >= 4.3 (e.g. string(JSON STRING_ENCODE)
+      # used for SBOM generation), newer than what apt ships on ubuntu-latest.
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -65,9 +70,7 @@ jobs:
 
   linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
-    runs-on: ubuntu-24.04
-    env:
-      VCPKG_FORCE_SYSTEM_BINARIES: "1"
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -98,7 +101,12 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build clang make cmake curl zip unzip tar pkg-config
+            ninja-build clang make curl zip unzip tar pkg-config
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -116,9 +124,7 @@ jobs:
 
   linux-clang-sanitizers:
     name: Linux / Clang / ${{ matrix.variant }}
-    runs-on: ubuntu-24.04
-    env:
-      VCPKG_FORCE_SYSTEM_BINARIES: "1"
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -141,7 +147,12 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build clang make cmake curl zip unzip tar pkg-config
+            ninja-build clang make curl zip unzip tar pkg-config
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -162,7 +173,6 @@ jobs:
       VCPKG_HOME: ${{ github.workspace }}\extras\vcpkg
       VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\extras\registry\ports
       VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\extras\registry\triplets
-      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -196,6 +206,13 @@ jobs:
 
       - name: Install Ninja
         run: choco install ninja --no-progress -y
+
+      # windows-2022's bundled CMake (via VS, 3.31) is older than the >= 4.3
+      # that vcpkg's latest scripts now require.
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
 
       - name: Cache vcpkg
         uses: actions/cache@v4

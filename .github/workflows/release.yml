@@ -9,9 +9,7 @@ on:
 jobs:
   package-unix:
     name: Package Unix Source
-    runs-on: ubuntu-24.04
-    env:
-      VCPKG_FORCE_SYSTEM_BINARIES: "1"
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -27,7 +25,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential \
-            cmake \
             make \
             ninja-build \
             curl \
@@ -36,6 +33,13 @@ jobs:
             tar \
             pkg-config \
             git
+
+      # vcpkg's latest scripts require CMake >= 4.3 (e.g. string(JSON STRING_ENCODE)
+      # used for SBOM generation), newer than what apt ships on ubuntu-latest.
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
 
       - name: Clone vcpkg and registry for validation
         run: |
@@ -84,6 +88,13 @@ jobs:
       - name: Install Ninja
         run: choco install ninja --no-progress -y
 
+      # windows-2022's bundled CMake (via VS, 3.31) is older than the >= 4.3
+      # that vcpkg's latest scripts now require.
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.31.6
+        with:
+          cmakeVersion: "4.3.0"
+
       - name: Clone vcpkg and registry for validation
         shell: pwsh
         run: |
@@ -117,7 +128,7 @@ jobs:
   create-release:
     name: Create Release
     needs: [package-unix, package-windows]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
