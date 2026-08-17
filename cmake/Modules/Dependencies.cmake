@@ -13,10 +13,10 @@ endif()
 
 # fmt library
 find_package(fmt CONFIG REQUIRED)
-if (TARGET fmt::fmt-header-only)
-    set(I18N_REDIS_FMT_TARGET fmt::fmt-header-only)
-elseif (TARGET fmt::fmt)
+if (TARGET fmt::fmt)
     set(I18N_REDIS_FMT_TARGET fmt::fmt)
+elseif (TARGET fmt::fmt-header-only)
+    set(I18N_REDIS_FMT_TARGET fmt::fmt-header-only)
 else()
     message(FATAL_ERROR "fmt target not found")
 endif()

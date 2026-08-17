@@ -4,7 +4,7 @@
 #include "i18n/Configuration.h"
 #include "i18n/redis/RedisTranslationProvider.h"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <sw/redis++/redis++.h>
 #ifdef I18N_REDIS_USE_SIMDJSON
 #include <simdjson.h>

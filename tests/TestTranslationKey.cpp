@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #ifndef I18N_REDIS_NO_CATCH2
 #include <catch2/catch_test_macros.hpp>
