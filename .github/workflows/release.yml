@@ -10,6 +10,8 @@ jobs:
   package-unix:
     name: Package Unix Source
     runs-on: ubuntu-24.04
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
 
     steps:
       - name: Checkout repository
@@ -28,6 +30,11 @@ jobs:
             cmake \
             make \
             ninja-build \
+            curl \
+            zip \
+            unzip \
+            tar \
+            pkg-config \
             git
 
       - name: Clone vcpkg and registry for validation
@@ -47,7 +54,7 @@ jobs:
           extracted_dir=$(find validation/build -maxdepth 1 -type d -name "i18n-redis-*" | head -1)
           echo "Extracted directory: $extracted_dir"
           cd "$extracted_dir"
-          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
+          ./configure --preset linux-gcc-static-release --use-vcpkg --configure-only -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

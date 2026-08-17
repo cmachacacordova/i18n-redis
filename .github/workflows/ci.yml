@@ -15,6 +15,8 @@ jobs:
   linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
     runs-on: ubuntu-24.04
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +58,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -64,6 +66,8 @@ jobs:
   linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
     runs-on: ubuntu-24.04
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -105,7 +109,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
           if [[ "${{ matrix.preset }}" != *"shared"* ]]; then
             ctest --test-dir out/build --output-on-failure
           fi
@@ -113,6 +117,8 @@ jobs:
   linux-clang-sanitizers:
     name: Linux / Clang / ${{ matrix.variant }}
     runs-on: ubuntu-24.04
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -146,7 +152,7 @@ jobs:
 
       - name: Configure, build and test
         run: |
-          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS -G "Ninja"
+          ./configure --preset ${{ matrix.preset }} --use-vcpkg -- -DVCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS -DVCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS
           ctest --test-dir out/build --output-on-failure
 
   windows-msvc:
@@ -156,6 +162,7 @@ jobs:
       VCPKG_HOME: ${{ github.workspace }}\extras\vcpkg
       VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\extras\registry\ports
       VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\extras\registry\triplets
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:

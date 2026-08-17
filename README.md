@@ -48,8 +48,7 @@ This library provides a translation service that:
 |------|-----------------|
 | CMake | 3.25 |
 | C++ Compiler | C++20 (GCC 11+, Clang 13+, MSVC 2022) |
-| Ninja or Unix Makefiles | any recent (Linux/macOS) |
-| Ninja | any recent (Windows) |
+| Ninja | any recent |
 | Redis Server | 5.0+ |
 
 Optional:
