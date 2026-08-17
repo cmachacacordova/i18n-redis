@@ -52,7 +52,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -106,7 +106,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -152,7 +152,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Cache vcpkg
         uses: actions/cache@v4
@@ -212,7 +212,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Cache vcpkg
         uses: actions/cache@v4

@@ -39,7 +39,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Clone vcpkg and registry for validation
         run: |
@@ -93,7 +93,7 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.31.6
         with:
-          cmakeVersion: "4.3.0"
+          cmakeVersion: "4.3.4"
 
       - name: Clone vcpkg and registry for validation
         shell: pwsh
