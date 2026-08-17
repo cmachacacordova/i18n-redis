@@ -9,7 +9,7 @@ on:
 jobs:
   package-unix:
     name: Package Unix Source
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VCPKG_FORCE_SYSTEM_BINARIES: "1"
 
@@ -37,7 +37,7 @@ jobs:
             git
 
       # vcpkg's latest scripts require CMake >= 4.3 (e.g. string(JSON STRING_ENCODE)
-      # used for SBOM generation), newer than what apt ships on ubuntu-latest.
+      # used for SBOM generation), newer than what apt ships on ubuntu-24.04.
       - name: Setup CMake
         uses: lukka/get-cmake@v4.4.2
         with:
@@ -132,7 +132,7 @@ jobs:
   create-release:
     name: Create Release
     needs: [package-unix, package-windows]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 

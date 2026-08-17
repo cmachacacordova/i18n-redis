@@ -14,7 +14,7 @@ env:
 jobs:
   linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
@@ -47,10 +47,10 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build gcc g++ make curl zip unzip tar pkg-config
+            ninja-build gcc g++ lld make curl zip unzip tar pkg-config
 
       # vcpkg's latest scripts require CMake >= 4.3 (e.g. string(JSON STRING_ENCODE)
-      # used for SBOM generation), newer than what apt ships on ubuntu-latest.
+      # used for SBOM generation), newer than what apt ships on ubuntu-24.04.
       - name: Setup CMake
         uses: lukka/get-cmake@v4.4.2
         with:
@@ -73,7 +73,7 @@ jobs:
 
   linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
@@ -106,7 +106,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build clang make curl zip unzip tar pkg-config
+            ninja-build clang lld make curl zip unzip tar pkg-config
 
       - name: Setup CMake
         uses: lukka/get-cmake@v4.4.2
@@ -130,7 +130,7 @@ jobs:
 
   linux-clang-sanitizers:
     name: Linux / Clang / ${{ matrix.variant }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
@@ -155,7 +155,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            ninja-build clang make curl zip unzip tar pkg-config
+            ninja-build clang lld make curl zip unzip tar pkg-config
 
       - name: Setup CMake
         uses: lukka/get-cmake@v4.4.2
