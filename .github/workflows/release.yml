@@ -37,9 +37,10 @@ jobs:
       # vcpkg's latest scripts require CMake >= 4.3 (e.g. string(JSON STRING_ENCODE)
       # used for SBOM generation), newer than what apt ships on ubuntu-latest.
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.31.6
+        uses: lukka/get-cmake@v4.4.2
         with:
-          cmakeVersion: "4.3.4"
+          cmakeVersion: "~4.3.0"
+          ninjaVersion: "^1.13.1"
 
       - name: Clone vcpkg and registry for validation
         run: |
@@ -91,9 +92,10 @@ jobs:
       # windows-2022's bundled CMake (via VS, 3.31) is older than the >= 4.3
       # that vcpkg's latest scripts now require.
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.31.6
+        uses: lukka/get-cmake@v4.4.2
         with:
-          cmakeVersion: "4.3.4"
+          cmakeVersion: "~4.3.0"
+          ninjaVersion: "^1.13.1"
 
       - name: Clone vcpkg and registry for validation
         shell: pwsh
