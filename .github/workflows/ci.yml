@@ -15,6 +15,8 @@ jobs:
   linux-gcc:
     name: Linux / GCC / ${{ matrix.variant }}
     runs-on: ubuntu-latest
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +74,8 @@ jobs:
   linux-clang:
     name: Linux / Clang / ${{ matrix.variant }}
     runs-on: ubuntu-latest
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -127,6 +131,8 @@ jobs:
   linux-clang-sanitizers:
     name: Linux / Clang / ${{ matrix.variant }}
     runs-on: ubuntu-latest
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
     strategy:
       fail-fast: false
       matrix:

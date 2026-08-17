@@ -10,6 +10,8 @@ jobs:
   package-unix:
     name: Package Unix Source
     runs-on: ubuntu-latest
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: "1"
 
     steps:
       - name: Checkout repository
